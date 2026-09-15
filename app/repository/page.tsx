@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import ComingSoonNotice, { ComingSoonDetails } from '@/components/ComingSoonNotice';
 
 interface RepositoryDocument {
   id: string;
@@ -82,6 +83,15 @@ export default function RepositoryPage() {
     show: false,
     message: '',
   });
+
+  // Coming Soon Notification State
+  const [comingSoonOpen, setComingSoonOpen] = useState(false);
+  const [comingSoonDetails, setComingSoonDetails] = useState<ComingSoonDetails | null>(null);
+
+  const handleTriggerComingSoon = (details: ComingSoonDetails) => {
+    setComingSoonDetails(details);
+    setComingSoonOpen(true);
+  };
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -178,7 +188,15 @@ export default function RepositoryPage() {
     label: string
   ) => {
     if (!url) {
-      triggerToast('Tautan berkas belum tersedia di Google Drive.');
+      handleTriggerComingSoon({
+        title: `Berkas ${label} Belum Tersedia Online`,
+        category: 'Kurasi Arsip Repositori FEB UB',
+        description:
+          'Naskah karya ilmiah ini sedang dalam proses alih media digital berkas repositori atau berstatus pembatasan embargo publikasi fakultas. Naskah cetak fisik dapat dibaca langsung di SAC Gedung F Lt. 2.',
+        estimatedRelease: 'Digitalisasi Bertahap Tahun Akademik 2026',
+        alternative:
+          'Silakan kunjungi Meja Resepsionis SAC Gedung F Lantai 2 dengan membawa KTM Anda untuk membaca naskah fisik di Ruang Baca Hening.',
+      });
       return;
     }
 
@@ -404,27 +422,48 @@ export default function RepositoryPage() {
             </div>
           </div>
 
-          {/* Right: Results Count & Redis Cache Status Indicator */}
-          <div className="flex items-center gap-3 text-xs font-medium text-on-surface-variant">
+          {/* Right: Results Count, Export Citation & Redis Cache Status Indicator */}
+          <div className="flex flex-wrap items-center gap-2.5 text-xs font-medium text-on-surface-variant">
+            <button
+              type="button"
+              onClick={() =>
+                handleTriggerComingSoon({
+                  title: 'Ekspor Metadata Sitasi (Mendeley, Zotero, BibTeX)',
+                  category: 'Integrasi Manajemen Referensi Ilmiah',
+                  description:
+                    'Fitur ekspor otomatis berkas sitasi dalam format RIS dan BibTeX (standar APA 7th Edition) sedang dalam tahap standarisasi metadata database.',
+                  estimatedRelease: 'Fase Pembaruan v1.2',
+                  alternative:
+                    'Informasi penulis, judul skripsi, dan dosen pembimbing dapat disalin langsung dari kartu karya ilmiah untuk sitasi manual.',
+                })
+              }
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-outline-variant bg-surface-container-lowest hover:bg-surface-container text-xs font-semibold text-primary transition-colors cursor-pointer shadow-xs"
+            >
+              <span className="material-symbols-outlined text-[16px] text-secondary">
+                format_quote
+              </span>
+              <span>Ekspor Sitasi</span>
+            </button>
+
             {results && (
               <>
                 <span className="font-semibold text-primary">
                   {results.pagination.total.toLocaleString('id-ID')} naskah ditemukan
                 </span>
-                <span className="h-4 w-px bg-outline-variant"></span>
+                <span className="hidden sm:inline-block h-4 w-px bg-outline-variant"></span>
                 {results.meta.cached ? (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
                     <span className="material-symbols-outlined text-[15px] text-emerald-600">
                       bolt
                     </span>
-                    Redis Cache HIT ({results.meta.executionTimeMs}ms)
+                    Redis ({results.meta.executionTimeMs}ms)
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-amber-800 font-medium border border-amber-200">
                     <span className="material-symbols-outlined text-[15px] text-amber-600">
                       storage
                     </span>
-                    Database Query ({results.meta.executionTimeMs}ms)
+                    DB ({results.meta.executionTimeMs}ms)
                   </span>
                 )}
               </>
@@ -700,6 +739,13 @@ export default function RepositoryPage() {
           </div>
         </div>
       </footer>
+
+      {/* MODAL: FITUR SEGERA HADIR (COMING SOON NOTICE) */}
+      <ComingSoonNotice
+        isOpen={comingSoonOpen}
+        onClose={() => setComingSoonOpen(false)}
+        details={comingSoonDetails}
+      />
     </div>
   );
 }

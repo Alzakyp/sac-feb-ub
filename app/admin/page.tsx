@@ -10,6 +10,7 @@ import {
   formatDateTimeIndo,
   formatTimeOnly,
 } from '@/lib/utils';
+import ComingSoonNotice, { ComingSoonDetails } from '@/components/ComingSoonNotice';
 
 export default function AdminDashboardPage() {
   // Navigation tabs: 'overview' | 'visitors' | 'deposits' | 'members' | 'repository'
@@ -111,6 +112,15 @@ export default function AdminDashboardPage() {
 
   // Standee Modal
   const [showStandeeModal, setShowStandeeModal] = useState(false);
+
+  // Coming Soon Notification State
+  const [comingSoonOpen, setComingSoonOpen] = useState(false);
+  const [comingSoonDetails, setComingSoonDetails] = useState<ComingSoonDetails | null>(null);
+
+  const handleTriggerComingSoon = (details: ComingSoonDetails) => {
+    setComingSoonDetails(details);
+    setComingSoonOpen(true);
+  };
 
   // =========================================================================
   // DATA FETCHING FUNCTIONS
@@ -346,6 +356,35 @@ export default function AdminDashboardPage() {
                 </button>
               );
             })}
+
+            {/* Navigasi Fitur Integrasi Lanjutan (Coming Soon) */}
+            <div className="pt-2 mt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() =>
+                  handleTriggerComingSoon({
+                    title: 'Sinkronisasi Otomatis SIAM UB (Single Sign-On)',
+                    category: 'Integrasi Sistem Informasi Akademik UB',
+                    description:
+                      'Modul pertukaran data API Pangkalan Data Mahasiswa UB dan otentikasi SSO SIAM sedang dalam proses pengajuan token keamanan jaringan ke Tim UPT TIK Universitas Brawijaya.',
+                    estimatedRelease: 'Fase Pembaruan v1.3 (Semester Ganjil 2026)',
+                    alternative:
+                      'Untuk saat ini, administrasi akun mahasiswa dapat diverifikasi secara langsung melalui tab Data Anggota atau form pendaftaran mandiri.',
+                  })
+                }
+                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer group"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[20px] text-slate-400 group-hover:text-amber-400">
+                    sync_saved_locally
+                  </span>
+                  <span>Integrasi SIAM</span>
+                </div>
+                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                  Segera
+                </span>
+              </button>
+            </div>
           </nav>
         </div>
 
@@ -405,6 +444,49 @@ export default function AdminDashboardPage() {
               </span>
               <span>{currentTime}</span>
             </div>
+
+            {/* Quick Administrative Integration Buttons */}
+            <button
+              type="button"
+              onClick={() =>
+                handleTriggerComingSoon({
+                  title: 'Sinkronisasi Basis Data Mahasiswa SIAM UB',
+                  category: 'Integrasi API Pangkalan Data UB',
+                  description:
+                    'Layanan sinkronisasi otomatis status KRS, registrasi aktif, dan data profil mahasiswa langsung dari server pusat SIAM Universitas Brawijaya.',
+                  estimatedRelease: 'Fase v1.3 (Menunggu Otorisasi API UPT TIK UB)',
+                  alternative:
+                    'Pencarian dan pembaruan data anggota sementara dilakukan manual melalui tab Data Anggota.',
+                })
+              }
+              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px] text-[#0B2546]">
+                cloud_sync
+              </span>
+              <span>Sinkron SIAM</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                handleTriggerComingSoon({
+                  title: 'Siaran Pengumuman Massal (Broadcast Gateway)',
+                  category: 'Pusat Komunikasi & Notifikasi SAC',
+                  description:
+                    'Layanan pengiriman notifikasi massal melalui WhatsApp Business API dan Email blast SMTP untuk pengumuman jadwal serah simpan, workshop riset, dan pengembalian literatur.',
+                  estimatedRelease: 'Fase Pembaruan v1.2',
+                  alternative:
+                    'Pengumuman resmi disebarkan melalui mading pengumuman SAC Gedung F Lantai 2 dan akun Instagram @sac_febub.',
+                })
+              }
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0B2546] hover:bg-slate-900 text-amber-300 text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px] text-amber-400">
+                campaign
+              </span>
+              <span>Broadcast Notif</span>
+            </button>
 
             {/* Refresh Button */}
             <button
@@ -1683,6 +1765,13 @@ export default function AdminDashboardPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* MODAL: FITUR SEGERA HADIR (COMING SOON NOTICE) */}
+      <ComingSoonNotice
+        isOpen={comingSoonOpen}
+        onClose={() => setComingSoonOpen(false)}
+        details={comingSoonDetails}
+      />
     </div>
   );
 }

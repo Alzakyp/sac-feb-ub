@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
+import ComingSoonNotice, { ComingSoonDetails } from '@/components/ComingSoonNotice';
 
 interface ResourceItem {
   id: string;
@@ -154,6 +155,7 @@ export default function HomePage() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [presensiUrl, setPresensiUrl] = useState('/presensi');
   const [linkCopied, setLinkCopied] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // ChatSAC state - Minimized by default to keep page clean & uncluttered
   const [chatMinimized, setChatMinimized] = useState(true);
@@ -162,6 +164,15 @@ export default function HomePage() {
   const [userMessages, setUserMessages] = useState<Array<{ sender: 'user' | 'bot'; text: string }>>([]);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Coming Soon Notification State
+  const [comingSoonModalOpen, setComingSoonModalOpen] = useState(false);
+  const [comingSoonDetails, setComingSoonDetails] = useState<ComingSoonDetails | null>(null);
+
+  const handleTriggerComingSoon = (details: ComingSoonDetails) => {
+    setComingSoonDetails(details);
+    setComingSoonModalOpen(true);
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -237,81 +248,220 @@ export default function HomePage() {
       </AnimatePresence>
 
       {/* TOP ACADEMIC MASTHEAD HEADER */}
-      <header className="fixed top-0 left-0 right-0 w-full z-50 bg-surface-container-lowest border-b border-outline-variant shadow-sm">
-        <div className="h-20 max-w-[1280px] mx-auto px-6 lg:px-8 flex items-center justify-between gap-4">
+      <header className="fixed top-0 left-0 right-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs transition-all">
+        <div className="h-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
           {/* Official Branding Logo */}
-          <Link href="/" className="flex items-center gap-3.5 shrink-0 group">
+          <Link href="/" className="flex items-center gap-3 shrink-0 group">
             <img
               alt="FEB UB Logo"
               className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
               src="/logo-feb-black.png"
             />
             <div className="flex flex-col">
-              <span className="text-[16px] font-bold text-on-surface leading-tight tracking-tight font-sans">
-                Self Access Centre
-              </span>
-              <span className="text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider font-sans">
-                FEB Universitas Brawijaya
+              <div className="flex items-center gap-1.5">
+                <span className="text-[15px] sm:text-[16px] font-black text-[#0B2546] leading-tight tracking-tight font-sans group-hover:text-amber-600 transition-colors">
+                  Self Access Centre
+                </span>
+                <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300/60">
+                  FEB UB
+                </span>
+              </div>
+              <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold tracking-wider uppercase font-sans">
+                Gedung F Lantai 2 • FEB UB
               </span>
             </div>
           </Link>
 
-          {/* Navigation links */}
-          <nav className="hidden md:flex items-center gap-1.5">
+          {/* Desktop Navigation links (xl:flex) */}
+          <nav className="hidden xl:flex items-center gap-1 xl:gap-1.5">
             <a
               href="#hero"
-              className="px-3.5 py-2 rounded-lg bg-primary-container text-on-primary font-semibold text-sm transition-colors"
+              className="px-3 py-1.5 rounded-xl text-xs font-bold text-[#0B2546] bg-slate-100 border border-slate-200/80 shadow-2xs transition-all flex items-center gap-1.5 whitespace-nowrap"
             >
-              Beranda
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              <span>Beranda</span>
             </a>
             <a
               href="#profil"
-              className="px-3.5 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-medium text-sm"
+              className="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#0B2546] hover:bg-slate-100/80 transition-colors whitespace-nowrap"
             >
               Profil SAC
             </a>
             <a
               href="#layanan"
-              className="px-3.5 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-medium text-sm"
+              className="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#0B2546] hover:bg-slate-100/80 transition-colors whitespace-nowrap"
             >
-              Katalog Layanan
+              Layanan
             </a>
             <a
               href="#eresource"
-              className="px-3.5 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-medium text-sm"
+              className="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#0B2546] hover:bg-slate-100/80 transition-colors whitespace-nowrap"
             >
               E-Resource
             </a>
             <Link
               href="/repository"
-              className="px-3.5 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-medium text-sm flex items-center gap-1.5"
+              className="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-[#0B2546] hover:bg-slate-100/80 transition-colors flex items-center gap-1 whitespace-nowrap"
             >
-              <span className="material-symbols-outlined text-[17px] text-secondary">local_library</span>
-              <span>Katalog Repositori</span>
+              <span className="material-symbols-outlined text-[16px] text-amber-600">local_library</span>
+              <span>Repositori</span>
             </Link>
             <Link
               href="/serah-simpan"
-              className="px-3.5 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-medium text-sm flex items-center gap-1.5"
+              className="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-[#0B2546] hover:bg-slate-100/80 transition-colors flex items-center gap-1.5 whitespace-nowrap"
             >
-              <span className="material-symbols-outlined text-[17px] text-amber-500">school</span>
+              <span className="material-symbols-outlined text-[16px] text-[#0B2546]">school</span>
               <span>Serah Simpan</span>
+              <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
+                SAC-ONE
+              </span>
             </Link>
+          </nav>
+
+          {/* Right Action Buttons (xl:flex) */}
+          <div className="hidden xl:flex items-center gap-2">
             <Link
               href="/register"
-              className="px-3.5 py-2 rounded-lg bg-primary text-on-primary hover:bg-primary/90 transition-colors font-medium text-sm flex items-center gap-1.5 shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0B2546] hover:bg-slate-900 text-amber-300 hover:text-white text-xs font-bold shadow-sm hover:shadow-md transition-all whitespace-nowrap border border-[#0B2546]/30 active:scale-95 cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[17px] text-secondary-fixed">how_to_reg</span>
+              <span className="material-symbols-outlined text-[16px] text-amber-400">how_to_reg</span>
               <span>Daftar Anggota</span>
             </Link>
+
             <button
+              type="button"
               onClick={() => setChatMinimized(false)}
-              className="px-3.5 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-medium text-sm flex items-center gap-1.5 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300/80 text-xs font-bold transition-all shadow-2xs whitespace-nowrap cursor-pointer active:scale-95 group"
+              title="Buka ChatSAC Asisten Virtual"
             >
-              <span className="material-symbols-outlined text-[17px] text-secondary">smart_toy</span>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="material-symbols-outlined text-[16px] text-amber-700 group-hover:rotate-6 transition-transform">
+                smart_toy
+              </span>
               <span>ChatSAC</span>
+              <span className="px-1 py-0.2 rounded text-[9px] font-black bg-amber-300/60 text-amber-950 uppercase">
+                AI
+              </span>
             </button>
-          </nav>
+          </div>
+
+          {/* Mobile / Tablet Hamburger Button (xl:hidden) */}
+          <div className="flex xl:hidden items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setChatMinimized(false)}
+              className="p-2 rounded-xl bg-amber-50 border border-amber-300/80 text-amber-950 flex items-center justify-center cursor-pointer hover:bg-amber-100 transition-colors"
+              title="ChatSAC"
+            >
+              <span className="material-symbols-outlined text-[20px] text-amber-700">smart_toy</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl border border-slate-200 text-slate-700 hover:text-[#0B2546] hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer"
+              aria-label="Toggle Menu Navigasi"
+            >
+              <span className="material-symbols-outlined text-[22px]">
+                {mobileMenuOpen ? 'close' : 'menu'}
+              </span>
+            </button>
+          </div>
         </div>
+
+        {/* Mobile / Tablet Animated Dropdown Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="xl:hidden border-t border-slate-200 bg-white/98 backdrop-blur-md px-4 py-4 space-y-2.5 shadow-xl max-h-[80vh] overflow-y-auto"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <a
+                  href="#hero"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3.5 py-2.5 rounded-xl text-xs font-bold text-[#0B2546] bg-slate-100 border border-slate-200 flex items-center gap-2"
+                >
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  <span>Beranda Portal</span>
+                </a>
+                <a
+                  href="#profil"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-slate-500">info</span>
+                  <span>Profil &amp; Tata Tertib SAC</span>
+                </a>
+                <a
+                  href="#layanan"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-slate-500">meeting_room</span>
+                  <span>Katalog Layanan &amp; Ruangan</span>
+                </a>
+                <a
+                  href="#eresource"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-slate-500">dataset</span>
+                  <span>Database E-Resource</span>
+                </a>
+                <Link
+                  href="/repository"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-amber-600">local_library</span>
+                  <span>Katalog Repositori Ilmiah</span>
+                </Link>
+                <Link
+                  href="/serah-simpan"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px] text-[#0B2546]">school</span>
+                    <span>Serah Simpan Karya</span>
+                  </div>
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-blue-100 text-blue-800">
+                    SAC-ONE
+                  </span>
+                </Link>
+              </div>
+
+              <div className="pt-3 border-t border-slate-200 flex flex-col sm:flex-row gap-2">
+                <Link
+                  href="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-[#0B2546] text-amber-300 font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-amber-400">how_to_reg</span>
+                  <span>Daftar Anggota SAC</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setChatMinimized(false);
+                  }}
+                  className="py-2.5 px-4 rounded-xl bg-amber-50 text-amber-950 border border-amber-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-amber-700">smart_toy</span>
+                  <span>Buka ChatSAC AI</span>
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* MAIN BODY CONTENT */}
@@ -429,8 +579,22 @@ export default function HomePage() {
                   ].map((chip) => (
                     <button
                       key={chip}
-                      onClick={() => handleQuickSearch(chip)}
-                      className="px-3 py-1 rounded-full bg-surface-container hover:bg-surface-container-high text-primary text-xs font-semibold transition-colors border border-outline-variant/40"
+                      onClick={() => {
+                        if (chip === 'Panduan Skripsi FEB') {
+                          handleTriggerComingSoon({
+                            title: 'Buku Pedoman Penulisan Skripsi & Tesis FEB UB 2026/2027',
+                            category: 'Pedoman Akademik & Format Naskah',
+                            description:
+                              'Format buku pedoman dan template penulisan naskah revisi 2026 sedang dalam finalisasi oleh Senat Akademik Fakultas. Berkas panduan resmi akan dapat diunduh segera.',
+                            estimatedRelease: 'Fase Pembaruan v1.2 (Tahun Akademik 2026/2027)',
+                            alternative:
+                              'Untuk konsultasi format naskah saat ini, silakan hubungi dosen pembimbing Anda atau kunjungi Meja Resepsionis SAC Gedung F Lt. 2.',
+                          });
+                        } else {
+                          handleQuickSearch(chip);
+                        }
+                      }}
+                      className="px-3 py-1 rounded-full bg-surface-container hover:bg-surface-container-high text-primary text-xs font-semibold transition-colors border border-outline-variant/40 cursor-pointer"
                     >
                       {chip}
                     </button>
@@ -633,62 +797,146 @@ export default function HomePage() {
                 {/* 3 Feature Highlight Cards (Vertical Stack) */}
                 <div className="lg:col-span-7 flex flex-col justify-between gap-4">
                   {/* Item 1: Ruang Baca Hening */}
-                  <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex items-start gap-4 border border-outline-variant/60">
-                    <div className="w-12 h-12 rounded-xl bg-surface-container text-primary flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-[26px]">volume_off</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="text-base font-bold text-primary">
-                          Ruang Baca Hening (Silent Study Area)
-                        </h4>
-                        <span className="text-xs px-2.5 py-0.5 rounded bg-surface-container font-semibold text-outline">
-                          48 Meja
-                        </span>
+                  <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between gap-4 border border-outline-variant/60">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-surface-container text-primary flex items-center justify-center shrink-0">
+                        <span className="material-symbols-outlined text-[26px]">volume_off</span>
                       </div>
-                      <p className="text-on-surface-variant text-sm leading-relaxed">
-                        Zona studi bebas kebisingan dengan sekat meja privasi individual, lampu baca terintegrasi, dan terminal daya listrik di setiap kubikel.
-                      </p>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="text-base font-bold text-primary">
+                            Ruang Baca Hening (Silent Study Area)
+                          </h4>
+                          <span className="text-xs px-2.5 py-0.5 rounded bg-surface-container font-semibold text-outline">
+                            48 Meja
+                          </span>
+                        </div>
+                        <p className="text-on-surface-variant text-sm leading-relaxed">
+                          Zona studi bebas kebisingan dengan sekat meja privasi individual, lampu baca terintegrasi, dan terminal daya listrik di setiap kubikel.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-3 border-t border-outline-variant/40">
+                      <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>48 Kubikel Belajar Aktif</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleTriggerComingSoon({
+                            title: 'Pemantauan Okupansi Meja Belajar IoT',
+                            category: 'Ruang Baca Hening • Gedung F Lt. 2',
+                            description:
+                              'Sistem sensor okupansi real-time dan denah interaktif kubikel meja belajar sedang dipersiapkan untuk memantau 48 kubikel secara live.',
+                            estimatedRelease: 'Fase Rilis v1.2 (Semester Ganjil 2026/2027)',
+                            alternative:
+                              'Silakan langsung datang dan menempati meja belajar yang kosong di Ruang Baca Hening SAC Gedung F Lt. 2.',
+                          })
+                        }
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container hover:bg-primary-container text-primary hover:text-on-primary font-bold text-xs transition-colors cursor-pointer"
+                      >
+                        <span>Lihat Denah &amp; Status Meja</span>
+                        <span className="material-symbols-outlined text-[15px]">sensors</span>
+                      </button>
                     </div>
                   </div>
 
                   {/* Item 2: Bilik Diskusi Kelompok */}
-                  <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex items-start gap-4 border border-outline-variant/60">
-                    <div className="w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-fixed flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-[26px]">groups</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="text-base font-bold text-primary">
-                          Ruang Diskusi Privat (Discussion Pods)
-                        </h4>
-                        <span className="text-xs px-2.5 py-0.5 rounded bg-secondary-container font-semibold text-on-secondary-fixed">
-                          4 Ruangan
-                        </span>
+                  <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between gap-4 border border-outline-variant/60">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-fixed flex items-center justify-center shrink-0">
+                        <span className="material-symbols-outlined text-[26px]">groups</span>
                       </div>
-                      <p className="text-on-surface-variant text-sm leading-relaxed">
-                        Empat ruang rapat kedap suara yang dilengkapi Smart TV UHD 50" untuk presentasi, whiteboard kaca, dan sistem ventilasi sejuk mandiri.
-                      </p>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="text-base font-bold text-primary">
+                            Ruang Diskusi Privat (Discussion Pods)
+                          </h4>
+                          <span className="text-xs px-2.5 py-0.5 rounded bg-secondary-container font-semibold text-on-secondary-fixed">
+                            4 Ruangan
+                          </span>
+                        </div>
+                        <p className="text-on-surface-variant text-sm leading-relaxed">
+                          Empat ruang rapat kedap suara yang dilengkapi Smart TV UHD 50" untuk presentasi, whiteboard kaca, dan sistem ventilasi sejuk mandiri.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-3 border-t border-outline-variant/40">
+                      <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[14px] text-amber-600">
+                          event_seat
+                        </span>
+                        <span>Kapasitas: 4–6 Mahasiswa/Pod</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleTriggerComingSoon({
+                            title: 'Reservasi Online Discussion Pods',
+                            category: 'Ruang Diskusi Mandiri & Kelompok',
+                            description:
+                              'Modul pemesanan daring slot waktu diskusi, integrasi kalender akademik, dan konfirmasi otomatis berbasis PIN Anggota sedang dalam tahap pengembangan.',
+                            estimatedRelease: 'Fase Rilis v1.2',
+                            alternative:
+                              'Reservasi manual dapat dilakukan langsung di Meja Resepsionis SAC Gedung F Lt. 2 dengan menunjukkan KTM atau PIN anggota.',
+                          })
+                        }
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary-container hover:bg-amber-400 text-on-secondary-fixed hover:text-slate-950 font-bold text-xs transition-colors cursor-pointer"
+                      >
+                        <span>Reservasi Online Pod</span>
+                        <span className="material-symbols-outlined text-[15px]">calendar_add_on</span>
+                      </button>
                     </div>
                   </div>
 
                   {/* Item 3: Komputer Riset & Data */}
-                  <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex items-start gap-4 border border-outline-variant/60">
-                    <div className="w-12 h-12 rounded-xl bg-primary-container text-on-primary flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-[26px]">desktop_windows</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="text-base font-bold text-primary">
-                          24 Terminal PC Riset &amp; Laboratorium Data
-                        </h4>
-                        <span className="text-xs px-2.5 py-0.5 rounded bg-surface-container font-semibold text-outline">
-                          24 Unit PC
-                        </span>
+                  <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between gap-4 border border-outline-variant/60">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-primary-container text-on-primary flex items-center justify-center shrink-0">
+                        <span className="material-symbols-outlined text-[26px]">desktop_windows</span>
                       </div>
-                      <p className="text-on-surface-variant text-sm leading-relaxed">
-                        Workstation berspesifikasi tinggi terinstal software olah data statistik terlisensi (SPSS, Stata, EViews, AMOS) serta jalur intranet ultra-cepat.
-                      </p>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="text-base font-bold text-primary">
+                            24 Terminal PC Riset &amp; Laboratorium Data
+                          </h4>
+                          <span className="text-xs px-2.5 py-0.5 rounded bg-surface-container font-semibold text-outline">
+                            24 Unit PC
+                          </span>
+                        </div>
+                        <p className="text-on-surface-variant text-sm leading-relaxed">
+                          Workstation berspesifikasi tinggi terinstal software olah data statistik terlisensi (SPSS, Stata, EViews, AMOS) serta jalur intranet ultra-cepat.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-3 border-t border-outline-variant/40">
+                      <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[14px] text-blue-600">
+                          terminal
+                        </span>
+                        <span>SPSS, Stata, EViews, AMOS</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleTriggerComingSoon({
+                            title: 'Cek Antrean & Ketersediaan PC Riset',
+                            category: 'Laboratorium Data & Workstation FEB',
+                            description:
+                              'Sistem antrean digital dan pemantauan terminal workstation SPSS/Stata/EViews secara real-time sedang dihubungkan ke jaringan server lokal SAC.',
+                            estimatedRelease: 'Fase Rilis v1.2',
+                            alternative:
+                              'Silakan datang langsung ke Ruang Terminal PC SAC Gedung F Lantai 2. Petugas resepsionis siap membantu aktivasi workstation.',
+                          })
+                        }
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container hover:bg-primary-container text-primary hover:text-on-primary font-bold text-xs transition-colors cursor-pointer"
+                      >
+                        <span>Cek Antrean PC</span>
+                        <span className="material-symbols-outlined text-[15px]">
+                          desktop_access_disabled
+                        </span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -1106,6 +1354,14 @@ export default function HomePage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* MODAL: FITUR SEGERA HADIR (COMING SOON NOTICE) */}
+      <ComingSoonNotice
+        isOpen={comingSoonModalOpen}
+        onClose={() => setComingSoonModalOpen(false)}
+        details={comingSoonDetails}
+        onOpenChat={() => setChatMinimized(false)}
+      />
     </div>
   );
 }
