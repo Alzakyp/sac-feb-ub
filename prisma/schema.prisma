@@ -1,0 +1,137 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model VisitorLog {
+  id             String    @id @default(cuid())
+  identityNumber String    // NIM / NIK pengunjung
+  fullName       String    // Nama lengkap pengunjung
+  studyProgram   String    // Program studi / institusi
+  checkInTime    DateTime  @default(now())
+  checkOutTime   DateTime?
+  status         String    @default("ACTIVE") // ACTIVE = Sedang di ruangan, COMPLETED = Selesai berkunjung
+  purpose        String?   @default("SAC Room Visit")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([identityNumber])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ResourceAccessLog {
+  id           String   @id @default(cuid())
+  resourceName String
+  userAgent    String?
+  createdAt    DateTime @default(now())
+}
+
+model RepositoryDocument {
+  id             String   @id @default(cuid())
+  nomor          String?  // No. inventaris arsip
+  nama           String   // Nama mahasiswa penulis
+  nim            String   // NIM mahasiswa
+  prodi          String   // S1 Manajemen, S1 Akuntansi, S1 Ekonomi Islam, dll.
+  judul          String   // Judul naskah Bahasa Indonesia
+  judulEn        String?  // Judul Bahasa Inggris
+  jenis          String   @default("Skripsi") // Skripsi, Tesis, Disertasi
+  pembimbing     String?
+  penguji1       String?
+  penguji2       String?
+  bagianAwalUrl  String?  // Link Google Drive Cover & Abstrak
+  bagianIsiUrl   String?  // Link Google Drive Bab 1-5
+  bagianAkhirUrl String?  // Link Google Drive Daftar Pustaka & Lampiran
+  viewCount      Int      @default(0)
+  downloadCount  Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  activities     RepositoryActivityLog[]
+
+  @@index([judul])
+  @@index([nim])
+  @@index([nama])
+  @@index([prodi])
+}
+
+model RepositoryActivityLog {
+  id           String              @id @default(cuid())
+  documentId   String?
+  document     RepositoryDocument? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  nim          String?             // Opsional jika terdeteksi dari session/storage
+  nama         String?
+  prodi        String?
+  kataKunci    String?             // Kata kunci pencarian yang dimasukkan
+  aktifitas    String              // SEARCH, VIEW_DETAIL, CLICK_AWAL, CLICK_ISI, CLICK_AKHIR, DOWNLOAD
+  device       String?             // PC, Mobile, Tablet (via ua-parser-js)
+  browser      String?             // Chrome, Safari, Firefox, dll.
+  ipAddress    String?
+  createdAt    DateTime            @default(now())
+
+  @@index([aktifitas])
+  @@index([createdAt])
+  @@index([documentId])
+}
+
+model Member {
+  id               String   @id @default(cuid())
+  pin              String   @unique // Format otomatis: SAC-26-XXXX
+  membershipType   String   // Non FEB-UB, Mahasiswa FEB-UB, Tendik FEB-UB, Dosen FEB-UB, Other
+  identityType     String   // KTM [Student Card], KTP, Kartu Pegawai [Dosen/Tendik UB], Pasport
+  identityNumber   String   @unique // NIM / NIK / Paspor
+  fullName         String
+  studyProgram     String   // Pilihan 18 prodi atau 'Other'
+  whatsapp         String   // Format: 6281234567890
+  email            String   @unique
+  originAddress    String   // Alamat asal
+  malangAddress    String?  // Alamat di Malang (opsional)
+  selfiePhotoUrl   String?
+  identityCardUrl  String?
+  password         String   // Hashed password
+  status           String   @default("ACTIVE") // ACTIVE, SUSPENDED, INACTIVE
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([identityNumber])
+  @@index([email])
+  @@index([studyProgram])
+}
+
+model ScientificWorkDeposit {
+  id                  String    @id @default(cuid())
+  depositNumber       String    @unique // Format: DEP-26-XXXX
+  identityNumber      String    // NIM
+  fullName            String
+  degreeLevel         String    // S1, S2, S3, Profesi, Other
+  studyProgram        String?
+  whatsappCountryCode String    @default("+62")
+  whatsappNumber      String
+  email               String
+  mailingAddress      String
+  titleId             String
+  titleEn             String?
+  workType            String    // Skripsi, Tesis, Disertasi
+  advisor             String?
+  examiner1           String?
+  examiner2           String?
+  initialSectionUrl   String    // File NIM_Bagian Awal.pdf
+  mainSectionUrl      String    // File NIM_Bagian Isi.pdf
+  finalSectionUrl     String    // File NIM_Bagian Akhir.pdf
+  hardcopySubmitted   Boolean   @default(false)
+  verificationStatus  String    @default("PENDING") // PENDING, APPROVED, REVISION_NEEDED
+  revisionNotes       String?
+  certificateUrl      String?
+  verifiedAt          DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([identityNumber])
+  @@index([depositNumber])
+  @@index([verificationStatus])
+}
+
