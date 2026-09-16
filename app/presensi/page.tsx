@@ -69,7 +69,7 @@ export default function PresensiPage() {
     if (!trimmedNIM) {
       setNotification({
         type: 'ERROR',
-        message: 'Silakan masukkan atau scan Nomor Induk Mahasiswa (NIM).',
+        message: 'Silakan masukkan Nomor Induk Mahasiswa (NIM).',
       });
       inputRef.current?.focus();
       return;
@@ -122,7 +122,7 @@ export default function PresensiPage() {
       });
     } finally {
       setLoading(false);
-      // Re-focus input immediately so next visitor or barcode scan is ready
+      // Re-focus input immediately so next visitor is ready
       setTimeout(() => {
         inputRef.current?.focus();
       }, 50);
@@ -204,14 +204,14 @@ export default function PresensiPage() {
                     <span>Nomor Induk Mahasiswa (NIM)</span>
                   </span>
                   <span className="text-[11px] text-slate-400 font-normal">
-                    Scanner Aktif • Tap atau Ketik
+                    Input Mandiri NIM
                   </span>
                 </label>
 
                 <div className="relative flex items-center">
                   <span className="absolute left-4 text-slate-400 select-none">
                     <span className="material-symbols-outlined text-[24px]">
-                      qr_code_scanner
+                      badge
                     </span>
                   </span>
                   <input
@@ -220,7 +220,7 @@ export default function PresensiPage() {
                     type="text"
                     value={identityNumber}
                     onChange={(e) => setIdentityNumber(e.target.value)}
-                    placeholder="Ketik NIM atau Scan KTM..."
+                    placeholder="Ketik Nomor Induk Mahasiswa (NIM)..."
                     disabled={loading}
                     autoComplete="off"
                     autoFocus
@@ -418,9 +418,9 @@ export default function PresensiPage() {
                 info
               </span>
               <p className="text-xs text-slate-600 leading-relaxed">
-                <strong>Ketentuan Check-In &amp; Check-Out:</strong> Tap pertama dicatat
-                sebagai <strong>Masuk (Check-In)</strong>. Tap berikutnya setelah minimal{' '}
-                <strong>5 menit</strong> berada di ruangan otomatis dicatat sebagai{' '}
+                <strong>Ketentuan Check-In &amp; Check-Out:</strong> Masukkan NIM untuk{' '}
+                <strong>Masuk (Check-In)</strong>. Masukkan kembali NIM setelah minimal{' '}
+                <strong>5 menit</strong> berada di ruangan untuk{' '}
                 <strong>Keluar (Check-Out)</strong>.
               </p>
             </div>

@@ -251,22 +251,22 @@ export default function HomePage() {
       <header className="fixed top-0 left-0 right-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs transition-all">
         <div className="h-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
           {/* Official Branding Logo */}
-          <Link href="/" className="flex items-center gap-3 shrink-0 group">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink min-w-0 group">
             <img
               alt="FEB UB Logo"
-              className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
+              className="h-8 sm:h-10 w-auto object-contain shrink-0 transition-transform group-hover:scale-105"
               src="/logo-feb-black.png"
             />
-            <div className="flex flex-col">
+            <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-[15px] sm:text-[16px] font-black text-[#0B2546] leading-tight tracking-tight font-sans group-hover:text-amber-600 transition-colors">
+                <span className="text-sm sm:text-base font-black text-[#0B2546] leading-tight tracking-tight font-sans group-hover:text-amber-600 transition-colors truncate">
                   Self Access Centre
                 </span>
-                <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300/60">
+                <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300/60 shrink-0">
                   FEB UB
                 </span>
               </div>
-              <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold tracking-wider uppercase font-sans">
+              <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold tracking-wider uppercase font-sans truncate">
                 Gedung F Lantai 2 • FEB UB
               </span>
             </div>
@@ -349,23 +349,15 @@ export default function HomePage() {
           </div>
 
           {/* Mobile / Tablet Hamburger Button (xl:hidden) */}
-          <div className="flex xl:hidden items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setChatMinimized(false)}
-              className="p-2 rounded-xl bg-amber-50 border border-amber-300/80 text-amber-950 flex items-center justify-center cursor-pointer hover:bg-amber-100 transition-colors"
-              title="ChatSAC"
-            >
-              <span className="material-symbols-outlined text-[20px] text-amber-700">smart_toy</span>
-            </button>
-
+          <div className="flex xl:hidden items-center shrink-0">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl border border-slate-200 text-slate-700 hover:text-[#0B2546] hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer"
+              className="p-2.5 rounded-xl border border-slate-200 text-slate-700 hover:text-[#0B2546] hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer shrink-0 shadow-2xs"
               aria-label="Toggle Menu Navigasi"
+              id="mobileMenuToggle"
             >
-              <span className="material-symbols-outlined text-[22px]">
+              <span className="material-symbols-outlined text-[24px]">
                 {mobileMenuOpen ? 'close' : 'menu'}
               </span>
             </button>
@@ -999,12 +991,12 @@ export default function HomePage() {
 
                 <div className="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/60 flex flex-col gap-3 shadow-xs">
                   <div className="w-12 h-12 rounded-xl bg-surface-container text-primary flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[26px]">lock</span>
+                    <span className="material-symbols-outlined text-[26px]">volume_off</span>
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-primary">3. Menyimpan Tas di Loker</h3>
+                    <h3 className="text-base font-bold text-primary">3. Menjaga Ketenangan Ruangan</h3>
                     <p className="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
-                      Tas ransel, jaket, dan wadah berukuran besar wajib dimasukkan ke loker digital. Cukup membawa laptop dan alat tulis ke area baca hening.
+                      Pengunjung wajib menjaga ketenangan suasana ruangan, tidak membuat kegaduhan, dan mengatur ponsel ke mode hening demi kenyamanan belajar bersama.
                     </p>
                   </div>
                 </div>
