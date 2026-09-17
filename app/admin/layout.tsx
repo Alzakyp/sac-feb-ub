@@ -11,7 +11,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-slate-100 flex font-sans antialiased text-slate-800">
+    <div className="min-h-screen w-full bg-slate-100 flex flex-col font-sans antialiased text-slate-800">
       {children}
     </div>
   );
