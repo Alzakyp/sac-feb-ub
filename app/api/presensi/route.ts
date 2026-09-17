@@ -96,6 +96,7 @@ export async function POST(request: Request) {
           action: 'CHECK_IN',
           message: 'Check-in berhasil! Selamat datang di SAC FEB UB.',
           data: {
+            sessionId: newSession.id,
             fullName: newSession.fullName,
             identityNumber: newSession.identityNumber,
             studyProgram: newSession.studyProgram,
@@ -164,6 +165,7 @@ export async function POST(request: Request) {
         action: 'CHECK_OUT',
         message: 'Check-out berhasil! Terima kasih atas kunjungannya.',
         data: {
+          sessionId: updatedSession.id,
           fullName: updatedSession.fullName,
           identityNumber: updatedSession.identityNumber,
           studyProgram: updatedSession.studyProgram,

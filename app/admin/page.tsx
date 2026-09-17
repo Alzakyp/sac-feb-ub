@@ -432,7 +432,7 @@ export default function AdminDashboardPage() {
               {activeTab === 'repository' && 'Analisis Repositori & Akses E-Resource'}
             </h1>
             <p className="text-xs text-slate-500 font-medium">
-              Gedung F Lantai 2 &amp; Pascasarjana Lantai 1 FEB Universitas Brawijaya
+              Gedung F Pascasarjana Lantai 1 FEB Universitas Brawijaya
             </p>
           </div>
 
@@ -477,7 +477,7 @@ export default function AdminDashboardPage() {
                     'Layanan pengiriman notifikasi massal melalui WhatsApp Business API dan Email blast SMTP untuk pengumuman jadwal serah simpan, workshop riset, dan pengembalian literatur.',
                   estimatedRelease: 'Fase Pembaruan v1.2',
                   alternative:
-                    'Pengumuman resmi disebarkan melalui mading pengumuman SAC Gedung F Lantai 2 dan akun Instagram @sac_febub.',
+                    'Pengumuman resmi disebarkan melalui mading pengumuman SAC Gedung F Pascasarjana Lantai 1 dan akun Instagram @sac_febub.',
                 })
               }
               className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0B2546] hover:bg-slate-900 text-amber-300 text-xs font-semibold shadow-sm transition-colors cursor-pointer"
@@ -1436,7 +1436,11 @@ export default function AdminDashboardPage() {
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
                     <a
-                      href={`/uploads/${selectedDeposit.initialSectionUrl}`}
+                      href={
+                        selectedDeposit.initialSectionUrl.startsWith('/')
+                          ? selectedDeposit.initialSectionUrl
+                          : `/uploads/${selectedDeposit.initialSectionUrl}`
+                      }
                       target="_blank"
                       rel="noreferrer"
                       className="p-2.5 bg-white rounded-xl border border-slate-200 hover:border-[#0B2546] flex items-center gap-2 text-slate-700 hover:text-[#0B2546] transition-colors shadow-sm"
@@ -1451,7 +1455,11 @@ export default function AdminDashboardPage() {
                     </a>
 
                     <a
-                      href={`/uploads/${selectedDeposit.mainSectionUrl}`}
+                      href={
+                        selectedDeposit.mainSectionUrl.startsWith('/')
+                          ? selectedDeposit.mainSectionUrl
+                          : `/uploads/${selectedDeposit.mainSectionUrl}`
+                      }
                       target="_blank"
                       rel="noreferrer"
                       className="p-2.5 bg-white rounded-xl border border-slate-200 hover:border-[#0B2546] flex items-center gap-2 text-slate-700 hover:text-[#0B2546] transition-colors shadow-sm"
@@ -1466,7 +1474,11 @@ export default function AdminDashboardPage() {
                     </a>
 
                     <a
-                      href={`/uploads/${selectedDeposit.finalSectionUrl}`}
+                      href={
+                        selectedDeposit.finalSectionUrl.startsWith('/')
+                          ? selectedDeposit.finalSectionUrl
+                          : `/uploads/${selectedDeposit.finalSectionUrl}`
+                      }
                       target="_blank"
                       rel="noreferrer"
                       className="p-2.5 bg-white rounded-xl border border-slate-200 hover:border-[#0B2546] flex items-center gap-2 text-slate-700 hover:text-[#0B2546] transition-colors shadow-sm"

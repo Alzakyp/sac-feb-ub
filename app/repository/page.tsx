@@ -4,6 +4,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import ComingSoonNotice, { ComingSoonDetails } from '@/components/ComingSoonNotice';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 
 interface RepositoryDocument {
   id: string;
@@ -68,11 +70,39 @@ const POPULAR_KEYWORDS = [
   'Keputusan Investasi',
 ];
 
+const HERO_SLIDES = [
+  {
+    url: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1920&q=80',
+    caption: 'Ruang Baca & Koleksi Tugas Akhir Gedung F',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1920&q=80',
+    caption: 'Pusat Riset Sivitas Akademika FEB UB',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1920&q=80',
+    caption: 'Arsip Digital Skripsi, Tesis, & Disertasi',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&w=1920&q=80',
+    caption: 'Layanan Repositori Ilmiah Terpadu',
+  },
+];
+
 export default function RepositoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProdi, setSelectedProdi] = useState('Semua Program Studi');
   const [selectedJenis, setSelectedJenis] = useState('Semua');
   const [page, setPage] = useState(1);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Auto-advance hero background slider every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState<SearchResponse | null>(null);
@@ -192,10 +222,10 @@ export default function RepositoryPage() {
         title: `Berkas ${label} Belum Tersedia Online`,
         category: 'Kurasi Arsip Repositori FEB UB',
         description:
-          'Naskah karya ilmiah ini sedang dalam proses alih media digital berkas repositori atau berstatus pembatasan embargo publikasi fakultas. Naskah cetak fisik dapat dibaca langsung di SAC Gedung F Lt. 2.',
+          'Naskah karya ilmiah ini sedang dalam proses alih media digital berkas repositori atau berstatus pembatasan embargo publikasi fakultas. Naskah cetak fisik dapat dibaca langsung di SAC Gedung F Pascasarjana Lantai 1.',
         estimatedRelease: 'Digitalisasi Bertahap Tahun Akademik 2026',
         alternative:
-          'Silakan kunjungi Meja Resepsionis SAC Gedung F Lantai 2 dengan membawa KTM Anda untuk membaca naskah fisik di Ruang Baca Hening.',
+          'Silakan kunjungi Meja Resepsionis SAC Gedung F Pascasarjana Lantai 1 dengan membawa KTM Anda untuk membaca naskah fisik di Ruang Baca Hening.',
       });
       return;
     }
@@ -242,84 +272,52 @@ export default function RepositoryPage() {
         )}
       </AnimatePresence>
 
-      {/* TOP HEADER & MASTHEAD */}
-      <header className="sticky top-0 z-40 bg-surface-container-lowest/95 backdrop-blur-md border-b border-outline-variant shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-3 group">
-              <img
-                src="/logo-feb-black.png"
-                alt="FEB UB Logo"
-                className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
-              />
-              <div className="flex flex-col">
-                <span className="text-[16px] font-bold text-on-surface leading-tight tracking-tight">
-                  Self Access Centre
-                </span>
-                <span className="text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider">
-                  FEB Universitas Brawijaya
-                </span>
-              </div>
-            </Link>
+      {/* UNIFIED TOP ACADEMIC NAVBAR */}
+      <Navbar />
 
-            <div className="hidden md:block h-6 w-px bg-outline-variant mx-2"></div>
+      {/* HERO SECTION WITH ANIMATED IMAGE SLIDER & SEAMLESS TRANSITION */}
+      <section className="relative overflow-hidden pt-28 pb-16 lg:pt-36 lg:pb-24">
+        {/* Continuous Smooth Crossfade Carousel without flash or re-render stutter */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          {HERO_SLIDES.map((slide, idx) => (
+            <div
+              key={slide.url}
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage: `url(${slide.url})`,
+                opacity: currentSlide === idx ? 1 : 0,
+                transform: currentSlide === idx ? 'scale(1.04)' : 'scale(1)',
+                transitionProperty: 'opacity, transform',
+                transitionDuration: '1200ms, 8000ms',
+                transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+            />
+          ))}
 
-            <nav className="hidden md:flex items-center gap-2 text-xs font-semibold text-on-surface-variant">
-              <Link href="/" className="hover:text-primary transition-colors flex items-center gap-1">
-                <span className="material-symbols-outlined text-[16px]">home</span>
-                Beranda
-              </Link>
-              <span>/</span>
-              <span className="text-primary font-bold">Katalog Repositori Ilmiah</span>
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold text-primary hover:bg-surface-container border border-outline-variant/80 transition-colors"
-            >
-              <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-              <span className="hidden sm:inline">Kembali ke Portal SAC</span>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* HERO SECTION WITH REAL-TIME ARCHIVE STATS */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#0B2546] to-[#081B33] text-white py-14 lg:py-16">
-        {/* Subtle Institutional Watermark */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.04] flex items-center justify-center -rotate-6">
-          <svg className="text-white" fill="none" height="800" stroke="currentColor" viewBox="0 0 100 100" width="800">
-            <circle cx="50" cy="50" r="46" strokeDasharray="2 1.5" strokeWidth="0.75" />
-            <circle cx="50" cy="50" r="38" strokeWidth="0.5" />
-            <ellipse cx="50" cy="42" rx="20" ry="18" strokeWidth="0.5" />
-          </svg>
+          {/* Clean solid dark overlay */}
+          <div className="absolute inset-0 bg-slate-950/70" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-secondary/15 text-secondary-fixed text-xs font-semibold uppercase tracking-wider mb-4 border border-secondary/30">
-            <span className="material-symbols-outlined text-[16px]">local_library</span>
-            <span>Koleksi Terindeks Resmi • 7.600+ Karya Ilmiah Mahasiswa</span>
-          </div>
-
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white max-w-3xl leading-tight">
-            Katalog Repositori Karya Ilmiah <br className="hidden sm:inline" />
-            <span className="text-[#FED65B]">FEB Universitas Brawijaya</span>
+            Repositori Riset Ilmiah Digital <br className="hidden sm:inline" />
+            <span className="text-amber-300">
+              FEB Universitas Brawijaya
+            </span>
           </h1>
 
-          <p className="mt-3 text-sm sm:text-base text-slate-300 max-w-2xl font-normal leading-relaxed">
-            Pencarian cepat skripsi, tesis, dan disertasi mahasiswa Fakultas Ekonomi dan Bisnis Universitas Brawijaya dengan tautan berkas resmi Google Drive.
+          <p className="mt-3 text-sm sm:text-base text-slate-200 max-w-2xl font-normal leading-relaxed drop-shadow-xs">
+            Akses instan unduh dokumen PDF tugas akhir mahasiswa (Bagian Awal, Bagian Isi, dan Bagian Akhir)
+            dengan integrasi penyimpanan cloud Google Drive terindeks.
           </p>
 
           {/* MAIN SEARCH BOX */}
           <form
             onSubmit={handleSearchSubmit}
-            className="w-full max-w-3xl mt-8 flex flex-col sm:flex-row items-stretch gap-2 bg-white/10 p-2 rounded-2xl backdrop-blur-md border border-white/20 shadow-2xl"
+            className="w-full max-w-3xl mt-8 flex flex-col sm:flex-row items-stretch gap-2 bg-white/95 backdrop-blur-md p-2 rounded-2xl shadow-2xl border border-white/40 focus-within:ring-2 focus-within:ring-amber-400/60 transition-all"
           >
             <div className="relative flex-1 flex items-center">
-              <span className="material-symbols-outlined absolute left-4 text-slate-400 text-[22px]">
+              <span className="material-symbols-outlined absolute left-4 text-[#0B2546] text-[22px]">
                 search
               </span>
               <input
@@ -328,7 +326,7 @@ export default function RepositoryPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Cari judul naskah, nama mahasiswa, NIM, atau dosen pembimbing..."
-                className="w-full pl-12 pr-4 py-3.5 bg-white text-slate-900 rounded-xl placeholder-slate-400 text-sm font-medium focus:outline-hidden focus:ring-2 focus:ring-secondary shadow-inner"
+                className="w-full pl-12 pr-4 py-3.5 bg-transparent text-slate-900 placeholder-slate-400 text-sm font-medium focus:outline-none"
               />
               {searchQuery && (
                 <button
@@ -346,7 +344,7 @@ export default function RepositoryPage() {
 
             <button
               type="submit"
-              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#E5A823] text-[#0B2546] font-bold text-sm shadow-md hover:brightness-105 active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[#0B2546] hover:bg-slate-900 text-amber-300 hover:text-white font-bold text-sm shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
             >
               <span className="material-symbols-outlined text-[19px]">manage_search</span>
               <span>Cari Naskah</span>
@@ -354,9 +352,9 @@ export default function RepositoryPage() {
           </form>
 
           {/* POPULAR KEYWORDS CHIPS */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5 text-xs text-slate-300 max-w-3xl">
-            <span className="font-semibold text-slate-400 mr-1 flex items-center gap-1">
-              <span className="material-symbols-outlined text-[15px] text-secondary">trending_up</span>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5 text-xs text-slate-200 max-w-3xl">
+            <span className="font-semibold text-amber-300 mr-1 flex items-center gap-1">
+              <span className="material-symbols-outlined text-[15px]">trending_up</span>
               Populer:
             </span>
             {POPULAR_KEYWORDS.map((kw) => (
@@ -364,10 +362,27 @@ export default function RepositoryPage() {
                 key={kw}
                 type="button"
                 onClick={() => handleKeywordClick(kw)}
-                className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white/90 text-xs font-medium border border-white/10 transition-colors cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-medium border border-white/20 transition-colors cursor-pointer backdrop-blur-xs"
               >
                 {kw}
               </button>
+            ))}
+          </div>
+
+          {/* Carousel Slide Indicators (Placed at Bottom of Hero) */}
+          <div className="flex items-center gap-2 mt-8">
+            {HERO_SLIDES.map((slide, idx) => (
+              <button
+                key={slide.url}
+                type="button"
+                onClick={() => setCurrentSlide(idx)}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${
+                  currentSlide === idx
+                    ? 'w-8 h-1.5 bg-amber-400'
+                    : 'w-2 h-1.5 bg-white/40 hover:bg-white/75'
+                }`}
+                aria-label={`Slide ${idx + 1}`}
+              />
             ))}
           </div>
         </div>
@@ -421,54 +436,6 @@ export default function RepositoryPage() {
               ))}
             </div>
           </div>
-
-          {/* Right: Results Count, Export Citation & Redis Cache Status Indicator */}
-          <div className="flex flex-wrap items-center gap-2.5 text-xs font-medium text-on-surface-variant">
-            <button
-              type="button"
-              onClick={() =>
-                handleTriggerComingSoon({
-                  title: 'Ekspor Metadata Sitasi (Mendeley, Zotero, BibTeX)',
-                  category: 'Integrasi Manajemen Referensi Ilmiah',
-                  description:
-                    'Fitur ekspor otomatis berkas sitasi dalam format RIS dan BibTeX (standar APA 7th Edition) sedang dalam tahap standarisasi metadata database.',
-                  estimatedRelease: 'Fase Pembaruan v1.2',
-                  alternative:
-                    'Informasi penulis, judul skripsi, dan dosen pembimbing dapat disalin langsung dari kartu karya ilmiah untuk sitasi manual.',
-                })
-              }
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-outline-variant bg-surface-container-lowest hover:bg-surface-container text-xs font-semibold text-primary transition-colors cursor-pointer shadow-xs"
-            >
-              <span className="material-symbols-outlined text-[16px] text-secondary">
-                format_quote
-              </span>
-              <span>Ekspor Sitasi</span>
-            </button>
-
-            {results && (
-              <>
-                <span className="font-semibold text-primary">
-                  {results.pagination.total.toLocaleString('id-ID')} naskah ditemukan
-                </span>
-                <span className="hidden sm:inline-block h-4 w-px bg-outline-variant"></span>
-                {results.meta.cached ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
-                    <span className="material-symbols-outlined text-[15px] text-emerald-600">
-                      bolt
-                    </span>
-                    Redis ({results.meta.executionTimeMs}ms)
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-amber-800 font-medium border border-amber-200">
-                    <span className="material-symbols-outlined text-[15px] text-amber-600">
-                      storage
-                    </span>
-                    DB ({results.meta.executionTimeMs}ms)
-                  </span>
-                )}
-              </>
-            )}
-          </div>
         </div>
 
         {/* DOCUMENTS LIST / GRID */}
@@ -479,7 +446,7 @@ export default function RepositoryPage() {
                 sync
               </span>
               <p className="mt-3 text-sm font-semibold text-primary">Memuat naskah repositori FEB UB...</p>
-              <p className="text-xs text-on-surface-variant">Menghubungkan ke cache Redis dan database...</p>
+              <p className="text-xs text-on-surface-variant">Memuat data repositori ilmiah...</p>
             </div>
           ) : !results || results.data.length === 0 ? (
             <div className="text-center py-20 bg-surface-container-lowest rounded-2xl border border-outline-variant p-8">
@@ -719,26 +686,8 @@ export default function RepositoryPage() {
         )}
       </main>
 
-      {/* FOOTER */}
-      <footer className="mt-16 bg-[#001027] text-white border-t border-white/10 py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-          <div className="flex items-center gap-3">
-            <img src="/logo-feb.webp" alt="FEB UB" className="h-8 w-auto object-contain" />
-            <span>© {new Date().getFullYear()} Self Access Centre - FEB Universitas Brawijaya</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/" className="hover:text-white transition-colors">
-              Portal E-Resource
-            </Link>
-            <Link href="/presensi" className="hover:text-white transition-colors">
-              Presensi Digital
-            </Link>
-            <Link href="/admin" className="hover:text-white transition-colors">
-              Admin Console
-            </Link>
-          </div>
-        </div>
-      </footer>
+      {/* UNIFIED GLOBAL FOOTER */}
+      <Footer />
 
       {/* MODAL: FITUR SEGERA HADIR (COMING SOON NOTICE) */}
       <ComingSoonNotice

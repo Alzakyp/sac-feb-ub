@@ -35,7 +35,7 @@ export default function ComingSoonNotice({
     details?.estimatedRelease || 'Tahap Uji Coba Operasional (Fase Rilis v1.2)';
   const alternative =
     details?.alternative ||
-    'Untuk saat ini, layanan dapat diakses langsung melalui Meja Resepsionis Gedung F Lantai 2 atau hubungi Asisten Virtual ChatSAC.';
+    'Untuk saat ini, layanan dapat diakses langsung melalui Meja Resepsionis Gedung F Pascasarjana Lantai 1 atau hubungi Asisten Virtual ChatSAC.';
 
   if (mode === 'toast') {
     return (
@@ -150,7 +150,7 @@ export default function ComingSoonNotice({
                     <span>Node Sistem</span>
                   </div>
                   <p className="text-[11px] text-blue-950 font-semibold">
-                    SAC FEB UB • Gedung F Lt. 2
+                    SAC FEB UB • Gedung F Pascasarjana Lantai 1
                   </p>
                 </div>
               </div>

@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 import ComingSoonNotice, { ComingSoonDetails } from '@/components/ComingSoonNotice';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 
 interface ResourceItem {
   id: string;
@@ -140,14 +142,33 @@ const CATEGORY_TABS = [
 
 const FAQ_RESPONSES: Record<string, string> = {
   'Panduan Akses VPN & SSO UB':
-    'Akses dari luar kampus dapat menggunakan portal ezproxy.ub.ac.id dengan login email/SIAM @student.ub.ac.id, atau sambungkan OpenVPN resmi Universitas Brawijaya (vpn.ub.ac.id). Di dalam ruangan SAC Gedung F Lt. 2, perangkat Anda otomatis terhubung tanpa login tambahan via Wi-Fi SAC-FEB.',
+    'Akses dari luar kampus dapat menggunakan portal ezproxy.ub.ac.id dengan login email/SIAM @student.ub.ac.id, atau sambungkan EduVPN resmi Universitas Brawijaya (bits.ub.ac.id). Di dalam ruangan SAC Gedung F Pascasarjana Lantai 1, perangkat Anda otomatis terhubung tanpa login tambahan via Wi-Fi SAC-FEB.',
   'Cara Cek Turnitin FEB UB':
-    'Pengujian orisinalitas Turnitin untuk skripsi/tesis dilayani di meja asistensi SAC Gedung F Lt. 2. Bawa draf file Bab 1 s.d. Bab 5 format .docx/.pdf atau kirim email ke sac.feb@ub.ac.id dengan subjek "Cek Turnitin - NIM - Nama". Laporan similarity index diproses dalam 1x24 jam kerja.',
+    'Pengujian orisinalitas Turnitin untuk skripsi/tesis dilayani di meja asistensi SAC Gedung F Pascasarjana Lantai 1. Bawa draf file Bab 1 s.d. Bab 5 format .docx/.pdf atau kirim email ke sac.feb@ub.ac.id dengan subjek "Cek Turnitin - NIM - Nama". Laporan similarity index diproses dalam 1x24 jam kerja.',
   'Peminjaman Ruang Diskusi Privat':
     'Bilik Diskusi Privat (Discussion Pods) dapat dipinjam oleh kelompok mahasiswa aktif FEB UB (minimal 3 orang). Fasilitas dilengkapi Smart TV UHD 50" untuk presentasi, whiteboard kaca, AC mandiri, dan stopkontak portabel dengan durasi maksimal 2 jam per sesi.',
   'Jam Operasional & Layanan':
-    'SAC Gedung F Lantai 2 melayani pengunjung setiap Senin s.d. Kamis pukul 08.00–16.00 WIB dan Jumat pukul 08.00–15.30 WIB (istirahat 11.00–13.00 WIB). Layanan ditutup pada hari Sabtu, Minggu, dan hari libur nasional.',
+    'SAC Gedung F Pascasarjana Lantai 1 melayani pengunjung setiap Senin s.d. Jumat pukul 08.00–15.00 WIB (istirahat Jumat 11.00–13.00 WIB). Layanan ditutup pada hari Sabtu, Minggu, dan hari libur nasional.',
 };
+
+const BERANDA_HERO_SLIDES = [
+  {
+    url: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1920&q=80',
+    title: 'Ruang Belajar Mandiri & Kolaborasi Mahasiswa',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1920&q=80',
+    title: 'Pusat Studi & Akses E-Resource Ilmiah',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=1920&q=80',
+    title: 'Ruang Baca Hening & Konsultasi Riset',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?auto=format&fit=crop&w=1920&q=80',
+    title: 'Fasilitas Akademik Unggul FEB Universitas Brawijaya',
+  },
+];
 
 export default function HomePage() {
   const [searchCategory, setSearchCategory] = useState('all');
@@ -155,7 +176,15 @@ export default function HomePage() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [presensiUrl, setPresensiUrl] = useState('/presensi');
   const [linkCopied, setLinkCopied] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentHeroSlide, setCurrentHeroSlide] = useState(0);
+
+  // Auto-advance hero background slider every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentHeroSlide((prev) => (prev + 1) % BERANDA_HERO_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   // ChatSAC state - Minimized by default to keep page clean & uncluttered
   const [chatMinimized, setChatMinimized] = useState(true);
@@ -211,7 +240,7 @@ export default function HomePage() {
       { sender: 'user', text: msg },
       {
         sender: 'bot',
-        text: 'Terima kasih! Pesan Anda telah diteruskan ke staf pustakawan bertugas di Gedung F Lt. 2.',
+        text: 'Terima kasih! Pesan Anda telah diteruskan ke staf pustakawan bertugas di Gedung F Pascasarjana Lantai 1.',
       },
     ]);
     setChatInput('');
@@ -247,256 +276,61 @@ export default function HomePage() {
         )}
       </AnimatePresence>
 
-      {/* TOP ACADEMIC MASTHEAD HEADER */}
-      <header className="fixed top-0 left-0 right-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs transition-all">
-        <div className="h-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
-          {/* Official Branding Logo */}
-          <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink min-w-0 group">
-            <img
-              alt="FEB UB Logo"
-              className="h-8 sm:h-10 w-auto object-contain shrink-0 transition-transform group-hover:scale-105"
-              src="/logo-feb-black.png"
-            />
-            <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm sm:text-base font-black text-[#0B2546] leading-tight tracking-tight font-sans group-hover:text-amber-600 transition-colors truncate">
-                  Self Access Centre
-                </span>
-                <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300/60 shrink-0">
-                  FEB UB
-                </span>
-              </div>
-              <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold tracking-wider uppercase font-sans truncate">
-                Gedung F Lantai 2 • FEB UB
-              </span>
-            </div>
-          </Link>
-
-          {/* Desktop Navigation links (xl:flex) */}
-          <nav className="hidden xl:flex items-center gap-1 xl:gap-1.5">
-            <a
-              href="#hero"
-              className="px-3 py-1.5 rounded-xl text-xs font-bold text-[#0B2546] bg-slate-100 border border-slate-200/80 shadow-2xs transition-all flex items-center gap-1.5 whitespace-nowrap"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-              <span>Beranda</span>
-            </a>
-            <a
-              href="#profil"
-              className="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#0B2546] hover:bg-slate-100/80 transition-colors whitespace-nowrap"
-            >
-              Profil SAC
-            </a>
-            <a
-              href="#layanan"
-              className="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#0B2546] hover:bg-slate-100/80 transition-colors whitespace-nowrap"
-            >
-              Layanan
-            </a>
-            <a
-              href="#eresource"
-              className="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#0B2546] hover:bg-slate-100/80 transition-colors whitespace-nowrap"
-            >
-              E-Resource
-            </a>
-            <Link
-              href="/repository"
-              className="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-[#0B2546] hover:bg-slate-100/80 transition-colors flex items-center gap-1 whitespace-nowrap"
-            >
-              <span className="material-symbols-outlined text-[16px] text-amber-600">local_library</span>
-              <span>Repositori</span>
-            </Link>
-            <Link
-              href="/serah-simpan"
-              className="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-[#0B2546] hover:bg-slate-100/80 transition-colors flex items-center gap-1.5 whitespace-nowrap"
-            >
-              <span className="material-symbols-outlined text-[16px] text-[#0B2546]">school</span>
-              <span>Serah Simpan</span>
-              <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
-                SAC-ONE
-              </span>
-            </Link>
-          </nav>
-
-          {/* Right Action Buttons (xl:flex) */}
-          <div className="hidden xl:flex items-center gap-2">
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0B2546] hover:bg-slate-900 text-amber-300 hover:text-white text-xs font-bold shadow-sm hover:shadow-md transition-all whitespace-nowrap border border-[#0B2546]/30 active:scale-95 cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[16px] text-amber-400">how_to_reg</span>
-              <span>Daftar Anggota</span>
-            </Link>
-
-            <button
-              type="button"
-              onClick={() => setChatMinimized(false)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300/80 text-xs font-bold transition-all shadow-2xs whitespace-nowrap cursor-pointer active:scale-95 group"
-              title="Buka ChatSAC Asisten Virtual"
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span className="material-symbols-outlined text-[16px] text-amber-700 group-hover:rotate-6 transition-transform">
-                smart_toy
-              </span>
-              <span>ChatSAC</span>
-              <span className="px-1 py-0.2 rounded text-[9px] font-black bg-amber-300/60 text-amber-950 uppercase">
-                AI
-              </span>
-            </button>
-          </div>
-
-          {/* Mobile / Tablet Hamburger Button (xl:hidden) */}
-          <div className="flex xl:hidden items-center shrink-0">
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 rounded-xl border border-slate-200 text-slate-700 hover:text-[#0B2546] hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer shrink-0 shadow-2xs"
-              aria-label="Toggle Menu Navigasi"
-              id="mobileMenuToggle"
-            >
-              <span className="material-symbols-outlined text-[24px]">
-                {mobileMenuOpen ? 'close' : 'menu'}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile / Tablet Animated Dropdown Menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-              className="xl:hidden border-t border-slate-200 bg-white/98 backdrop-blur-md px-4 py-4 space-y-2.5 shadow-xl max-h-[80vh] overflow-y-auto"
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <a
-                  href="#hero"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-3.5 py-2.5 rounded-xl text-xs font-bold text-[#0B2546] bg-slate-100 border border-slate-200 flex items-center gap-2"
-                >
-                  <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  <span>Beranda Portal</span>
-                </a>
-                <a
-                  href="#profil"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center gap-2"
-                >
-                  <span className="material-symbols-outlined text-[18px] text-slate-500">info</span>
-                  <span>Profil &amp; Tata Tertib SAC</span>
-                </a>
-                <a
-                  href="#layanan"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center gap-2"
-                >
-                  <span className="material-symbols-outlined text-[18px] text-slate-500">meeting_room</span>
-                  <span>Katalog Layanan &amp; Ruangan</span>
-                </a>
-                <a
-                  href="#eresource"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center gap-2"
-                >
-                  <span className="material-symbols-outlined text-[18px] text-slate-500">dataset</span>
-                  <span>Database E-Resource</span>
-                </a>
-                <Link
-                  href="/repository"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center gap-2"
-                >
-                  <span className="material-symbols-outlined text-[18px] text-amber-600">local_library</span>
-                  <span>Katalog Repositori Ilmiah</span>
-                </Link>
-                <Link
-                  href="/serah-simpan"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[18px] text-[#0B2546]">school</span>
-                    <span>Serah Simpan Karya</span>
-                  </div>
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-blue-100 text-blue-800">
-                    SAC-ONE
-                  </span>
-                </Link>
-              </div>
-
-              <div className="pt-3 border-t border-slate-200 flex flex-col sm:flex-row gap-2">
-                <Link
-                  href="/register"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 py-2.5 px-4 rounded-xl bg-[#0B2546] text-amber-300 font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
-                >
-                  <span className="material-symbols-outlined text-[18px] text-amber-400">how_to_reg</span>
-                  <span>Daftar Anggota SAC</span>
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setChatMinimized(false);
-                  }}
-                  className="py-2.5 px-4 rounded-xl bg-amber-50 text-amber-950 border border-amber-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px] text-amber-700">smart_toy</span>
-                  <span>Buka ChatSAC AI</span>
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
+      {/* UNIFIED TOP ACADEMIC NAVBAR */}
+      <Navbar onChatClick={() => setChatMinimized(false)} />
 
       {/* MAIN BODY CONTENT */}
-      <main className="w-full pt-20 bg-surface min-h-screen">
+      <main className="w-full pt-28 bg-surface min-h-screen">
         <div className="flex flex-col w-full">
-          {/* HERO SECTION */}
-          <section id="hero" className="relative w-full overflow-hidden bg-surface-container-lowest py-16 lg:py-20 border-b border-outline-variant/60">
-            {/* Subtle Institutional Architectural Watermark Pattern */}
-            <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center -rotate-6">
-              <svg className="text-primary" fill="none" height="820" stroke="currentColor" viewBox="0 0 100 100" width="820">
-                <circle cx="50" cy="50" r="46" strokeDasharray="2 1.5" strokeWidth="0.75" />
-                <circle cx="50" cy="50" r="38" strokeWidth="0.5" />
-                <path d="M22 65 C32 50, 68 50, 78 65 M22 65 L50 61 L78 65" strokeWidth="0.5" />
-                <ellipse cx="50" cy="42" rx="20" ry="18" strokeWidth="0.5" />
-              </svg>
+          {/* HERO SECTION WITH ANIMATED IMAGE SLIDER & SEAMLESS TRANSITION */}
+          <section id="hero" className="relative w-full overflow-hidden pt-12 pb-16 lg:pt-16 lg:pb-24">
+            {/* Continuous Smooth Crossfade Carousel */}
+            <div className="absolute inset-0 z-0 overflow-hidden">
+              {BERANDA_HERO_SLIDES.map((slide, idx) => (
+                <div
+                  key={slide.url}
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{
+                    backgroundImage: `url(${slide.url})`,
+                    opacity: currentHeroSlide === idx ? 1 : 0,
+                    transform: currentHeroSlide === idx ? 'scale(1.04)' : 'scale(1)',
+                    transitionProperty: 'opacity, transform',
+                    transitionDuration: '1200ms, 8000ms',
+                    transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
+                />
+              ))}
+
+              {/* Clean solid dark overlay */}
+              <div className="absolute inset-0 bg-slate-950/70" />
             </div>
 
-            <div className="relative max-w-[1280px] mx-auto px-6 lg:px-8">
+            <div className="relative z-10 max-w-[1280px] mx-auto px-6 lg:px-8">
               <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
                 {/* Live Academic Operational Status Badge */}
-                <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-surface-container text-primary shadow-sm mb-6 border border-outline-variant/50">
+                <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/15 text-white shadow-sm mb-6 border border-white/25 backdrop-blur-xs">
                   <span className="relative flex h-2.5 w-2.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                   </span>
-                  <span className="text-[11.5px] uppercase tracking-wider text-primary font-bold">
-                    Buka: 08.00 – 16.00 WIB &bull; Lokasi: Gedung F Lantai 2 FEB UB
+                  <span className="text-[11.5px] uppercase tracking-wider text-white font-bold">
+                    Buka: 08.00 – 15.00 WIB &bull; Lokasi: Gedung F Pascasarjana Lantai 1 FEB UB
                   </span>
                 </div>
 
                 {/* Scholarly Main Title */}
-                <h1 className="text-3xl sm:text-4xl lg:text-[40px] font-bold text-primary tracking-tight leading-tight max-w-3xl">
+                <h1 className="text-3xl sm:text-4xl lg:text-[40px] font-bold text-white tracking-tight leading-tight max-w-3xl drop-shadow-md">
                   Akses Referensi Ilmiah Global &amp; Ruang Belajar Mandiri
                 </h1>
 
                 {/* Institutional Subtitle */}
-                <p className="mt-4 text-base sm:text-lg text-on-surface-variant max-w-2xl leading-relaxed">
+                <p className="mt-4 text-base sm:text-lg text-slate-200 max-w-2xl leading-relaxed drop-shadow-xs">
                   Gerbang kurasi jurnal internasional berlangganan, repositori tugas akhir, dan pusat studi
                   mandiri mahasiswa Fakultas Ekonomi dan Bisnis Universitas Brawijaya.
                 </p>
 
                 {/* Main Omnisearch Academic Box */}
-                <div className="w-full mt-8 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant p-2 max-w-3xl">
+                <div className="w-full mt-8 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/40 p-2 max-w-3xl text-slate-800">
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -508,7 +342,7 @@ export default function HomePage() {
                       <select
                         value={searchCategory}
                         onChange={(e) => setSearchCategory(e.target.value)}
-                        className="w-full h-full appearance-none bg-surface-container-low text-primary font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-lg focus:outline-none focus:bg-surface-container cursor-pointer transition-colors"
+                        className="w-full h-full appearance-none bg-slate-100 text-slate-800 font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-lg focus:outline-none focus:bg-slate-200 cursor-pointer transition-colors"
                       >
                         <option value="all">Semua Kategori</option>
                         <option value="jurnal">Jurnal Internasional</option>
@@ -516,20 +350,20 @@ export default function HomePage() {
                         <option value="finansial">Database Finansial &amp; BEI</option>
                         <option value="statistik">Data BPS &amp; Makroekonomi</option>
                       </select>
-                      <span className="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">
+                      <span className="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-[20px]">
                         unfold_more
                       </span>
                     </div>
 
                     {/* Search Input Field */}
                     <div className="relative flex-1 flex items-center">
-                      <span className="material-symbols-outlined absolute left-3 text-outline text-[22px]">
+                      <span className="material-symbols-outlined absolute left-3 text-slate-400 text-[22px]">
                         search
                       </span>
                       <input
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full py-2.5 pl-10 pr-4 text-on-surface placeholder:text-outline text-sm bg-transparent focus:outline-none"
+                        className="w-full py-2.5 pl-10 pr-4 text-slate-900 placeholder:text-slate-400 text-sm bg-transparent focus:outline-none"
                         placeholder="Cari judul jurnal, skripsi/tesis, atau database ekonomi..."
                         type="text"
                       />
@@ -537,7 +371,7 @@ export default function HomePage() {
                         <button
                           type="button"
                           onClick={() => setSearchQuery('')}
-                          className="mr-2 text-outline hover:text-on-surface"
+                          className="mr-2 text-slate-400 hover:text-slate-700 cursor-pointer"
                         >
                           <span className="material-symbols-outlined text-[18px]">close</span>
                         </button>
@@ -547,9 +381,9 @@ export default function HomePage() {
                     {/* Prominent Gold-Navy Action Button */}
                     <button
                       type="submit"
-                      className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-primary-container text-on-primary hover:bg-primary font-semibold text-xs sm:text-sm shadow-md transition-all active:scale-[0.99]"
+                      className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-[#0B2546] hover:bg-slate-900 text-amber-300 hover:text-white font-semibold text-xs sm:text-sm shadow-md transition-all active:scale-[0.99] cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-[20px] text-secondary-fixed">
+                      <span className="material-symbols-outlined text-[20px]">
                         manage_search
                       </span>
                       <span>Cari Literatur</span>
@@ -558,8 +392,8 @@ export default function HomePage() {
                 </div>
 
                 {/* Quick Curated Discovery Chips */}
-                <div className="flex flex-wrap items-center justify-center gap-2 mt-6 text-on-surface-variant">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-outline mr-1">
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-6 text-slate-200">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-300 mr-1">
                     Pencarian Populer:
                   </span>
                   {[
@@ -580,16 +414,33 @@ export default function HomePage() {
                               'Format buku pedoman dan template penulisan naskah revisi 2026 sedang dalam finalisasi oleh Senat Akademik Fakultas. Berkas panduan resmi akan dapat diunduh segera.',
                             estimatedRelease: 'Fase Pembaruan v1.2 (Tahun Akademik 2026/2027)',
                             alternative:
-                              'Untuk konsultasi format naskah saat ini, silakan hubungi dosen pembimbing Anda atau kunjungi Meja Resepsionis SAC Gedung F Lt. 2.',
+                              'Untuk konsultasi format naskah saat ini, silakan hubungi dosen pembimbing Anda atau kunjungi Meja Resepsionis SAC Gedung F Pascasarjana Lantai 1.',
                           });
                         } else {
                           handleQuickSearch(chip);
                         }
                       }}
-                      className="px-3 py-1 rounded-full bg-surface-container hover:bg-surface-container-high text-primary text-xs font-semibold transition-colors border border-outline-variant/40 cursor-pointer"
+                      className="px-3 py-1 rounded-full bg-white/15 hover:bg-white/25 text-white text-xs font-semibold transition-colors border border-white/20 cursor-pointer backdrop-blur-xs"
                     >
                       {chip}
                     </button>
+                  ))}
+                </div>
+
+                {/* Carousel Slide Indicators (Placed at Bottom of Hero) */}
+                <div className="flex items-center gap-2 mt-8">
+                  {BERANDA_HERO_SLIDES.map((slide, idx) => (
+                    <button
+                      key={slide.url}
+                      type="button"
+                      onClick={() => setCurrentHeroSlide(idx)}
+                      className={`transition-all duration-300 rounded-full cursor-pointer ${
+                        currentHeroSlide === idx
+                          ? 'w-8 h-1.5 bg-amber-400'
+                          : 'w-2 h-1.5 bg-white/40 hover:bg-white/75'
+                      }`}
+                      aria-label={`Slide ${idx + 1}`}
+                    />
                   ))}
                 </div>
               </div>
@@ -744,10 +595,10 @@ export default function HomePage() {
                         <span>Informasi Kunjungan Fisik</span>
                       </div>
                       <h3 className="text-xl sm:text-2xl text-on-primary font-bold">
-                        Senin – Jumat: 08.00 – 16.00 WIB
+                        Senin – Jumat: 08.00 – 15.00 WIB
                       </h3>
                       <p className="text-xs sm:text-sm text-primary-fixed-dim mt-0.5">
-                        Lokasi: Gedung F Lantai 2 FEB UB | Kapasitas Nyaman: 80 Kursi Belajar
+                        Lokasi: Gedung F Pascasarjana Lantai 1 FEB UB | Kapasitas Nyaman: 80 Kursi Belajar
                       </p>
                     </div>
                   </div>
@@ -818,12 +669,12 @@ export default function HomePage() {
                         onClick={() =>
                           handleTriggerComingSoon({
                             title: 'Pemantauan Okupansi Meja Belajar IoT',
-                            category: 'Ruang Baca Hening • Gedung F Lt. 2',
+                            category: 'Ruang Baca Hening • Gedung F Pascasarjana Lantai 1',
                             description:
                               'Sistem sensor okupansi real-time dan denah interaktif kubikel meja belajar sedang dipersiapkan untuk memantau 48 kubikel secara live.',
                             estimatedRelease: 'Fase Rilis v1.2 (Semester Ganjil 2026/2027)',
                             alternative:
-                              'Silakan langsung datang dan menempati meja belajar yang kosong di Ruang Baca Hening SAC Gedung F Lt. 2.',
+                              'Silakan langsung datang dan menempati meja belajar yang kosong di Ruang Baca Hening SAC Gedung F Pascasarjana Lantai 1.',
                           })
                         }
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container hover:bg-primary-container text-primary hover:text-on-primary font-bold text-xs transition-colors cursor-pointer"
@@ -871,7 +722,7 @@ export default function HomePage() {
                               'Modul pemesanan daring slot waktu diskusi, integrasi kalender akademik, dan konfirmasi otomatis berbasis PIN Anggota sedang dalam tahap pengembangan.',
                             estimatedRelease: 'Fase Rilis v1.2',
                             alternative:
-                              'Reservasi manual dapat dilakukan langsung di Meja Resepsionis SAC Gedung F Lt. 2 dengan menunjukkan KTM atau PIN anggota.',
+                              'Reservasi manual dapat dilakukan langsung di Meja Resepsionis SAC Gedung F Pascasarjana Lantai 1 dengan menunjukkan KTM atau PIN anggota.',
                           })
                         }
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary-container hover:bg-amber-400 text-on-secondary-fixed hover:text-slate-950 font-bold text-xs transition-colors cursor-pointer"
@@ -919,7 +770,7 @@ export default function HomePage() {
                               'Sistem antrean digital dan pemantauan terminal workstation SPSS/Stata/EViews secara real-time sedang dihubungkan ke jaringan server lokal SAC.',
                             estimatedRelease: 'Fase Rilis v1.2',
                             alternative:
-                              'Silakan datang langsung ke Ruang Terminal PC SAC Gedung F Lantai 2. Petugas resepsionis siap membantu aktivasi workstation.',
+                              'Silakan datang langsung ke Ruang Terminal PC SAC Gedung F Pascasarjana Lantai 1. Petugas resepsionis siap membantu aktivasi workstation.',
                           })
                         }
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container hover:bg-primary-container text-primary hover:text-on-primary font-bold text-xs transition-colors cursor-pointer"
@@ -950,7 +801,7 @@ export default function HomePage() {
                     Self Access Centre (SAC) FEB UB
                   </h2>
                   <p className="mt-2 text-sm text-on-surface-variant leading-relaxed">
-                    Unit penunjang akademik strategis Fakultas Ekonomi dan Bisnis Universitas Brawijaya yang berlokasi di Gedung F Lantai 2. SAC mengintegrasikan akses basis data bereputasi internasional, asistensi statistik, dan ekosistem studi mandiri yang kondusif.
+                    Unit penunjang akademik strategis Fakultas Ekonomi dan Bisnis Universitas Brawijaya yang berlokasi di Gedung F Pascasarjana Lantai 1. SAC mengintegrasikan akses basis data bereputasi internasional, asistensi statistik, dan ekosistem studi mandiri yang kondusif.
                   </p>
                 </div>
                 <div className="shrink-0 flex items-center gap-3">
@@ -1140,7 +991,7 @@ export default function HomePage() {
               {/* Direct WhatsApp Staff Support Button */}
               <div className="pt-1">
                 <a
-                  href="https://wa.me/6281234567890?text=Halo%20Staf%20SAC%20FEB%20UB,%20saya%20ingin%20konsultasi%20layanan%20ruangan%20dan%20e-resource..."
+                  href="https://wa.me/6282315377515?text=Halo%20Staf%20SAC%20FEB%20UB,%20saya%20ingin%20konsultasi%20layanan%20ruangan%20dan%20e-resource..."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-2.5 px-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-xs active:scale-98"
@@ -1175,96 +1026,8 @@ export default function HomePage() {
         )}
       </AnimatePresence>
 
-      {/* FOOTER */}
-      <footer className="w-full bg-primary text-on-primary mt-16">
-        <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-12 gap-8">
-          <div className="md:col-span-5 flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-surface-container-lowest rounded-lg inline-block">
-                <img alt="FEB UB Logo" className="h-7 w-auto object-contain" src="/logo-feb-black.png" />
-              </div>
-              <span className="text-lg font-bold text-on-primary font-sans">
-                Self Access Centre (SAC)
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-primary-fixed-dim max-w-md leading-relaxed">
-              Pusat rujukan akademik, literatur mandiri, dan fasilitas riset komprehensif bagi civitas akademika
-              Fakultas Ekonomi dan Bisnis Universitas Brawijaya.
-            </p>
-            <div className="flex items-center gap-2 text-secondary-fixed text-xs font-semibold">
-              <span className="material-symbols-outlined text-[18px]">verified</span>
-              <span className="uppercase tracking-wider">Layanan Akademik Terakreditasi Unggul</span>
-            </div>
-          </div>
-
-          <div className="md:col-span-4 flex flex-col gap-3">
-            <span className="text-base font-semibold text-on-primary">Lokasi &amp; Kontak Resmi</span>
-            <div className="flex items-start gap-2 text-primary-fixed-dim text-xs leading-relaxed">
-              <span className="material-symbols-outlined text-secondary-fixed text-[18px] shrink-0 mt-0.5">
-                location_on
-              </span>
-              <p>
-                Gedung F Lantai 2, Fakultas Ekonomi dan Bisnis Universitas Brawijaya
-                <br />
-                Jl. MT. Haryono No. 165, Malang 65145, Jawa Timur
-              </p>
-            </div>
-            <div className="flex items-center gap-2 text-primary-fixed-dim text-xs">
-              <span className="material-symbols-outlined text-secondary-fixed text-[18px] shrink-0">
-                mail
-              </span>
-              <span>sac.feb@ub.ac.id</span>
-            </div>
-            <div className="flex items-center gap-2 text-primary-fixed-dim text-xs">
-              <span className="material-symbols-outlined text-secondary-fixed text-[18px] shrink-0">
-                call
-              </span>
-              <span>(0341) 555-000 ext. 204</span>
-            </div>
-          </div>
-
-          <div className="md:col-span-3 flex flex-col gap-3">
-            <span className="text-base font-semibold text-on-primary">Jam Operasional</span>
-            <div className="bg-primary-container p-4 rounded-xl flex flex-col gap-2 text-primary-fixed-dim text-xs border border-on-primary-container/20">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-on-primary">Senin - Kamis:</span>
-                <span>08.00 - 16.00 WIB</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-on-primary">Jumat:</span>
-                <span>08.00 - 15.30 WIB</span>
-              </div>
-              <div className="flex justify-between items-center text-outline-variant">
-                <span>Sabtu &amp; Minggu:</span>
-                <span>Tutup (Libur)</span>
-              </div>
-              <div className="pt-2 mt-2 border-t border-on-primary-container/30 text-secondary-fixed text-[11px]">
-                *Istirahat Jumat: 11.00 - 13.00 WIB
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="w-full bg-[#180e00] py-4 border-t border-white/5">
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-2 text-primary-fixed-dim text-xs">
-            <div>© {new Date().getFullYear()} Self Access Centre FEB Universitas Brawijaya. Seluruh hak cipta dilindungi.</div>
-            <div className="flex gap-4">
-              <Link href="/serah-simpan" className="hover:text-on-primary transition-colors">
-                Serah Simpan (SAC-ONE)
-              </Link>
-              <Link href="/register" className="hover:text-on-primary transition-colors">
-                Pendaftaran Anggota
-              </Link>
-              <Link href="/presensi" className="hover:text-on-primary transition-colors">
-                Presensi Ruangan
-              </Link>
-              <Link href="/admin" className="hover:text-on-primary transition-colors">
-                Admin Console
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* UNIFIED GLOBAL FOOTER */}
+      <Footer />
 
       {/* MODAL: QR CODE PRESENSI RUANGAN */}
       <AnimatePresence>
@@ -1291,7 +1054,7 @@ export default function HomePage() {
                   Presensi Pengunjung SAC FEB UB
                 </h3>
                 <p className="text-xs text-on-surface-variant mt-1 mb-5">
-                  Scan QR code menggunakan kamera smartphone Anda di pintu masuk Gedung F Lantai 2
+                  Scan QR code menggunakan kamera smartphone Anda di pintu masuk Gedung F Pascasarjana Lantai 1
                 </p>
 
                 {/* High Resolution QR Code */}

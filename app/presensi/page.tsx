@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface PresensiResponseData {
+  sessionId?: string;
   fullName: string;
   identityNumber: string;
   studyProgram: string;
@@ -27,12 +28,58 @@ export default function PresensiPage() {
   const [currentTime, setCurrentTime] = useState<string>('');
   const [currentDate, setCurrentDate] = useState<string>('');
 
+  // Locker SOP Modal State
+  const [showLockerModal, setShowLockerModal] = useState(false);
+  const [lockerCountdown, setLockerCountdown] = useState(6);
+
+  // Satisfaction Survey Modal State
+  const [showSurveyModal, setShowSurveyModal] = useState(false);
+  const [surveyCountdown, setSurveyCountdown] = useState(8);
+  const [surveyData, setSurveyData] = useState<{
+    sessionId?: string;
+    nim?: string;
+    fullName?: string;
+  } | null>(null);
+  const [selectedRating, setSelectedRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [feedbackNotes, setFeedbackNotes] = useState('');
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto-focus input on mount
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  // Locker SOP auto-dismiss countdown timer
+  useEffect(() => {
+    if (!showLockerModal) return;
+    if (lockerCountdown <= 0) {
+      setShowLockerModal(false);
+      inputRef.current?.focus();
+      return;
+    }
+    const timer = setTimeout(() => {
+      setLockerCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [showLockerModal, lockerCountdown]);
+
+  // Checkout survey auto-dismiss countdown timer
+  useEffect(() => {
+    if (!showSurveyModal || feedbackSubmitted) return;
+    if (surveyCountdown <= 0) {
+      setShowSurveyModal(false);
+      inputRef.current?.focus();
+      return;
+    }
+    const timer = setTimeout(() => {
+      setSurveyCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [showSurveyModal, surveyCountdown, feedbackSubmitted]);
 
   // Live Digital Clock (WIB)
   useEffect(() => {
@@ -112,6 +159,27 @@ export default function PresensiPage() {
           message: result.message,
           data: result.data,
         });
+
+        // Trigger SOP Loker Modal on successful Check-In
+        if (result.action === 'CHECK_IN') {
+          setShowLockerModal(true);
+          setLockerCountdown(6);
+        }
+
+        // Trigger Satisfaction Rating Modal on successful Check-Out
+        if (result.action === 'CHECK_OUT') {
+          setSurveyData({
+            sessionId: result.data?.sessionId,
+            nim: result.data?.identityNumber,
+            fullName: result.data?.fullName,
+          });
+          setSelectedRating(5);
+          setHoverRating(0);
+          setFeedbackNotes('');
+          setFeedbackSubmitted(false);
+          setShowSurveyModal(true);
+          setSurveyCountdown(8);
+        }
       }
     } catch (err: any) {
       setNotification({
@@ -126,6 +194,36 @@ export default function PresensiPage() {
       setTimeout(() => {
         inputRef.current?.focus();
       }, 50);
+    }
+  };
+
+  // Submit Feedback Handler
+  const handleSendFeedback = async () => {
+    if (!surveyData || selectedRating < 1) return;
+    setSubmittingFeedback(true);
+    try {
+      await fetch('/api/presensi/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: surveyData.sessionId,
+          nim: surveyData.nim,
+          rating: selectedRating,
+          notes: feedbackNotes,
+        }),
+      });
+      setFeedbackSubmitted(true);
+      setTimeout(() => {
+        setShowSurveyModal(false);
+        setFeedbackSubmitted(false);
+        inputRef.current?.focus();
+      }, 1500);
+    } catch (e) {
+      console.error('Failed to submit feedback:', e);
+      setShowSurveyModal(false);
+      inputRef.current?.focus();
+    } finally {
+      setSubmittingFeedback(false);
     }
   };
 
@@ -172,7 +270,7 @@ export default function PresensiPage() {
                   Presensi Pengunjung SAC FEB UB
                 </h1>
                 <p className="text-[11px] text-slate-300 font-medium mt-0.5">
-                  Gedung F Lantai 2 • Check-In &amp; Check-Out Mandiri
+                  Gedung F Pascasarjana Lantai 1 • Check-In &amp; Check-Out Mandiri
                 </p>
               </div>
             </div>
@@ -430,9 +528,241 @@ export default function PresensiPage() {
 
       {/* FOOTER NOTE */}
       <footer className="w-full max-w-xl text-center py-4 text-[11px] text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <span>© {new Date().getFullYear()} Self Access Centre • Gedung F Lantai 2 FEB UB</span>
+        <span>© {new Date().getFullYear()} Self Access Centre • Gedung F Pascasarjana Lantai 1 FEB UB</span>
         <span className="font-mono text-[10px] text-slate-400">Node F2-KIOSK-V2</span>
       </footer>
+
+      {/* MODAL 1: SOP LOKER MANDIRI (SETELAH CHECK-IN) */}
+      <AnimatePresence>
+        {showLockerModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 15 }}
+              className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col relative"
+            >
+              {/* Header */}
+              <div className="bg-[#0B2546] text-white p-5 flex items-center justify-between border-b border-amber-400/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-400/30 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[22px]">lock</span>
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-white leading-tight">
+                      SOP Loker &amp; Tata Tertib Ruangan
+                    </h3>
+                    <p className="text-[11px] text-amber-300 font-medium">
+                      Check-In Sukses • Gedung F Pascasarjana Lantai 1
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowLockerModal(false);
+                    inputRef.current?.focus();
+                  }}
+                  className="p-1 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[20px]">close</span>
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-4 text-xs">
+                {/* Rule 1: Loker Tas */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center shrink-0 shadow-2xs">
+                    <span className="material-symbols-outlined text-[22px]">backpack</span>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-bold text-slate-900">
+                      1. Wajib Simpan Tas &amp; Jaket di Loker
+                    </h4>
+                    <p className="text-slate-600 leading-relaxed text-[11.5px]">
+                      Tas ransel, tas laptop besar, jaket tebal, dan buku teks luar wajib disimpan di
+                      dalam <strong>Loker Penitipan Tas</strong>. Hanya diperkenankan membawa laptop, buku catatan tipis, dan alat tulis.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Rule 2: Loker Sepatu & Sandal */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 flex items-center justify-center shrink-0 shadow-2xs">
+                    <span className="material-symbols-outlined text-[22px]">styler</span>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-bold text-slate-900">
+                      2. Ganti Sepatu Luar dengan Sandal SAC
+                    </h4>
+                    <p className="text-slate-600 leading-relaxed text-[11.5px]">
+                      Demi menjaga kebersihan dan kenyamanan ruang karpet, lepas sepatu luar di batas suci,
+                      simpan di <strong>Loker Sepatu</strong>, dan kenakan <strong>Sandal Internal SAC</strong> yang telah disterilkan.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Notice Makanan */}
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 flex items-center gap-2 text-[11px] font-semibold">
+                  <span className="material-symbols-outlined text-[18px] text-rose-600 shrink-0">
+                    no_food
+                  </span>
+                  <span>Dilarang membawa makanan dan minuman berbau menyengat ke dalam area baca hening.</span>
+                </div>
+              </div>
+
+              {/* Footer CTA & Auto-dismiss timer */}
+              <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
+                <span className="text-[11px] font-medium text-slate-500">
+                  Menutup otomatis dalam <strong className="text-[#0B2546] font-mono">{lockerCountdown} detik</strong>
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowLockerModal(false);
+                    inputRef.current?.focus();
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-[#0B2546] hover:bg-slate-900 text-amber-300 hover:text-white font-extrabold text-xs flex items-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer"
+                >
+                  <span>Saya Mengerti &amp; Masuk</span>
+                  <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL 2: SURVEI KEPUASAN PENGUNJUNG (SETELAH CHECK-OUT) */}
+      <AnimatePresence>
+        {showSurveyModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 15 }}
+              className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col relative"
+            >
+              {/* Header */}
+              <div className="bg-[#0B2546] text-white p-5 text-center relative border-b border-amber-400/30">
+                <div className="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center mx-auto mb-2 shadow-md">
+                  <span className="material-symbols-outlined text-[28px]">
+                    sentiment_very_satisfied
+                  </span>
+                </div>
+                <h3 className="text-lg font-black text-white">Survei Kepuasan Kunjungan</h3>
+                <p className="text-xs text-amber-300 font-medium mt-0.5">
+                  Terima kasih telah berkunjung, {surveyData?.fullName || 'Sobat SAC'}!
+                </p>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 flex flex-col gap-4 text-center">
+                {feedbackSubmitted ? (
+                  <div className="py-6 flex flex-col items-center gap-2 text-emerald-700 animate-in fade-in">
+                    <span className="material-symbols-outlined text-[48px] text-emerald-600 animate-bounce">
+                      check_circle
+                    </span>
+                    <h4 className="text-base font-bold text-slate-900">Penilaian Berhasil Dikirim!</h4>
+                    <p className="text-xs text-slate-500">
+                      Masukan Anda sangat berharga bagi peningkatan fasilitas SAC FEB UB.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <span className="text-xs font-bold text-slate-700 block mb-2">
+                        Bagaimana kenyamanan &amp; layanan SAC hari ini?
+                      </span>
+
+                      {/* Interactive 5 Star Rating */}
+                      <div className="flex items-center justify-center gap-2 py-1">
+                        {[1, 2, 3, 4, 5].map((star) => {
+                          const isFilled = (hoverRating || selectedRating) >= star;
+                          return (
+                            <button
+                              key={star}
+                              type="button"
+                              onMouseEnter={() => setHoverRating(star)}
+                              onMouseLeave={() => setHoverRating(0)}
+                              onClick={() => setSelectedRating(star)}
+                              className="p-1 text-amber-400 hover:scale-125 transition-transform cursor-pointer"
+                              aria-label={`Beri bintang ${star}`}
+                            >
+                              <span
+                                className="material-symbols-outlined text-[36px]"
+                                style={{ fontVariationSettings: isFilled ? "'FILL' 1" : "'FILL' 0" }}
+                              >
+                                star
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Rating text label */}
+                      <span className="text-xs font-extrabold text-[#0B2546] mt-1 block">
+                        {selectedRating === 5 && 'Sangat Puas ⭐⭐⭐⭐⭐'}
+                        {selectedRating === 4 && 'Puas ⭐⭐⭐⭐'}
+                        {selectedRating === 3 && 'Cukup ⭐⭐⭐'}
+                        {selectedRating === 2 && 'Kurang Puas ⭐⭐'}
+                        {selectedRating === 1 && 'Perlu Perbaikan ⭐'}
+                      </span>
+                    </div>
+
+                    {/* Optional Feedback Notes */}
+                    <div className="text-left">
+                      <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                        Kritik / Saran Fasilitas (Opsional):
+                      </label>
+                      <textarea
+                        value={feedbackNotes}
+                        onChange={(e) => setFeedbackNotes(e.target.value)}
+                        placeholder="Contoh: AC dingin nyaman, Wi-Fi lancar, usul tambah stopkontak..."
+                        rows={2}
+                        className="w-full text-xs p-3 rounded-xl border border-slate-300 focus:border-[#0B2546] focus:ring-2 focus:ring-[#0B2546]/20 text-slate-800 placeholder:text-slate-400 resize-none"
+                      />
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowSurveyModal(false);
+                          inputRef.current?.focus();
+                        }}
+                        className="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition-colors cursor-pointer"
+                      >
+                        Lewati ({surveyCountdown}s)
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={submittingFeedback}
+                        onClick={handleSendFeedback}
+                        className="flex-1 py-2.5 px-3 rounded-xl bg-[#0B2546] hover:bg-slate-900 text-amber-300 hover:text-white font-extrabold text-xs transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      >
+                        {submittingFeedback ? (
+                          <span>Mengirim...</span>
+                        ) : (
+                          <>
+                            <span className="material-symbols-outlined text-[16px]">send</span>
+                            <span>Kirim Penilaian</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -99,7 +99,7 @@ export function exportVisitorsToPDF(visitors: VisitorRecord[], filterName = 'Har
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(212, 175, 55); // Warm Gold
-  doc.text('Gedung F Lt. 2, Fakultas Ekonomi dan Bisnis, Universitas Brawijaya Malang', 36, 44);
+  doc.text('Gedung F Pascasarjana Lantai 1, Fakultas Ekonomi dan Bisnis, Universitas Brawijaya Malang', 36, 44);
 
   // Subheader Info
   doc.setTextColor(30, 41, 59);
@@ -210,7 +210,7 @@ export function exportDepositReceiptPDF(deposit: DepositReceiptData) {
   doc.setFontSize(8);
   doc.setTextColor(203, 213, 225); // Slate 300
   doc.text(
-    'Gedung F Pascasarjana Lt. 1 & Gedung F Lt. 2, Jl. MT Haryono No. 165, Malang 65145',
+    'Gedung F Pascasarjana Lantai 1, Jl. MT Haryono No. 165, Malang 65145',
     36,
     62
   );

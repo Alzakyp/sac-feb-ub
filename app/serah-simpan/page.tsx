@@ -4,6 +4,8 @@ import React, { useState, useId } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { exportDepositReceiptPDF, DepositReceiptData } from '@/lib/utils';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 
 // Program studi list
 const STUDY_PROGRAMS = [
@@ -75,10 +77,10 @@ export default function SerahSimpanPage() {
     agreedToTerms: false,
   });
 
-  // Uploaded files metadata
-  const [fileAwal, setFileAwal] = useState<{ name: string; size: number; url: string } | null>(null);
-  const [fileIsi, setFileIsi] = useState<{ name: string; size: number; url: string } | null>(null);
-  const [fileAkhir, setFileAkhir] = useState<{ name: string; size: number; url: string } | null>(null);
+  // Uploaded files metadata with real browser File objects
+  const [fileAwal, setFileAwal] = useState<{ file: File; name: string; size: number; url: string } | null>(null);
+  const [fileIsi, setFileIsi] = useState<{ file: File; name: string; size: number; url: string } | null>(null);
+  const [fileAkhir, setFileAkhir] = useState<{ file: File; name: string; size: number; url: string } | null>(null);
 
   // Unique input IDs for accessibility
   const fileAwalInputId = useId();
@@ -214,6 +216,7 @@ export default function SerahSimpanPage() {
     if (type === 'akhir') standardName = `${nimPrefix}_Bagian Akhir.pdf`;
 
     const fileInfo = {
+      file,
       name: file.name,
       size: file.size,
       url: `/uploads/deposits/${Date.now()}_${standardName}`,
@@ -267,31 +270,31 @@ export default function SerahSimpanPage() {
     setIsSubmitting(true);
 
     try {
-      const payload = {
-        identityNumber: studentData.identityNumber,
-        fullName: studentData.fullName,
-        degreeLevel: studentData.degreeLevel,
-        studyProgram: studentData.studyProgram,
-        whatsappCountryCode: studentData.whatsappCountryCode,
-        whatsappNumber: studentData.whatsappNumber,
-        email: studentData.email,
-        mailingAddress: studentData.mailingAddress,
-        titleId: workData.titleId,
-        titleEn: workData.titleEn || null,
-        workType: workData.workType,
-        advisor: workData.advisor || null,
-        examiner1: workData.examiner1 || null,
-        examiner2: workData.examiner2 || null,
-        initialSectionUrl: fileAwal.name,
-        mainSectionUrl: fileIsi.name,
-        finalSectionUrl: fileAkhir.name,
-        hardcopySubmitted: false,
-      };
+      const formData = new FormData();
+      formData.append('identityNumber', studentData.identityNumber);
+      formData.append('fullName', studentData.fullName);
+      formData.append('degreeLevel', studentData.degreeLevel);
+      formData.append('studyProgram', studentData.studyProgram || '');
+      formData.append('whatsappCountryCode', studentData.whatsappCountryCode || '+62');
+      formData.append('whatsappNumber', studentData.whatsappNumber);
+      formData.append('email', studentData.email);
+      formData.append('mailingAddress', studentData.mailingAddress);
+      formData.append('titleId', workData.titleId);
+      formData.append('titleEn', workData.titleEn || '');
+      formData.append('workType', workData.workType);
+      formData.append('advisor', workData.advisor || '');
+      formData.append('examiner1', workData.examiner1 || '');
+      formData.append('examiner2', workData.examiner2 || '');
+      formData.append('hardcopySubmitted', 'false');
+
+      // Append binary PDF files
+      formData.append('initialSection', fileAwal.file);
+      formData.append('mainSection', fileIsi.file);
+      formData.append('finalSection', fileAkhir.file);
 
       const res = await fetch('/api/serah-simpan/submit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       const result = await res.json();
@@ -337,63 +340,11 @@ export default function SerahSimpanPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
-      {/* INSTITUTIONAL TOP BAR */}
-      <header className="bg-[#0B2546] text-white sticky top-0 z-40 shadow-md border-b border-amber-400/30">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-3.5 group">
-            <img
-              src="/logo-feb.webp"
-              alt="FEB UB"
-              className="h-11 w-auto object-contain transition-transform group-hover:scale-105"
-            />
-            <div className="flex flex-col">
-              <span className="text-[15px] sm:text-base font-bold tracking-tight text-white leading-tight">
-                Self Access Centre
-              </span>
-              <span className="text-[10px] sm:text-[11px] font-semibold tracking-wider text-amber-400 uppercase">
-                FEB Universitas Brawijaya • SAC-ONE
-              </span>
-            </div>
-          </Link>
-
-          <div className="flex items-center gap-3">
-            {/* Bilingual Switcher */}
-            <div className="bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 flex items-center shadow-inner">
-              <button
-                onClick={() => setLang('ID')}
-                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
-                  lang === 'ID'
-                    ? 'bg-amber-500 text-slate-950 shadow-sm'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                ID
-              </button>
-              <button
-                onClick={() => setLang('EN')}
-                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
-                  lang === 'EN'
-                    ? 'bg-amber-500 text-slate-950 shadow-sm'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                EN
-              </button>
-            </div>
-
-            <Link
-              href="/"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800/60 hover:bg-slate-800 rounded-lg border border-slate-700/60 transition-colors"
-            >
-              <span className="material-symbols-outlined text-[16px]">home</span>
-              <span>{t.backToHome}</span>
-            </Link>
-          </div>
-        </div>
-      </header>
+      {/* UNIFIED TOP ACADEMIC NAVBAR */}
+      <Navbar />
 
       {/* MAIN CONTENT CONTAINER */}
-      <main className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6">
+      <main className="max-w-4xl mx-auto pt-28 pb-12 px-4 sm:px-6">
         {/* WIZARD CARD */}
         <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden">
           {/* HEADER BANNER */}
@@ -403,17 +354,45 @@ export default function SerahSimpanPage() {
               <span className="material-symbols-outlined text-[180px]">school</span>
             </div>
 
-            <div className="relative z-10">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-2.5">
-                <span className="material-symbols-outlined text-[15px]">verified</span>
-                <span>Modul SAC-ONE Mandiri</span>
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-2.5">
+                  <span className="material-symbols-outlined text-[15px]">verified</span>
+                  <span>Modul SAC-ONE Mandiri</span>
+                </div>
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white leading-snug">
+                  {t.headerTitle}
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl font-normal">
+                  {t.headerSub}
+                </p>
               </div>
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white leading-snug">
-                {t.headerTitle}
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl font-normal">
-                {t.headerSub}
-              </p>
+
+              {/* Bilingual Switcher */}
+              <div className="bg-slate-900/80 p-1 rounded-xl border border-white/20 flex items-center shadow-inner self-start shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setLang('ID')}
+                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                    lang === 'ID'
+                      ? 'bg-amber-500 text-slate-950 shadow-sm'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  ID
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLang('EN')}
+                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                    lang === 'EN'
+                      ? 'bg-amber-500 text-slate-950 shadow-sm'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  EN
+                </button>
+              </div>
             </div>
 
             {/* STEPPER PROGRESS INDICATOR */}
@@ -1917,7 +1896,7 @@ export default function SerahSimpanPage() {
                             Sistem Serah Simpan Karya Ilmiah Mahasiswa Mandiri (SAC-ONE)
                           </p>
                           <p className="text-[9px] text-slate-300 mt-0.5">
-                            Gedung F Pascasarjana Lt. 1 &amp; Gedung F Lt. 2, Jl. MT Haryono No. 165, Malang 65145
+                            Gedung F Pascasarjana Lantai 1, Jl. MT Haryono No. 165, Malang 65145
                           </p>
                         </div>
                         <span className="material-symbols-outlined text-amber-400 text-[36px] opacity-80 shrink-0">
@@ -2027,16 +2006,10 @@ export default function SerahSimpanPage() {
             </div>
           )}
         </AnimatePresence>
-
-
-        {/* FOOTER METADATA */}
-        <div className="mt-8 text-center text-xs text-slate-400 space-y-1">
-          <p>© {new Date().getFullYear()} Self Access Centre • Fakultas Ekonomi dan Bisnis Universitas Brawijaya</p>
-          <p className="text-[11px] text-slate-400">
-            Sistem Serah Simpan Karya Ilmiah Terpadu (SAC-ONE) • Gedung F Pascasarjana Lt. 1 &amp; Gedung F Lt. 2
-          </p>
-        </div>
       </main>
+
+      {/* UNIFIED GLOBAL FOOTER */}
+      <Footer />
     </div>
   );
 }

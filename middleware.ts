@@ -45,7 +45,7 @@ export function middleware(request: NextRequest) {
           {
             success: false,
             error:
-              'Akses Terbatas: Presensi pengunjung hanya dapat diakses melalui jaringan lokal Wi-Fi SAC Gedung F Lantai 2 FEB UB.',
+              'Akses Terbatas: Presensi pengunjung hanya dapat diakses melalui jaringan lokal Wi-Fi SAC Gedung F Pascasarjana Lantai 1 FEB UB.',
             clientIp,
           },
           { status: 403 }
@@ -179,7 +179,7 @@ export function middleware(request: NextRequest) {
         <img src="/logo-feb.webp" alt="FEB UB Logo" />
       </div>
       <h1 style="font-size: 1rem; font-weight: 700; letter-spacing: -0.01em;">Self Access Centre (SAC) FEB UB</h1>
-      <p style="font-size: 0.75rem; color: #CBD5E1; margin-top: 0.25rem;">Gedung F Lantai 2 • Universitas Brawijaya</p>
+      <p style="font-size: 0.75rem; color: #CBD5E1; margin-top: 0.25rem;">Gedung F Pascasarjana Lantai 1 • Universitas Brawijaya</p>
     </div>
     <div class="content">
       <div class="badge-alert">
@@ -188,7 +188,7 @@ export function middleware(request: NextRequest) {
       </div>
       <h2>Presensi Ruangan Khusus Jaringan Lokal</h2>
       <div class="message">
-        Akses Terbatas: Presensi pengunjung hanya dapat diakses melalui jaringan lokal Wi-Fi SAC Gedung F Lantai 2 FEB UB.
+        Akses Terbatas: Presensi pengunjung hanya dapat diakses melalui jaringan lokal Wi-Fi SAC Gedung F Pascasarjana Lantai 1 FEB UB.
       </div>
       <div class="ip-info">
         IP Anda: <strong>${clientIp}</strong> (Di luar subnet SAC)
@@ -198,7 +198,7 @@ export function middleware(request: NextRequest) {
         <span>&rarr;</span>
       </a>
       <p class="footer-note">
-        Jika Anda sedang berada di ruangan SAC Gedung F Lt. 2, pastikan perangkat terhubung ke Wi-Fi resmi <strong>SAC-FEB-UB</strong> atau hubungi staf resepsionis bertugas.
+        Jika Anda sedang berada di ruangan SAC Gedung F Pascasarjana Lantai 1, pastikan perangkat terhubung ke Wi-Fi resmi <strong>SAC-FEB-UB</strong> atau hubungi staf resepsionis bertugas.
       </p>
     </div>
   </div>

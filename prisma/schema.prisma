@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -8,16 +8,18 @@ generator client {
 }
 
 model VisitorLog {
-  id             String    @id @default(cuid())
-  identityNumber String    // NIM / NIK pengunjung
-  fullName       String    // Nama lengkap pengunjung
-  studyProgram   String    // Program studi / institusi
-  checkInTime    DateTime  @default(now())
-  checkOutTime   DateTime?
-  status         String    @default("ACTIVE") // ACTIVE = Sedang di ruangan, COMPLETED = Selesai berkunjung
-  purpose        String?   @default("SAC Room Visit")
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id                 String    @id @default(cuid())
+  identityNumber     String    // NIM / NIK pengunjung
+  fullName           String    // Nama lengkap pengunjung
+  studyProgram       String    // Program studi / institusi
+  checkInTime        DateTime  @default(now())
+  checkOutTime       DateTime?
+  status             String    @default("ACTIVE") // ACTIVE = Sedang di ruangan, COMPLETED = Selesai berkunjung
+  purpose            String?   @default("SAC Room Visit")
+  satisfactionRating Int?      // Skala 1–5 bintang penilaian pengunjung
+  feedbackNotes      String?   @db.Text // Masukan / kritik / ulasan fasilitas
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   @@index([identityNumber])
   @@index([status])
@@ -27,7 +29,7 @@ model VisitorLog {
 model ResourceAccessLog {
   id           String   @id @default(cuid())
   resourceName String
-  userAgent    String?
+  userAgent    String?  @db.Text
   createdAt    DateTime @default(now())
 }
 
@@ -37,15 +39,15 @@ model RepositoryDocument {
   nama           String   // Nama mahasiswa penulis
   nim            String   // NIM mahasiswa
   prodi          String   // S1 Manajemen, S1 Akuntansi, S1 Ekonomi Islam, dll.
-  judul          String   // Judul naskah Bahasa Indonesia
-  judulEn        String?  // Judul Bahasa Inggris
+  judul          String   @db.Text // Judul naskah Bahasa Indonesia
+  judulEn        String?  @db.Text // Judul Bahasa Inggris
   jenis          String   @default("Skripsi") // Skripsi, Tesis, Disertasi
   pembimbing     String?
   penguji1       String?
   penguji2       String?
-  bagianAwalUrl  String?  // Link Google Drive Cover & Abstrak
-  bagianIsiUrl   String?  // Link Google Drive Bab 1-5
-  bagianAkhirUrl String?  // Link Google Drive Daftar Pustaka & Lampiran
+  bagianAwalUrl  String?  @db.Text // Link Google Drive Cover & Abstrak
+  bagianIsiUrl   String?  @db.Text // Link Google Drive Bab 1-5
+  bagianAkhirUrl String?  @db.Text // Link Google Drive Daftar Pustaka & Lampiran
   viewCount      Int      @default(0)
   downloadCount  Int      @default(0)
   createdAt      DateTime @default(now())
@@ -53,7 +55,7 @@ model RepositoryDocument {
 
   activities     RepositoryActivityLog[]
 
-  @@index([judul])
+  @@index([judul(length: 191)])
   @@index([nim])
   @@index([nama])
   @@index([prodi])
@@ -66,14 +68,14 @@ model RepositoryActivityLog {
   nim          String?             // Opsional jika terdeteksi dari session/storage
   nama         String?
   prodi        String?
-  kataKunci    String?             // Kata kunci pencarian yang dimasukkan
-  aktifitas    String              // SEARCH, VIEW_DETAIL, CLICK_AWAL, CLICK_ISI, CLICK_AKHIR, DOWNLOAD
+  kataKunci    String?             @db.Text // Kata kunci pencarian yang dimasukkan
+  aktifitas    String              @db.Text // SEARCH, VIEW_DETAIL, CLICK_AWAL, CLICK_ISI, CLICK_AKHIR, DOWNLOAD
   device       String?             // PC, Mobile, Tablet (via ua-parser-js)
   browser      String?             // Chrome, Safari, Firefox, dll.
   ipAddress    String?
   createdAt    DateTime            @default(now())
 
-  @@index([aktifitas])
+  @@index([aktifitas(length: 191)])
   @@index([createdAt])
   @@index([documentId])
 }
@@ -88,10 +90,10 @@ model Member {
   studyProgram     String   // Pilihan 18 prodi atau 'Other'
   whatsapp         String   // Format: 6281234567890
   email            String   @unique
-  originAddress    String   // Alamat asal
-  malangAddress    String?  // Alamat di Malang (opsional)
-  selfiePhotoUrl   String?
-  identityCardUrl  String?
+  originAddress    String   @db.Text // Alamat asal
+  malangAddress    String?  @db.Text // Alamat di Malang (opsional)
+  selfiePhotoUrl   String?  @db.Text
+  identityCardUrl  String?  @db.Text
   password         String   // Hashed password
   status           String   @default("ACTIVE") // ACTIVE, SUSPENDED, INACTIVE
   createdAt        DateTime @default(now())
@@ -112,20 +114,20 @@ model ScientificWorkDeposit {
   whatsappCountryCode String    @default("+62")
   whatsappNumber      String
   email               String
-  mailingAddress      String
-  titleId             String
-  titleEn             String?
+  mailingAddress      String    @db.Text
+  titleId             String    @db.Text
+  titleEn             String?   @db.Text
   workType            String    // Skripsi, Tesis, Disertasi
   advisor             String?
   examiner1           String?
   examiner2           String?
-  initialSectionUrl   String    // File NIM_Bagian Awal.pdf
-  mainSectionUrl      String    // File NIM_Bagian Isi.pdf
-  finalSectionUrl     String    // File NIM_Bagian Akhir.pdf
+  initialSectionUrl   String    @db.Text // File NIM_Bagian Awal.pdf
+  mainSectionUrl      String    @db.Text // File NIM_Bagian Isi.pdf
+  finalSectionUrl     String    @db.Text // File NIM_Bagian Akhir.pdf
   hardcopySubmitted   Boolean   @default(false)
   verificationStatus  String    @default("PENDING") // PENDING, APPROVED, REVISION_NEEDED
-  revisionNotes       String?
-  certificateUrl      String?
+  revisionNotes       String?   @db.Text
+  certificateUrl      String?   @db.Text
   verifiedAt          DateTime?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
@@ -134,4 +136,3 @@ model ScientificWorkDeposit {
   @@index([depositNumber])
   @@index([verificationStatus])
 }
-

@@ -3,6 +3,8 @@
 import React, { useState, useId } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 
 const STUDY_PROGRAMS = [
   'S1 Ekonomi Pembangunan',
@@ -363,10 +365,13 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col justify-between p-4 sm:p-6 font-sans text-slate-800">
-      <div className="w-full flex justify-center items-center flex-1">
+    <div className="min-h-screen bg-slate-100 flex flex-col justify-between pt-24 font-sans text-slate-800">
+      {/* UNIFIED TOP ACADEMIC NAVBAR */}
+      <Navbar />
+
+      <div className="w-full flex justify-center items-center flex-1 p-4 sm:p-6">
         {/* MAIN MODAL CARD CONTAINER (max-w-xl) */}
-        <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl border border-slate-200/80 overflow-hidden flex flex-col">
+        <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl border border-slate-200/80 overflow-hidden flex flex-col my-4">
           {/* HEADER (Navy Brawijaya #0B2546 with Gold accent & Language Switch) */}
           <header className="bg-[#0B2546] text-white px-6 py-4 flex items-center justify-between border-b border-amber-500/30">
             <div className="flex items-center gap-3">
@@ -380,7 +385,7 @@ export default function RegisterPage() {
                   {t.headerTitle}
                 </h1>
                 <p className="text-[11px] text-slate-300 font-medium">
-                  Self Access Centre • Gedung F Lantai 2 FEB UB
+                  Self Access Centre • Gedung F Pascasarjana Lantai 1 FEB UB
                 </p>
               </div>
             </div>
@@ -1206,10 +1211,8 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* FOOTER TEXT */}
-      <footer className="w-full text-center py-2 text-slate-400 text-xs font-medium">
-        {t.version} • Self Access Centre FEB Universitas Brawijaya
-      </footer>
+      {/* UNIFIED GLOBAL FOOTER */}
+      <Footer />
     </div>
   );
 }

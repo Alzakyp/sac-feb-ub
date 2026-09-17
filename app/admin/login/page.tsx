@@ -183,7 +183,7 @@ export default function AdminLoginPage() {
                 setNoticeModal({
                   title: 'Pusat Bantuan & Layanan IT SAC FEB UB',
                   description:
-                    'Jika mengalami kendala hak akses akun admin, reset sandi staf, atau aktivasi Kiosk presensi, silakan hubungi Tim PSIK Gedung F Lantai 2 FEB UB atau kontak WhatsApp Helpdesk: +62 812-3456-7890.',
+                    'Jika mengalami kendala hak akses akun admin, reset sandi staf, atau aktivasi Kiosk presensi, silakan hubungi Tim PSIK Gedung F Pascasarjana Lantai 1 FEB UB atau kontak WhatsApp Helpdesk: +62 823-1537-7515.',
                   type: 'help',
                 })
               }
