@@ -17,6 +17,7 @@ export default function Navbar({ onChatClick }: NavbarProps) {
     { href: '/katalog', label: 'Katalog Buku' },
     { href: '/repository', label: 'Repositori' },
     { href: '/serah-simpan', label: 'Serah Simpan' },
+    { href: '/turnitin', label: 'Cek Plagiasi' },
     { href: '/gallery', label: 'E-Resource' },
     { href: '/lapor', label: 'Bantuan' },
   ];
@@ -106,7 +107,7 @@ export default function Navbar({ onChatClick }: NavbarProps) {
             </button>
           ) : (
             <Link
-              href="/chat-sac"
+              href="/turnitin"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 text-xs font-bold transition-all shadow-2xs whitespace-nowrap cursor-pointer active:scale-95 group"
               title="Buka Layanan Asisten ChatSAC"
             >
@@ -121,26 +122,10 @@ export default function Navbar({ onChatClick }: NavbarProps) {
             </Link>
           )}
 
-          {/* Prominent High-Contrast Daftar Anggota Button */}
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#0B2546] hover:bg-slate-900 text-white font-bold text-xs shadow-sm transition-all whitespace-nowrap active:scale-95 cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[16px] text-amber-400">how_to_reg</span>
-            <span>Daftar Anggota</span>
-          </Link>
         </div>
 
         {/* Mobile / Tablet Controls (< 1280px) */}
         <div className="flex xl:hidden items-center gap-2 shrink-0">
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#0B2546] text-white text-xs font-bold shadow-xs"
-          >
-            <span className="material-symbols-outlined text-[15px] text-amber-400">how_to_reg</span>
-            <span>Daftar</span>
-          </Link>
-
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -195,7 +180,7 @@ export default function Navbar({ onChatClick }: NavbarProps) {
               </button>
             ) : (
               <Link
-                href="/chat-sac"
+                href="/turnitin"
                 onClick={() => setMobileMenuOpen(false)}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-amber-50 text-amber-950 border border-amber-300 font-bold text-sm"
               >

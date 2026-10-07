@@ -35,57 +35,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Cari mahasiswa di tabel Member
-    const member = await prisma.member.findFirst({
-      where: {
-        identityNumber: cleanedIdentityNumber,
-      },
+    // Cek apakah mahasiswa pernah melakukan serah simpan sebelumnya
+    const prevDeposit = await prisma.scientificWorkDeposit.findFirst({
+      where: { identityNumber: cleanedIdentityNumber },
+      orderBy: { createdAt: 'desc' },
     });
 
-    if (member) {
-      // Deteksi jenjang studi dari program studi
-      let degreeLevel = 'S1';
-      const prodiUpper = member.studyProgram.toUpperCase();
-      if (prodiUpper.startsWith('S2') || prodiUpper.includes('MAGISTER')) {
-        degreeLevel = 'S2';
-      } else if (prodiUpper.startsWith('S3') || prodiUpper.includes('DOKTOR')) {
-        degreeLevel = 'S3';
-      } else if (prodiUpper.includes('PROFESI') || prodiUpper.includes('PPA')) {
-        degreeLevel = 'Profesi';
-      } else if (prodiUpper.startsWith('S1') || prodiUpper.includes('SARJANA')) {
-        degreeLevel = 'S1';
-      } else {
-        degreeLevel = 'Other';
-      }
-
-      // Bersihkan whatsapp format jika memiliki prefix 62
-      let whatsappClean = member.whatsapp;
-      if (whatsappClean.startsWith('62')) {
-        whatsappClean = whatsappClean.slice(2);
-      } else if (whatsappClean.startsWith('0')) {
-        whatsappClean = whatsappClean.slice(1);
-      }
-
+    if (prevDeposit) {
       return NextResponse.json({
         found: true,
         data: {
-          identityNumber: member.identityNumber,
-          fullName: member.fullName,
-          degreeLevel,
-          studyProgram: member.studyProgram,
-          whatsapp: whatsappClean,
-          whatsappCountryCode: '+62',
-          email: member.email,
-          originAddress: member.originAddress,
+          identityNumber: prevDeposit.identityNumber,
+          fullName: prevDeposit.fullName,
+          degreeLevel: prevDeposit.degreeLevel,
+          studyProgram: prevDeposit.studyProgram || 'FEB UB',
+          whatsapp: prevDeposit.whatsappNumber,
+          whatsappCountryCode: prevDeposit.whatsappCountryCode || '+62',
+          email: prevDeposit.email,
+          originAddress: prevDeposit.mailingAddress,
         },
       });
     }
 
-    // Jika tidak ditemukan
     return NextResponse.json({
       found: false,
-      message:
-        'Data NIM tidak ditemukan. Silakan lengkapi data mahasiswa berikut. / The NIM was not found. Please complete the following student data.',
+      message: 'Silakan isi formulir identitas serah simpan secara mandiri.',
     });
   } catch (error) {
     console.error('API Verify Error:', error);

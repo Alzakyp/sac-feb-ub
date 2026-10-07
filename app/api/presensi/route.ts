@@ -25,24 +25,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Lookup Identitas di tabel Member:
-    // Query tabel Member berdasarkan identityNumber.
-    // Jika ditemukan: ambil fullName dan studyProgram dari akun member.
-    // Jika tidak ditemukan: fallback ke fullName: "Mahasiswa FEB UB" dan studyProgram: "FEB UB".
-    let fullName = 'Mahasiswa FEB UB';
-    let studyProgram = 'FEB UB';
-
-    try {
-      const member = await prisma.member.findUnique({
-        where: { identityNumber },
-      });
-      if (member) {
-        fullName = member.fullName;
-        studyProgram = member.studyProgram;
-      }
-    } catch (lookupErr) {
-      console.warn('Member lookup error:', lookupErr);
-    }
+    // Data keanggotaan telah dihapus; presensi memakai identitas input pengguna.
+    const fullName = String(body.fullName || 'Mahasiswa FEB UB').trim();
+    const studyProgram = String(body.studyProgram || 'FEB UB').trim();
 
     // 3. Cek Sesi Aktif:
     // Query VisitorLog dengan filter: identityNumber dan status = "ACTIVE".

@@ -35,7 +35,7 @@ model ResourceAccessLog {
 
 model RepositoryDocument {
   id             String   @id @default(cuid())
-  nomor          String?  // No. inventaris arsip
+  nomor          String?  @db.Text // SACRBI_ID / nomor arsip
   nama           String   // Nama mahasiswa penulis
   nim            String   // NIM mahasiswa
   prodi          String   // S1 Manajemen, S1 Akuntansi, S1 Ekonomi Islam, dll.
@@ -80,28 +80,108 @@ model RepositoryActivityLog {
   @@index([documentId])
 }
 
-model Member {
-  id               String   @id @default(cuid())
-  pin              String   @unique // Format otomatis: SAC-26-XXXX
-  membershipType   String   // Non FEB-UB, Mahasiswa FEB-UB, Tendik FEB-UB, Dosen FEB-UB, Other
-  identityType     String   // KTM [Student Card], KTP, Kartu Pegawai [Dosen/Tendik UB], Pasport
-  identityNumber   String   @unique // NIM / NIK / Paspor
+model Staff {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  role         String   @default("PETUGAS") // ADMIN | PETUGAS
+  passwordHash String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([email])
+}
+
+model PlagiarismRequest {
+  id               String    @id @default(cuid())
+  requestNumber    String    @unique // Format: PLG-YYYY-XXXX
+  nim              String
   fullName         String
-  studyProgram     String   // Pilihan 18 prodi atau 'Other'
-  whatsapp         String   // Format: 6281234567890
-  email            String   @unique
-  originAddress    String   @db.Text // Alamat asal
-  malangAddress    String?  @db.Text // Alamat di Malang (opsional)
-  selfiePhotoUrl   String?  @db.Text
-  identityCardUrl  String?  @db.Text
-  password         String   // Hashed password
-  status           String   @default("ACTIVE") // ACTIVE, SUSPENDED, INACTIVE
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  email            String
+  studyProgram     String
+  workType         String    // Skripsi | Tesis | Disertasi | Artikel
+  title            String    @db.Text
+  fileName         String    @db.Text
+  filePath         String    @db.Text
+  status           String    @default("PENDING") // PENDING | PROCESSING | COMPLETED | REJECTED
+  similarityScore  Int?
+  resultFilePath   String?   @db.Text
+  staffNotes       String?   @db.Text
+  processedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([nim])
+  @@index([status])
+  @@index([createdAt])
+}
+
+
+model Member {
+  id              String   @id @default(cuid())
+  memberType      String   // Mahasiswa FEB-UB | Non FEB-UB | Dosen/Tendik FEB-UB
+  fullName        String
+  nim             String   @unique
+  studyLevel      String?
+  studyProgram    String?
+  whatsapp        String
+  email           String   @unique
+  mailingAddress  String   @db.Text
+  identityType    String
+  passwordHash    String
+  selfiePath      String?  @db.Text
+  identityPath    String?  @db.Text
+  status          String   @default("PENDING") // PENDING | ACTIVE | REJECTED | INACTIVE
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([nim])
+  @@index([status])
+}
+
+model TicketReport {
+  id               String    @id @default(cuid())
+  ticketNumber     String    @unique
+  fullName         String
+  identityNumber   String
+  email            String
+  phone            String?
+  category         String
+  description      String    @db.Text
+  attachmentUrl    String?   @db.Text // URL foto bukti kendala
+  status           String    @default("OPEN") // OPEN | IN_PROGRESS | RESOLVED
+  staffNotes       String?   @db.Text
+  resolvedAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([identityNumber])
-  @@index([email])
-  @@index([studyProgram])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model BookCollection {
+  id                  String   @id @default(cuid())
+  inventoryNumber     String?  @unique // No. Inventaris
+  registerNumber      String?  // Register
+  title               String   @db.Text // Judul
+  author              String?  @db.Text // Pengarang
+  edition             String?  // Edisi
+  publicationPlace    String?  // Tempat Terbit
+  publisher           String?  // Penerbit
+  publicationYear     Int?     // Tahun
+  physicalDescription String?  @db.Text // Deskripsi fisik
+  isbn                String?  // ISBN
+  ddc                 String?  // Klasifikasi DDC
+  subject             String?  @db.Text // Subjek
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([title(length: 191)])
+  @@index([author(length: 191)])
+  @@index([isbn])
+  @@index([ddc])
 }
 
 model ScientificWorkDeposit {

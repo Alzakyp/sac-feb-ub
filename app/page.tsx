@@ -592,7 +592,7 @@ export default function HomePage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-1 text-secondary-fixed text-xs uppercase font-bold tracking-wider">
-                        <span>Informasi Kunjungan Fisik</span>
+                        <span>Informasi Kunjungan</span>
                       </div>
                       <h3 className="text-xl sm:text-2xl text-on-primary font-bold">
                         Senin – Jumat: 08.00 – 15.00 WIB

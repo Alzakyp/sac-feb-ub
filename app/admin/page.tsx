@@ -12,10 +12,481 @@ import {
 } from '@/lib/utils';
 import ComingSoonNotice, { ComingSoonDetails } from '@/components/ComingSoonNotice';
 
+function ReportManagementPanel() {
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [status, setStatus] = useState('ALL');
+  const [selected, setSelected] = useState<any | null>(null);
+  const [notes, setNotes] = useState('');
+
+  const load = useCallback(async () => {
+    const res = await fetch(`/api/backoffice/reports?status=${status}`);
+    const json = await res.json();
+    if (json.success) setTickets(json.data);
+  }, [status]);
+  useEffect(() => { load(); }, [load]);
+
+  async function update(nextStatus: string) {
+    if (!selected) return;
+    await fetch(`/api/backoffice/reports/${selected.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: nextStatus, staffNotes: notes }) });
+    setSelected(null); load();
+  }
+
+  return <div className="space-y-4">
+    <div className="flex justify-between items-center rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+      <p className="text-sm font-bold text-[#0B2546]">{tickets.length} tiket</p>
+      <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-slate-300 p-2 text-xs bg-white"><option value="ALL">Semua Status</option><option value="OPEN">Baru</option><option value="IN_PROGRESS">Diproses</option><option value="RESOLVED">Selesai</option></select>
+    </div>
+    <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm"><table className="w-full text-left text-xs"><thead className="bg-slate-50 text-slate-500 uppercase text-[11px]"><tr><th className="p-3">Tiket</th><th className="p-3">Pengadu</th><th className="p-3">Kategori</th><th className="p-3">Laporan</th><th className="p-3">Status</th><th className="p-3" /></tr></thead><tbody className="divide-y divide-slate-100">{tickets.map((t) => <tr key={t.id}><td className="p-3 font-mono font-bold text-[#0B2546]">{t.ticketNumber}</td><td className="p-3"><p className="font-bold">{t.fullName}</p><p className="text-slate-500">{t.identityNumber}</p></td><td className="p-3">{t.category}</td><td className="p-3 max-w-xs line-clamp-2">{t.description}</td><td className="p-3"><span className="rounded bg-amber-50 px-2 py-1 font-bold text-[10px] text-amber-800">{t.status}</span></td><td className="p-3 text-right"><button onClick={() => { setSelected(t); setNotes(t.staffNotes || ''); }} className="text-blue-600 hover:underline">Tanggapi</button></td></tr>)}{tickets.length === 0 && <tr><td colSpan={6} className="p-8 text-center text-slate-400">Belum ada laporan.</td></tr>}</tbody></table></div>
+    {selected && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"><p className="text-xs font-bold text-amber-700">{selected.ticketNumber}</p><h3 className="mt-2 font-bold text-[#0B2546]">{selected.category}</h3><p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm leading-6">{selected.description}</p><textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} placeholder="Tulis tanggapan untuk mahasiswa..." className="mt-4 w-full rounded-xl border p-3 text-sm" /><div className="mt-4 flex flex-wrap justify-end gap-2"><button onClick={() => setSelected(null)} className="rounded-lg border px-3 py-2 text-xs">Batal</button><button onClick={() => update('IN_PROGRESS')} className="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold">Proses</button><button onClick={() => update('RESOLVED')} className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white">Kirim Jawaban & Selesai</button></div></div></div>}
+  </div>;
+}
+
+function RepositoryManagementPanel() {
+  const [data, setData] = useState<any[]>([]);
+  const [q, setQ] = useState('');
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [editDoc, setEditDoc] = useState<any | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const res = await fetch(`/api/backoffice/repository?q=${encodeURIComponent(q)}&page=${page}`);
+    const json = await res.json();
+    if (json.success) {
+      setData(json.data);
+      setTotal(json.total);
+    }
+    setLoading(false);
+  }, [q, page]);
+
+  useEffect(() => {
+    const t = setTimeout(load, 300);
+    return () => clearTimeout(t);
+  }, [load]);
+
+  async function handleSync() {
+    if (!confirm('Tarik data baru dari Google Spreadsheet sekarang?')) return;
+    setSyncing(true);
+    const res = await fetch('/api/backoffice/repository/sync', { method: 'POST' });
+    const json = await res.json();
+    alert(json.message || json.error);
+    setSyncing(false);
+    load();
+  }
+
+  async function remove(id: string) {
+    if (!confirm('Hapus naskah ini dari repositori?')) return;
+    await fetch(`/api/backoffice/repository/${id}`, { method: 'DELETE' });
+    load();
+  }
+
+  async function saveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editDoc) return;
+    await fetch(`/api/backoffice/repository/${editDoc.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editDoc),
+    });
+    setEditDoc(null);
+    load();
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="relative w-full sm:w-80">
+          <input
+            value={q}
+            onChange={(e) => { setQ(e.target.value); setPage(1); }}
+            placeholder="Cari judul, NIM, penulis, prodi..."
+            className="w-full pl-3 pr-3 py-2 rounded-xl border border-slate-300 text-xs outline-none"
+          />
+        </div>
+        <div className="flex items-center gap-3 self-end sm:self-auto">
+          <span className="text-xs font-bold text-slate-500">{total.toLocaleString('id-ID')} Karya</span>
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined text-[16px]">sync</span>
+            <span>{syncing ? 'Menyinkronkan…' : 'Sinkron Google Sheets'}</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <table className="w-full text-left text-xs">
+          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[11px]">
+            <tr>
+              <th className="p-3">Penulis / NIM</th>
+              <th className="p-3">Judul Karya</th>
+              <th className="p-3">Prodi & Jenis</th>
+              <th className="p-3">Tautan Berkas</th>
+              <th className="p-3 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {data.map((d) => (
+              <tr key={d.id} className="hover:bg-slate-50">
+                <td className="p-3">
+                  <p className="font-bold text-slate-800">{d.nama}</p>
+                  <p className="text-[11px] text-slate-500 font-mono">{d.nim}</p>
+                </td>
+                <td className="p-3 max-w-md">
+                  <p className="font-semibold text-[#0B2546] line-clamp-2">{d.judul}</p>
+                </td>
+                <td className="p-3">
+                  <span className="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-bold block w-fit mb-1">{d.jenis}</span>
+                  <span className="text-[11px] text-slate-600">{d.prodi}</span>
+                </td>
+                <td className="p-3 space-x-1.5 whitespace-nowrap">
+                  {d.bagianAwalUrl && <a href={d.bagianAwalUrl} target="_blank" rel="noreferrer" className="text-[10px] px-2 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200">Awal</a>}
+                  {d.bagianIsiUrl && <a href={d.bagianIsiUrl} target="_blank" rel="noreferrer" className="text-[10px] px-2 py-1 rounded bg-blue-50 text-blue-800 border border-blue-200">Isi</a>}
+                  {d.bagianAkhirUrl && <a href={d.bagianAkhirUrl} target="_blank" rel="noreferrer" className="text-[10px] px-2 py-1 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">Akhir</a>}
+                </td>
+                <td className="p-3 text-right space-x-2 whitespace-nowrap">
+                  <button onClick={() => setEditDoc(d)} className="text-xs text-blue-600 hover:underline">Edit</button>
+                  <button onClick={() => remove(d.id)} className="text-xs text-rose-600 hover:underline">Hapus</button>
+                </td>
+              </tr>
+            ))}
+            {data.length === 0 && (
+              <tr><td colSpan={5} className="p-8 text-center text-slate-400">{loading ? 'Memuat data…' : 'Tidak ada naskah ditemukan.'}</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex justify-between items-center px-2 py-1 text-xs">
+        <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="px-3 py-1.5 rounded-lg border bg-white disabled:opacity-40">Sebelumnya</button>
+        <span>Halaman {page}</span>
+        <button disabled={data.length < 20} onClick={() => setPage(page + 1)} className="px-3 py-1.5 rounded-lg border bg-white disabled:opacity-40">Berikutnya</button>
+      </div>
+
+      {editDoc && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4">
+          <form onSubmit={saveEdit} className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-xl space-y-3">
+            <h3 className="font-bold text-sm text-[#0B2546]">Edit Data Karya</h3>
+            <input required value={editDoc.nama} onChange={(e) => setEditDoc({ ...editDoc, nama: e.target.value })} placeholder="Nama" className="w-full rounded-xl border p-2 text-xs" />
+            <input required value={editDoc.nim} onChange={(e) => setEditDoc({ ...editDoc, nim: e.target.value })} placeholder="NIM" className="w-full rounded-xl border p-2 text-xs" />
+            <textarea required value={editDoc.judul} onChange={(e) => setEditDoc({ ...editDoc, judul: e.target.value })} rows={3} placeholder="Judul" className="w-full rounded-xl border p-2 text-xs" />
+            <input value={editDoc.prodi} onChange={(e) => setEditDoc({ ...editDoc, prodi: e.target.value })} placeholder="Prodi" className="w-full rounded-xl border p-2 text-xs" />
+            <input value={editDoc.bagianAwalUrl || ''} onChange={(e) => setEditDoc({ ...editDoc, bagianAwalUrl: e.target.value })} placeholder="Link Bagian Awal" className="w-full rounded-xl border p-2 text-xs" />
+            <input value={editDoc.bagianIsiUrl || ''} onChange={(e) => setEditDoc({ ...editDoc, bagianIsiUrl: e.target.value })} placeholder="Link Bagian Isi" className="w-full rounded-xl border p-2 text-xs" />
+            <input value={editDoc.bagianAkhirUrl || ''} onChange={(e) => setEditDoc({ ...editDoc, bagianAkhirUrl: e.target.value })} placeholder="Link Bagian Akhir" className="w-full rounded-xl border p-2 text-xs" />
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={() => setEditDoc(null)} className="px-3 py-1.5 text-xs rounded-lg border">Batal</button>
+              <button className="px-4 py-1.5 text-xs rounded-lg bg-[#0B2546] text-white font-bold">Simpan</button>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BookManagementPanel() {
+  const [books, setBooks] = useState<any[]>([]);
+  const [q, setQ] = useState('');
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [editBook, setEditBook] = useState<any | null>(null);
+
+  const load = useCallback(async () => {
+    const res = await fetch(`/api/backoffice/books?q=${encodeURIComponent(q)}&page=${page}`);
+    const json = await res.json();
+    if (json.success) {
+      setBooks(json.data);
+      setTotal(json.total);
+    }
+  }, [q, page]);
+
+  useEffect(() => {
+    const t = setTimeout(load, 300);
+    return () => clearTimeout(t);
+  }, [load]);
+
+  async function remove(id: string) {
+    if (!confirm('Hapus buku ini dari katalog?')) return;
+    await fetch(`/api/backoffice/books/${id}`, { method: 'DELETE' });
+    load();
+  }
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editBook) return;
+    if (editBook.id) {
+      await fetch(`/api/backoffice/books/${editBook.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editBook),
+      });
+    } else {
+      await fetch('/api/backoffice/books', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editBook),
+      });
+    }
+    setEditBook(null);
+    load();
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <input
+          value={q}
+          onChange={(e) => { setQ(e.target.value); setPage(1); }}
+          placeholder="Cari judul buku, pengarang, ISBN, DDC..."
+          className="w-full sm:w-80 px-3 py-2 rounded-xl border border-slate-300 text-xs outline-none"
+        />
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-slate-500">{total.toLocaleString('id-ID')} Buku Fisik</span>
+          <button
+            onClick={() => setEditBook({ title: '', author: '', publisher: '', publicationYear: 2024, isbn: '', ddc: '' })}
+            className="px-3 py-2 rounded-xl bg-[#0B2546] text-white font-bold text-xs"
+          >
+            + Tambah Buku
+          </button>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <table className="w-full text-left text-xs">
+          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[11px]">
+            <tr>
+              <th className="p-3">DDC / Register</th>
+              <th className="p-3">Judul Buku</th>
+              <th className="p-3">Pengarang & Penerbit</th>
+              <th className="p-3">Tahun & ISBN</th>
+              <th className="p-3 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {books.map((b) => (
+              <tr key={b.id} className="hover:bg-slate-50">
+                <td className="p-3 font-mono">
+                  <p className="font-bold text-amber-700">{b.ddc || '-'}</p>
+                  <p className="text-[10px] text-slate-400">{b.inventoryNumber || b.registerNumber || '-'}</p>
+                </td>
+                <td className="p-3 max-w-sm">
+                  <p className="font-bold text-[#0B2546]">{b.title}</p>
+                </td>
+                <td className="p-3">
+                  <p className="text-slate-800 font-medium">{b.author || '-'}</p>
+                  <p className="text-[11px] text-slate-500">{b.publisher || '-'}</p>
+                </td>
+                <td className="p-3">
+                  <p className="font-semibold">{b.publicationYear || '-'}</p>
+                  <p className="text-[10px] text-slate-500 font-mono">{b.isbn || '-'}</p>
+                </td>
+                <td className="p-3 text-right space-x-2 whitespace-nowrap">
+                  <button onClick={() => setEditBook(b)} className="text-xs text-blue-600 hover:underline">Edit</button>
+                  <button onClick={() => remove(b.id)} className="text-xs text-rose-600 hover:underline">Hapus</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex justify-between items-center px-2 py-1 text-xs">
+        <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="px-3 py-1.5 rounded-lg border bg-white disabled:opacity-40">Sebelumnya</button>
+        <span>Halaman {page}</span>
+        <button disabled={books.length < 20} onClick={() => setPage(page + 1)} className="px-3 py-1.5 rounded-lg border bg-white disabled:opacity-40">Berikutnya</button>
+      </div>
+
+      {editBook && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4">
+          <form onSubmit={save} className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-xl space-y-3">
+            <h3 className="font-bold text-sm text-[#0B2546]">{editBook.id ? 'Edit Buku' : 'Tambah Buku Baru'}</h3>
+            <input required value={editBook.title} onChange={(e) => setEditBook({ ...editBook, title: e.target.value })} placeholder="Judul Buku" className="w-full rounded-xl border p-2 text-xs" />
+            <input value={editBook.author || ''} onChange={(e) => setEditBook({ ...editBook, author: e.target.value })} placeholder="Pengarang" className="w-full rounded-xl border p-2 text-xs" />
+            <div className="grid grid-cols-2 gap-2">
+              <input value={editBook.publisher || ''} onChange={(e) => setEditBook({ ...editBook, publisher: e.target.value })} placeholder="Penerbit" className="rounded-xl border p-2 text-xs" />
+              <input type="number" value={editBook.publicationYear || ''} onChange={(e) => setEditBook({ ...editBook, publicationYear: parseInt(e.target.value) || null })} placeholder="Tahun" className="rounded-xl border p-2 text-xs" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <input value={editBook.isbn || ''} onChange={(e) => setEditBook({ ...editBook, isbn: e.target.value })} placeholder="ISBN" className="rounded-xl border p-2 text-xs" />
+              <input value={editBook.ddc || ''} onChange={(e) => setEditBook({ ...editBook, ddc: e.target.value })} placeholder="DDC" className="rounded-xl border p-2 text-xs" />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={() => setEditBook(null)} className="px-3 py-1.5 text-xs rounded-lg border">Batal</button>
+              <button className="px-4 py-1.5 text-xs rounded-lg bg-[#0B2546] text-white font-bold">Simpan</button>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StaffManagementPanel() {
+  const [list, setList] = useState<any[]>([]);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('PETUGAS');
+  const [error, setError] = useState('');
+
+  const load = useCallback(async () => {
+    const res = await fetch('/api/backoffice/staff');
+    const json = await res.json();
+    if (json.success) setList(json.data);
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function create(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    const res = await fetch('/api/backoffice/staff', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password, role }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      setError(json.error || 'Gagal');
+      return;
+    }
+    setName('');
+    setEmail('');
+    setPassword('');
+    load();
+  }
+
+  async function toggle(id: string, active: boolean) {
+    await fetch(`/api/backoffice/staff/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active: !active }),
+    });
+    load();
+  }
+
+  async function remove(id: string) {
+    if (!confirm('Hapus staf ini?')) return;
+    await fetch(`/api/backoffice/staff/${id}`, { method: 'DELETE' });
+    load();
+  }
+
+  return (
+    <div className="space-y-4">
+      <form onSubmit={create} className="rounded-2xl bg-white p-5 border border-slate-200 shadow-sm space-y-3">
+        <h2 className="font-bold text-sm text-[#0B2546]">Tambah Staf Baru</h2>
+        {error && <p className="text-xs text-red-600 font-semibold">{error}</p>}
+        <div className="grid gap-3 sm:grid-cols-4">
+          <input
+            required
+            placeholder="Nama lengkap"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="rounded-xl border border-slate-300 p-2 text-xs"
+          />
+          <input
+            required
+            type="email"
+            placeholder="Email UB (nama@ub.ac.id)"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="rounded-xl border border-slate-300 p-2 text-xs"
+          />
+          <input
+            required
+            type="password"
+            placeholder="Password (min 8 karakter)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="rounded-xl border border-slate-300 p-2 text-xs"
+          />
+          <div className="flex gap-2">
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="rounded-xl border border-slate-300 p-2 text-xs bg-white w-full"
+            >
+              <option value="PETUGAS">PETUGAS</option>
+              <option value="ADMIN">ADMIN</option>
+            </select>
+            <button className="rounded-xl bg-[#0B2546] px-4 py-2 text-xs font-semibold text-white whitespace-nowrap">
+              Simpan
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <table className="w-full text-left text-xs">
+          <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase text-slate-500">
+            <tr>
+              <th className="p-3.5">Nama</th>
+              <th className="p-3.5">Email</th>
+              <th className="p-3.5">Role</th>
+              <th className="p-3.5">Status</th>
+              <th className="p-3.5 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {list.map((s) => (
+              <tr key={s.id} className="hover:bg-slate-50">
+                <td className="p-3.5 font-bold text-slate-800">{s.name}</td>
+                <td className="p-3.5 text-slate-600 font-mono">{s.email}</td>
+                <td className="p-3.5">
+                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold">
+                    {s.role}
+                  </span>
+                </td>
+                <td className="p-3.5">
+                  <span
+                    className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
+                      s.active ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                    }`}
+                  >
+                    {s.active ? 'Aktif' : 'Nonaktif'}
+                  </span>
+                </td>
+                <td className="p-3.5 text-right space-x-3">
+                  <button
+                    onClick={() => toggle(s.id, s.active)}
+                    className="text-xs text-blue-600 hover:underline font-medium"
+                  >
+                    {s.active ? 'Nonaktifkan' : 'Aktifkan'}
+                  </button>
+                  <button
+                    onClick={() => remove(s.id)}
+                    className="text-xs text-rose-600 hover:underline font-medium"
+                  >
+                    Hapus
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {list.length === 0 && (
+              <tr>
+                <td colSpan={5} className="p-6 text-center text-slate-400">
+                  Belum ada data staf terdaftar.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboardPage() {
-  // Navigation tabs: 'overview' | 'visitors' | 'deposits' | 'members' | 'repository'
+  // Navigation tabs: 'overview' | 'visitors' | 'deposits' | 'reports' | 'staff' | 'repository' | 'books'
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'visitors' | 'deposits' | 'members' | 'repository'
+    'overview' | 'visitors' | 'deposits' | 'reports' | 'staff' | 'repository' | 'books'
   >('overview');
 
   const [loading, setLoading] = useState(true);
@@ -50,7 +521,8 @@ export default function AdminDashboardPage() {
     kpis: {
       activeVisitorsCount: number;
       pendingDepositsCount: number;
-      totalMembersCount: number;
+      openReportsCount: number;
+      totalStaffCount: number;
       totalActivityCount: number;
       todayTotalVisitors: number;
       todayApprovedDeposits: number;
@@ -201,7 +673,6 @@ export default function AdminDashboardPage() {
       fetchOverview(),
       fetchVisitors(),
       fetchDeposits(),
-      fetchMembers(),
       fetchRepoStats(),
     ]);
     setRefreshing(false);
@@ -326,8 +797,10 @@ export default function AdminDashboardPage() {
                     : null,
                 badgeColor: 'bg-amber-500 text-slate-950',
               },
-              { id: 'members', label: 'Data Anggota', icon: 'group', badge: null },
-              { id: 'repository', label: 'Repositori & Jurnal', icon: 'analytics', badge: null },
+              { id: 'reports', label: 'Lapor Kendala', icon: 'support_agent', badge: overviewData?.kpis?.openReportsCount ? `${overviewData.kpis.openReportsCount}` : null, badgeColor: 'bg-rose-500' },
+              { id: 'staff', label: 'Kelola Staf', icon: 'manage_accounts', badge: null },
+              { id: 'repository', label: 'Kelola Repositori', icon: 'auto_stories', badge: null },
+              { id: 'books', label: 'Kelola Buku', icon: 'library_books', badge: null },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -357,34 +830,6 @@ export default function AdminDashboardPage() {
               );
             })}
 
-            {/* Navigasi Fitur Integrasi Lanjutan (Coming Soon) */}
-            <div className="pt-2 mt-2 border-t border-white/10">
-              <button
-                type="button"
-                onClick={() =>
-                  handleTriggerComingSoon({
-                    title: 'Sinkronisasi Otomatis SIAM UB (Single Sign-On)',
-                    category: 'Integrasi Sistem Informasi Akademik UB',
-                    description:
-                      'Modul pertukaran data API Pangkalan Data Mahasiswa UB dan otentikasi SSO SIAM sedang dalam proses pengajuan token keamanan jaringan ke Tim UPT TIK Universitas Brawijaya.',
-                    estimatedRelease: 'Fase Pembaruan v1.3 (Semester Ganjil 2026)',
-                    alternative:
-                      'Untuk saat ini, administrasi akun mahasiswa dapat diverifikasi secara langsung melalui tab Data Anggota atau form pendaftaran mandiri.',
-                  })
-                }
-                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer group"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-[20px] text-slate-400 group-hover:text-amber-400">
-                    sync_saved_locally
-                  </span>
-                  <span>Integrasi SIAM</span>
-                </div>
-                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
-                  Segera
-                </span>
-              </button>
-            </div>
           </nav>
         </div>
 
@@ -428,8 +873,10 @@ export default function AdminDashboardPage() {
               {activeTab === 'overview' && 'Ringkasan Eksekutif Operasional'}
               {activeTab === 'visitors' && 'Monitoring Kiosk Presensi Ruangan'}
               {activeTab === 'deposits' && 'Verifikasi Serah Simpan Karya Ilmiah'}
-              {activeTab === 'members' && 'Manajemen Akun Mahasiswa Terdaftar'}
-              {activeTab === 'repository' && 'Analisis Repositori & Akses E-Resource'}
+              {activeTab === 'reports' && 'Kelola Laporan Kendala'}
+              {activeTab === 'staff' && 'Kelola Akun Staf'}
+              {activeTab === 'repository' && 'Manajemen Database Repositori'}
+              {activeTab === 'books' && 'Manajemen Katalog Buku Fisik'}
             </h1>
             <p className="text-xs text-slate-500 font-medium">
               Gedung F Pascasarjana Lantai 1 FEB Universitas Brawijaya
@@ -445,48 +892,6 @@ export default function AdminDashboardPage() {
               <span>{currentTime}</span>
             </div>
 
-            {/* Quick Administrative Integration Buttons */}
-            <button
-              type="button"
-              onClick={() =>
-                handleTriggerComingSoon({
-                  title: 'Sinkronisasi Basis Data Mahasiswa SIAM UB',
-                  category: 'Integrasi API Pangkalan Data UB',
-                  description:
-                    'Layanan sinkronisasi otomatis status KRS, registrasi aktif, dan data profil mahasiswa langsung dari server pusat SIAM Universitas Brawijaya.',
-                  estimatedRelease: 'Fase v1.3 (Menunggu Otorisasi API UPT TIK UB)',
-                  alternative:
-                    'Pencarian dan pembaruan data anggota sementara dilakukan manual melalui tab Data Anggota.',
-                })
-              }
-              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[16px] text-[#0B2546]">
-                cloud_sync
-              </span>
-              <span>Sinkron SIAM</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                handleTriggerComingSoon({
-                  title: 'Siaran Pengumuman Massal (Broadcast Gateway)',
-                  category: 'Pusat Komunikasi & Notifikasi SAC',
-                  description:
-                    'Layanan pengiriman notifikasi massal melalui WhatsApp Business API dan Email blast SMTP untuk pengumuman jadwal serah simpan, workshop riset, dan pengembalian literatur.',
-                  estimatedRelease: 'Fase Pembaruan v1.2',
-                  alternative:
-                    'Pengumuman resmi disebarkan melalui mading pengumuman SAC Gedung F Pascasarjana Lantai 1 dan akun Instagram @sac_febub.',
-                })
-              }
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0B2546] hover:bg-slate-900 text-amber-300 text-xs font-semibold shadow-sm transition-colors cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[16px] text-amber-400">
-                campaign
-              </span>
-              <span>Broadcast Notif</span>
-            </button>
 
             {/* Refresh Button */}
             <button
@@ -558,10 +963,10 @@ export default function AdminDashboardPage() {
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                   <div>
                     <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      Total Anggota
+                      Total Staf
                     </span>
                     <div className="text-2xl sm:text-3xl font-black text-[#0B2546] mt-1">
-                      {overviewData?.kpis?.totalMembersCount ?? 0}
+                      {overviewData?.kpis?.totalStaffCount ?? 0}
                       <span className="text-xs font-normal text-slate-400 ml-1.5">Akun</span>
                     </div>
                     <span className="text-[11px] text-slate-500 font-medium mt-1 block">
@@ -1007,7 +1412,15 @@ export default function AdminDashboardPage() {
           {/* ================================================================= */}
           {/* TAB 4: DATA ANGGOTA MANDIRI (MEMBERS)                             */}
           {/* ================================================================= */}
-          {activeTab === 'members' && (
+          {activeTab === 'reports' && <ReportManagementPanel />}
+
+          {activeTab === 'staff' && (
+            <div className="space-y-4">
+              <StaffManagementPanel />
+            </div>
+          )}
+
+          {false && activeTab === 'staff' && (
             <div className="space-y-4">
               {/* TOOLBAR */}
               <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -1109,6 +1522,7 @@ export default function AdminDashboardPage() {
           {/* ================================================================= */}
           {activeTab === 'repository' && (
             <div className="space-y-6">
+              <RepositoryManagementPanel />
               {/* REKAPITULASI KLIK JURNAL INTERNASIONAL */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -1727,6 +2141,8 @@ export default function AdminDashboardPage() {
       </AnimatePresence>
 
       {/* ===================================================================== */}
+          {activeTab === 'books' && <BookManagementPanel />}
+
       {/* 6. MODAL: STANDEE CETAK QR RESEPSIONIS                                */}
       {/* ===================================================================== */}
       <AnimatePresence>

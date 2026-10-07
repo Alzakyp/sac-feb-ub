@@ -15,19 +15,22 @@ export async function GET() {
       where: { verificationStatus: 'PENDING' },
     });
 
-    // 3. Hitung Total Anggota Terdaftar
-    const totalMembersCount = await prisma.member.count();
+    // 3. Hitung Total Staf Terdaftar
+    const totalStaffCount = await prisma.staff.count();
 
-    // 4. Hitung Total Aktivitas E-Resource & Repositori
+    // 4. Hitung Laporan Kendala baru untuk badge Backoffice
+    const openReportsCount = await prisma.ticketReport.count({ where: { status: 'OPEN' } });
+
+    // 5. Hitung Total Aktivitas E-Resource & Repositori
     const totalActivityCount = await prisma.repositoryActivityLog.count();
 
-    // 5. Pengunjung Terbaru Hari Ini (5 Terakhir)
+    // 6. Pengunjung Terbaru Hari Ini (5 Terakhir)
     const recentVisitors = await prisma.visitorLog.findMany({
       orderBy: { checkInTime: 'desc' },
       take: 5,
     });
 
-    // 6. Antrean Serah Simpan Prioritas (5 Naskah PENDING terlama)
+    // 7. Antrean Serah Simpan Prioritas (5 Naskah PENDING terlama)
     const priorityDeposits = await prisma.scientificWorkDeposit.findMany({
       where: { verificationStatus: 'PENDING' },
       orderBy: { createdAt: 'asc' },
@@ -57,7 +60,8 @@ export async function GET() {
         kpis: {
           activeVisitorsCount,
           pendingDepositsCount,
-          totalMembersCount,
+          openReportsCount,
+          totalStaffCount,
           totalActivityCount,
           todayTotalVisitors,
           todayApprovedDeposits,

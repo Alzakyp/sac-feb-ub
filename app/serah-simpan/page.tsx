@@ -507,6 +507,18 @@ export default function SerahSimpanPage() {
                             : 'Originality declaration page stamped with valid legal duty stamp (Rp 10,000).'}
                         </li>
                       </ul>
+                      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 text-xs">
+                        {[
+                          ['Bagian Awal', 'maks. 1 MB'],
+                          ['Bagian Isi', 'maks. 2 MB'],
+                          ['Bagian Akhir', 'maks. 1 MB'],
+                        ].map(([section, size]) => (
+                          <div key={section} className="rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-blue-900">
+                            <span className="block font-bold">{section}</span>
+                            <span className="text-[11px]">Rekomendasi ukuran: {size}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                     {/* 2. Persyaratan Tambahan S2 & S3 (DropBox Gedung F Lantai 1) */}
@@ -554,6 +566,9 @@ export default function SerahSimpanPage() {
                             Malang 65145.
                           </span>
                         </div>
+                      </div>
+                      <div className="mt-3 rounded-xl border border-amber-200 bg-white p-3 text-xs leading-relaxed text-slate-700">
+                        <strong className="text-amber-900">Alternatif paket/kurir:</strong> hardcopy dapat dikirim ke alamat SAC di atas bagi mahasiswa yang tidak dapat menyerahkan langsung melalui DropBox.
                       </div>
                     </div>
 
@@ -640,7 +655,7 @@ export default function SerahSimpanPage() {
                           <>
                             Waktu verifikasi naskah berkas oleh staf pengelola SAC FEB UB adalah{' '}
                             <strong>maksimal 1×24 jam hari kerja</strong> (Senin–Jumat pukul
-                            08.00–15.00 WIB). Apabila berkas lengkap, Anda akan diterbitkan{' '}
+                            08.00–15.00 WIB). Pengajuan hari Jumat setelah pukul 13.00 WIB diproses pada hari Senin berikutnya. Apabila berkas lengkap, Anda akan diterbitkan{' '}
                             <strong>Surat Bukti Serah Simpan / Bebas Pustaka</strong> yang dapat
                             diunduh dan digunakan untuk syarat wisuda. Jika terdapat kekurangan,
                             catatan revisi akan dikirim ke email terdaftar.
@@ -654,6 +669,9 @@ export default function SerahSimpanPage() {
                           </>
                         )}
                       </p>
+                      <div className="mt-3 rounded-xl border border-sky-200 bg-sky-50 p-3 text-xs leading-relaxed text-sky-900">
+                        <strong>Pantau progres:</strong> setelah submit, cek status menggunakan NIM pada halaman ini. Bukti Serah Simpan tersedia setelah status disetujui dan juga dikirim ke email terdaftar. Periksa folder Inbox serta Spam/Junk secara berkala.
+                      </div>
                     </div>
                   </div>
 

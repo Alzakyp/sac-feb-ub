@@ -191,14 +191,8 @@ export default function Footer() {
             <Link href="/serah-simpan" className="hover:text-white transition-colors">
               Serah Simpan
             </Link>
-            <Link href="/register" className="hover:text-white transition-colors">
-              Pendaftaran Anggota
-            </Link>
             <Link href="/presensi" className="hover:text-white transition-colors">
               Presensi Ruangan
-            </Link>
-            <Link href="/admin/login" className="hover:text-white transition-colors">
-              Portal Staf / Admin
             </Link>
           </div>
         </div>

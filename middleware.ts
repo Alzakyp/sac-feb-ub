@@ -1,8 +1,29 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Guard: dashboard staf dan seluruh API administrasi.
+  if (
+    pathname.startsWith('/backoffice') ||
+    pathname.startsWith('/api/backoffice') ||
+    pathname.startsWith('/api/admin')
+  ) {
+    if (pathname === '/backoffice/login' || pathname === '/api/backoffice/login') {
+      return NextResponse.next();
+    }
+    const { verifyEdgeSession } = await import('@/lib/session-edge');
+    const session = await verifyEdgeSession(request.cookies.get('sac_session')?.value ?? '');
+    if (!session) {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+      }
+      const loginUrl = new URL('/backoffice/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
 
   // Hanya periksa rute /presensi dan /api/presensi
   if (pathname.startsWith('/presensi') || pathname.startsWith('/api/presensi')) {
@@ -35,7 +56,6 @@ export function middleware(request: NextRequest) {
       return clientIp === allowed || clientIp.startsWith(allowed);
     });
 
-    // Izinkan bypass jika ada header khusus internal / mode dev testing
     const internalBypass = request.headers.get('x-sac-network') === 'local-sac';
 
     if (!isAllowed && !internalBypass) {
@@ -218,5 +238,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/presensi/:path*', '/api/presensi/:path*'],
+  matcher: ['/presensi/:path*', '/api/presensi/:path*', '/backoffice/:path*', '/api/backoffice/:path*', '/api/admin/:path*'],
 };

@@ -1,54 +1,35 @@
-import { NextResponse } from 'next/server';
-import { KATALOG_BUKU_DATA, DDC_CATEGORIES, BookRecord } from '@/lib/katalog-buku-data';
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const query = (searchParams.get('q') || '').trim().toLowerCase();
-    const ddc = (searchParams.get('ddc') || 'ALL').trim().toUpperCase();
-    const availableOnly = searchParams.get('availableOnly') === 'true';
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const query = (searchParams.get('q') || '').trim();
+  const ddc = (searchParams.get('ddc') || '').trim();
+  const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+  const limit = Math.min(50, parseInt(searchParams.get('limit') || '24'));
+  const skip = (page - 1) * limit;
 
-    let results: BookRecord[] = [...KATALOG_BUKU_DATA];
+  const where: Record<string, unknown> = {};
 
-    // Filter by DDC classification
-    if (ddc && ddc !== 'ALL') {
-      results = results.filter((book) => book.ddcCode === ddc);
-    }
-
-    // Filter by availability
-    if (availableOnly) {
-      results = results.filter((book) => book.isAvailable);
-    }
-
-    // Filter by search query keyword
-    if (query) {
-      results = results.filter((book) => {
-        return (
-          book.title.toLowerCase().includes(query) ||
-          book.author.toLowerCase().includes(query) ||
-          book.isbn.toLowerCase().includes(query) ||
-          book.callNumber.toLowerCase().includes(query) ||
-          book.publisher.toLowerCase().includes(query) ||
-          book.shelfLocation.toLowerCase().includes(query) ||
-          book.synopsis.toLowerCase().includes(query)
-        );
-      });
-    }
-
-    return NextResponse.json({
-      success: true,
-      total: results.length,
-      data: results,
-      categories: DDC_CATEGORIES,
-    });
-  } catch (error) {
-    console.error('Error fetching catalog books:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Gagal memproses data katalog buku.',
-      },
-      { status: 500 }
-    );
+  if (query) {
+    where.OR = [
+      { title: { contains: query } },
+      { author: { contains: query } },
+      { isbn: { contains: query } },
+      { ddc: { contains: query } },
+      { publisher: { contains: query } },
+    ];
   }
+
+  if (ddc) {
+    // match ddc prefix, e.g. "657" matches "657.042 WEY f"
+    where.ddc = { contains: ddc };
+  }
+
+  const [total, books] = await Promise.all([
+    prisma.bookCollection.count({ where }),
+    prisma.bookCollection.findMany({ where, skip, take: limit, orderBy: { inventoryNumber: 'asc' } }),
+  ]);
+
+  return NextResponse.json({ success: true, total, page, limit, data: books });
 }

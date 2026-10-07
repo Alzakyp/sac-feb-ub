@@ -6,7 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "prisma generate",
+    "seed": "tsx prisma/seed.ts",
+    "import:katalog": "tsx scripts/import-katalog-buku.ts",
+    "staff:create": "tsx scripts/create-staff.ts",
+    "import:repository": "tsx scripts/import-repository-sheets.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

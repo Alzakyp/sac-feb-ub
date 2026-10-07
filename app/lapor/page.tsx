@@ -13,6 +13,7 @@ interface TicketData {
   phone: string;
   category: string;
   description: string;
+  attachmentUrl?: string | null;
   submittedAt: string;
   slaHours: string;
 }
@@ -27,6 +28,9 @@ export default function LaporPage() {
     description: '',
   });
 
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [nimVerified, setNimVerified] = useState(false);
+  const [verifyingNim, setVerifyingNim] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [submittedTicket, setSubmittedTicket] = useState<TicketData | null>(null);
@@ -42,17 +46,19 @@ export default function LaporPage() {
     e.preventDefault();
     setErrorMsg(null);
 
-    if (!formData.fullName.trim() || !formData.identityNumber.trim() || !formData.email.trim() || !formData.description.trim()) {
+    if (!formData.fullName.trim() || !formData.identityNumber.trim() || !formData.email.trim() || !formData.phone.trim() || !formData.description.trim()) {
       setErrorMsg('Mohon lengkapi seluruh kolom bertanda bintang (*).');
       return;
     }
 
     setLoading(true);
     try {
+      const payload = new FormData();
+      Object.entries(formData).forEach(([key, value]) => payload.append(key, value));
+      if (attachment) payload.append('attachment', attachment);
       const res = await fetch('/api/lapor', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: payload,
       });
 
       const json = await res.json();
@@ -66,6 +72,29 @@ export default function LaporPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const verifyNim = async () => {
+    const nim = formData.identityNumber.replace(/\D/g, '');
+    if (nim.length < 5) {
+      setErrorMsg('NIM minimal 5 digit.');
+      return;
+    }
+    setVerifyingNim(true);
+    setErrorMsg(null);
+    const res = await fetch(`/api/members/verify?nim=${encodeURIComponent(nim)}`);
+    const raw = await res.text();
+    let json: { success?: boolean; data?: { fullName: string; email: string }; error?: string } = {};
+    try { json = raw ? JSON.parse(raw) : {}; } catch { json = {}; }
+    if (!res.ok) {
+      setErrorMsg('NIM belum terdaftar. Tetap isi nama dan email untuk mengirim laporan.');
+      setNimVerified(false);
+      setVerifyingNim(false);
+      return;
+    }
+    setFormData((current) => ({ ...current, fullName: json.data?.fullName || '', email: json.data?.email || '' }));
+    setNimVerified(true);
+    setVerifyingNim(false);
   };
 
   return (
@@ -228,10 +257,13 @@ export default function LaporPage() {
                       type="text"
                       required
                       value={formData.identityNumber}
-                      onChange={(e) => setFormData({ ...formData, identityNumber: e.target.value })}
+                      onChange={(e) => { setFormData({ ...formData, identityNumber: e.target.value.replace(/\D/g, '') }); setNimVerified(false); }}
                       placeholder="Contoh: 215020200111001"
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-[#0B2546] focus:ring-2 focus:ring-[#0B2546]/10 text-xs font-mono text-slate-900"
                     />
+                    <button type="button" onClick={verifyNim} disabled={verifyingNim || !formData.identityNumber} className={`mt-2 w-full rounded-lg px-3 py-2 text-xs font-bold ${nimVerified ? 'bg-emerald-100 text-emerald-800' : 'bg-[#0B2546] text-white'} disabled:opacity-50`}>
+                      {verifyingNim ? 'Memeriksa…' : nimVerified ? 'Data Anggota Ditemukan' : 'Cek Data Anggota (Opsional)'}
+                    </button>
                   </div>
 
                   {/* Email */}
@@ -252,10 +284,11 @@ export default function LaporPage() {
                   {/* Phone */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-700 block">
-                      Nomor WhatsApp (Opsional)
+                      Nomor WhatsApp <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="tel"
+                      required
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="Contoh: 081234567890"
@@ -280,6 +313,13 @@ export default function LaporPage() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 block">
+                    Foto Kendala <span className="font-normal text-slate-400">(opsional, JPG/PNG/WebP maks. 5 MB)</span>
+                  </label>
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setAttachment(e.target.files?.[0] || null)} className="block w-full rounded-xl border border-slate-300 bg-white p-2 text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-[#0B2546] file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-white" />
                 </div>
 
                 {/* Description */}
