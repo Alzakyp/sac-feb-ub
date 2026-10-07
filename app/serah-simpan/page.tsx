@@ -344,11 +344,11 @@ export default function SerahSimpanPage() {
       <Navbar />
 
       {/* MAIN CONTENT CONTAINER */}
-      <main className="max-w-4xl mx-auto pt-28 pb-12 px-4 sm:px-6">
+      <main className="max-w-4xl mx-auto pt-24 pb-12 px-4 sm:px-6">
         {/* WIZARD CARD */}
-        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden">
-          {/* HEADER BANNER */}
-          <div className="bg-gradient-to-r from-[#0B2546] via-[#103766] to-[#0B2546] text-white p-6 sm:p-8 relative overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+          {/* HEADER BANNER — seragam dengan halaman Cek Plagiasi */}
+          <div className="bg-gradient-to-b from-[#0B2546] to-[#081B33] text-white p-6 sm:p-10 relative overflow-hidden">
             {/* Background subtle watermark */}
             <div className="absolute -right-6 -bottom-10 opacity-10 pointer-events-none">
               <span className="material-symbols-outlined text-[180px]">school</span>
@@ -356,14 +356,14 @@ export default function SerahSimpanPage() {
 
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-2.5">
-                  <span className="material-symbols-outlined text-[15px]">verified</span>
-                  <span>Modul SAC-ONE Mandiri</span>
+                <div className="inline-flex items-center gap-2 text-amber-300 text-xs font-bold uppercase tracking-[.16em] mb-3">
+                  <span className="material-symbols-outlined text-[16px]">school</span>
+                  <span>Self Access Centre • FEB-UB</span>
                 </div>
-                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white leading-snug">
+                <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
                   {t.headerTitle}
                 </h1>
-                <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl font-normal">
+                <p className="text-xs sm:text-sm text-slate-300 mt-2 max-w-2xl font-normal italic">
                   {t.headerSub}
                 </p>
               </div>
@@ -446,7 +446,7 @@ export default function SerahSimpanPage() {
           </div>
 
           {/* CARD BODY CONTENT */}
-          <div className="p-6 sm:p-10">
+          <div className="p-6 sm:p-10 space-y-8">
             <AnimatePresence mode="wait">
               {/* ========================================================== */}
               {/* STEP 1: PANDUAN & SYARAT KETENTUAN RESMI                   */}

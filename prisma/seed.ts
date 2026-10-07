@@ -10,7 +10,7 @@ async function main() {
   const adminEmail = 'admin.sac@ub.ac.id';
   const existingAdmin = await prisma.staff.findUnique({ where: { email: adminEmail } });
   if (!existingAdmin) {
-    const defaultPassword = process.env.STAFF_PASSWORD || 'password';
+    const defaultPassword = process.env.STAFF_PASSWORD || 'Sac2026!';
     const passwordHash = await bcrypt.hash(defaultPassword, 10);
     await prisma.staff.create({
       data: {
@@ -23,7 +23,7 @@ async function main() {
     });
     console.log(`Berhasil membuat akun admin awal: ${adminEmail}`);
     if (!process.env.STAFF_PASSWORD) {
-      console.log('Password bawaan: sacfeb2026!');
+      console.log('Password bawaan: Sac2026!');
     }
   }
 

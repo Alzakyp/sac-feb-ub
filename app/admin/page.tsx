@@ -239,85 +239,144 @@ function BookManagementPanel() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <input
-          value={q}
-          onChange={(e) => { setQ(e.target.value); setPage(1); }}
-          placeholder="Cari judul buku, pengarang, ISBN, DDC..."
-          className="w-full sm:w-80 px-3 py-2 rounded-xl border border-slate-300 text-xs outline-none"
-        />
+        <div className="relative w-full sm:w-80">
+          <input
+            value={q}
+            onChange={(e) => { setQ(e.target.value); setPage(1); }}
+            placeholder="Cari judul buku, pengarang, ISBN, DDC..."
+            className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs outline-none focus:border-[#0B2546] focus:ring-1 focus:ring-[#0B2546]"
+          />
+          <span className="material-symbols-outlined absolute left-2.5 top-2.5 text-slate-400 text-[18px]">
+            search
+          </span>
+        </div>
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-slate-500">{total.toLocaleString('id-ID')} Buku Fisik</span>
           <button
             onClick={() => setEditBook({ title: '', author: '', publisher: '', publicationYear: 2024, isbn: '', ddc: '' })}
-            className="px-3 py-2 rounded-xl bg-[#0B2546] text-white font-bold text-xs"
+            className="px-3.5 py-2 rounded-xl bg-[#0B2546] hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            + Tambah Buku
+            <span className="material-symbols-outlined text-[16px]">add</span>
+            <span>Tambah Buku</span>
           </button>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
-        <table className="w-full text-left text-xs">
+      <div className="overflow-x-auto rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <table className="w-full text-left text-xs min-w-[760px]">
           <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[11px]">
             <tr>
-              <th className="p-3">DDC / Register</th>
+              <th className="p-3 w-40">DDC / Register</th>
               <th className="p-3">Judul Buku</th>
-              <th className="p-3">Pengarang & Penerbit</th>
-              <th className="p-3">Tahun & ISBN</th>
-              <th className="p-3 text-right">Aksi</th>
+              <th className="p-3 w-56">Pengarang & Penerbit</th>
+              <th className="p-3 w-36">Tahun & ISBN</th>
+              <th className="p-3 text-right w-24">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {books.map((b) => (
-              <tr key={b.id} className="hover:bg-slate-50">
-                <td className="p-3 font-mono">
-                  <p className="font-bold text-amber-700">{b.ddc || '-'}</p>
-                  <p className="text-[10px] text-slate-400">{b.inventoryNumber || b.registerNumber || '-'}</p>
+              <tr key={b.id} className="hover:bg-slate-50/80 transition-colors">
+                <td className="p-3 font-mono align-top">
+                  <p className="font-bold text-amber-700 text-xs">{b.ddc || '-'}</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">{b.inventoryNumber || b.registerNumber || '-'}</p>
                 </td>
-                <td className="p-3 max-w-sm">
-                  <p className="font-bold text-[#0B2546]">{b.title}</p>
+                <td className="p-3 align-top">
+                  <p className="font-bold text-[#0B2546] text-xs leading-relaxed line-clamp-2">{b.title}</p>
+                  {b.subject && (
+                    <span className="inline-block mt-1 px-1.5 py-0.5 rounded bg-slate-100 text-[10px] text-slate-500 font-medium">
+                      {b.subject}
+                    </span>
+                  )}
                 </td>
-                <td className="p-3">
-                  <p className="text-slate-800 font-medium">{b.author || '-'}</p>
-                  <p className="text-[11px] text-slate-500">{b.publisher || '-'}</p>
+                <td className="p-3 align-top">
+                  <p className="text-slate-800 font-semibold line-clamp-1">{b.author || '-'}</p>
+                  <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">{b.publisher || '-'}</p>
                 </td>
-                <td className="p-3">
-                  <p className="font-semibold">{b.publicationYear || '-'}</p>
-                  <p className="text-[10px] text-slate-500 font-mono">{b.isbn || '-'}</p>
+                <td className="p-3 align-top font-mono">
+                  <p className="font-semibold text-slate-700">{b.publicationYear || '-'}</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">{b.isbn || '-'}</p>
                 </td>
-                <td className="p-3 text-right space-x-2 whitespace-nowrap">
-                  <button onClick={() => setEditBook(b)} className="text-xs text-blue-600 hover:underline">Edit</button>
-                  <button onClick={() => remove(b.id)} className="text-xs text-rose-600 hover:underline">Hapus</button>
+                <td className="p-3 text-right space-x-2 whitespace-nowrap align-top">
+                  <button onClick={() => setEditBook(b)} className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer">Edit</button>
+                  <button onClick={() => remove(b.id)} className="text-xs font-semibold text-rose-600 hover:text-rose-800 hover:underline cursor-pointer">Hapus</button>
                 </td>
               </tr>
             ))}
+            {books.length === 0 && (
+              <tr>
+                <td colSpan={5} className="p-8 text-center text-slate-400">
+                  Tidak ada data buku yang cocok.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      <div className="flex justify-between items-center px-2 py-1 text-xs">
-        <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="px-3 py-1.5 rounded-lg border bg-white disabled:opacity-40">Sebelumnya</button>
-        <span>Halaman {page}</span>
-        <button disabled={books.length < 20} onClick={() => setPage(page + 1)} className="px-3 py-1.5 rounded-lg border bg-white disabled:opacity-40">Berikutnya</button>
+      <div className="flex justify-between items-center px-2 py-1 text-xs text-slate-600">
+        <button
+          disabled={page <= 1}
+          onClick={() => setPage(page - 1)}
+          className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white font-medium hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
+        >
+          Sebelumnya
+        </button>
+        <span className="font-medium text-slate-500">
+          Halaman {page} dari {Math.max(1, Math.ceil(total / 20))}
+        </span>
+        <button
+          disabled={page >= Math.ceil(total / 20)}
+          onClick={() => setPage(page + 1)}
+          className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white font-medium hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
+        >
+          Berikutnya
+        </button>
       </div>
 
       {editBook && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4">
-          <form onSubmit={save} className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-xl space-y-3">
-            <h3 className="font-bold text-sm text-[#0B2546]">{editBook.id ? 'Edit Buku' : 'Tambah Buku Baru'}</h3>
-            <input required value={editBook.title} onChange={(e) => setEditBook({ ...editBook, title: e.target.value })} placeholder="Judul Buku" className="w-full rounded-xl border p-2 text-xs" />
-            <input value={editBook.author || ''} onChange={(e) => setEditBook({ ...editBook, author: e.target.value })} placeholder="Pengarang" className="w-full rounded-xl border p-2 text-xs" />
-            <div className="grid grid-cols-2 gap-2">
-              <input value={editBook.publisher || ''} onChange={(e) => setEditBook({ ...editBook, publisher: e.target.value })} placeholder="Penerbit" className="rounded-xl border p-2 text-xs" />
-              <input type="number" value={editBook.publicationYear || ''} onChange={(e) => setEditBook({ ...editBook, publicationYear: parseInt(e.target.value) || null })} placeholder="Tahun" className="rounded-xl border p-2 text-xs" />
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 backdrop-blur-xs p-4">
+          <form onSubmit={save} className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-sm text-[#0B2546]">{editBook.id ? 'Edit Buku' : 'Tambah Buku Baru'}</h3>
+              <button
+                type="button"
+                onClick={() => setEditBook(null)}
+                className="p-1 text-slate-400 hover:text-slate-700 rounded-lg"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <input value={editBook.isbn || ''} onChange={(e) => setEditBook({ ...editBook, isbn: e.target.value })} placeholder="ISBN" className="rounded-xl border p-2 text-xs" />
-              <input value={editBook.ddc || ''} onChange={(e) => setEditBook({ ...editBook, ddc: e.target.value })} placeholder="DDC" className="rounded-xl border p-2 text-xs" />
+            <div>
+              <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Judul Buku *</label>
+              <input required value={editBook.title} onChange={(e) => setEditBook({ ...editBook, title: e.target.value })} placeholder="Judul Buku" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-[#0B2546]" />
             </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={() => setEditBook(null)} className="px-3 py-1.5 text-xs rounded-lg border">Batal</button>
-              <button className="px-4 py-1.5 text-xs rounded-lg bg-[#0B2546] text-white font-bold">Simpan</button>
+            <div>
+              <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Pengarang</label>
+              <input value={editBook.author || ''} onChange={(e) => setEditBook({ ...editBook, author: e.target.value })} placeholder="Pengarang" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-[#0B2546]" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Penerbit</label>
+                <input value={editBook.publisher || ''} onChange={(e) => setEditBook({ ...editBook, publisher: e.target.value })} placeholder="Penerbit" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-[#0B2546]" />
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Tahun Terbit</label>
+                <input type="number" value={editBook.publicationYear || ''} onChange={(e) => setEditBook({ ...editBook, publicationYear: parseInt(e.target.value) || null })} placeholder="Tahun" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-[#0B2546]" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[11px] font-semibold text-slate-600 mb-1 block">ISBN</label>
+                <input value={editBook.isbn || ''} onChange={(e) => setEditBook({ ...editBook, isbn: e.target.value })} placeholder="ISBN" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-[#0B2546]" />
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Klasifikasi DDC</label>
+                <input value={editBook.ddc || ''} onChange={(e) => setEditBook({ ...editBook, ddc: e.target.value })} placeholder="DDC" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-[#0B2546]" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <button type="button" onClick={() => setEditBook(null)} className="px-4 py-2 text-xs rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">Batal</button>
+              <button type="submit" className="px-4 py-2 text-xs rounded-xl bg-[#0B2546] hover:bg-slate-800 text-white font-bold transition-colors cursor-pointer">Simpan</button>
             </div>
           </form>
         </div>
@@ -333,6 +392,8 @@ function StaffManagementPanel() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('PETUGAS');
   const [error, setError] = useState('');
+  const [resetId, setResetId] = useState<string | null>(null);
+  const [resetPassword, setResetPassword] = useState('');
 
   const load = useCallback(async () => {
     const res = await fetch('/api/backoffice/staff');
@@ -370,6 +431,21 @@ function StaffManagementPanel() {
       body: JSON.stringify({ active: !active }),
     });
     load();
+  }
+
+  async function reset(id: string) {
+    if (resetPassword.length < 8) {
+      setError('Password baru minimal 8 karakter.');
+      return;
+    }
+    await fetch(`/api/backoffice/staff/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: resetPassword }),
+    });
+    setResetId(null);
+    setResetPassword('');
+    setError('');
   }
 
   async function remove(id: string) {
@@ -461,6 +537,12 @@ function StaffManagementPanel() {
                     {s.active ? 'Nonaktifkan' : 'Aktifkan'}
                   </button>
                   <button
+                    onClick={() => { setResetId(s.id); setResetPassword(''); }}
+                    className="text-xs text-amber-700 hover:underline font-medium"
+                  >
+                    Reset Password
+                  </button>
+                  <button
                     onClick={() => remove(s.id)}
                     className="text-xs text-rose-600 hover:underline font-medium"
                   >
@@ -479,6 +561,7 @@ function StaffManagementPanel() {
           </tbody>
         </table>
       </div>
+      {resetId && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><form onSubmit={(e) => { e.preventDefault(); reset(resetId); }} className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"><h3 className="font-bold text-[#0B2546]">Reset Password Staf</h3><input required minLength={8} type="password" value={resetPassword} onChange={(e) => setResetPassword(e.target.value)} placeholder="Password baru (min. 8 karakter)" className="mt-4 w-full rounded-xl border p-3 text-sm"/><div className="mt-4 flex justify-end gap-2"><button type="button" onClick={() => setResetId(null)} className="rounded-lg border px-3 py-2 text-xs">Batal</button><button className="rounded-lg bg-[#0B2546] px-3 py-2 text-xs font-bold text-white">Simpan</button></div></form></div>}
     </div>
   );
 }
@@ -1707,6 +1790,11 @@ export default function AdminDashboardPage() {
               </div>
             </div>
           )}
+
+          {/* ================================================================= */}
+          {/* TAB 7: KATALOG BUKU FISIK                                         */}
+          {/* ================================================================= */}
+          {activeTab === 'books' && <BookManagementPanel />}
         </main>
       </div>
 
@@ -2139,9 +2227,6 @@ export default function AdminDashboardPage() {
           </div>
         )}
       </AnimatePresence>
-
-      {/* ===================================================================== */}
-          {activeTab === 'books' && <BookManagementPanel />}
 
       {/* 6. MODAL: STANDEE CETAK QR RESEPSIONIS                                */}
       {/* ===================================================================== */}

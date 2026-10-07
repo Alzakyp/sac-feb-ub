@@ -22,11 +22,7 @@ async function main() {
     process.exit(1);
   }
 
-  const password = process.env.STAFF_PASSWORD;
-  if (!password || password.length < 8) {
-    console.error('Error: isi STAFF_PASSWORD minimal 8 karakter.');
-    process.exit(1);
-  }
+  const password = process.env.STAFF_PASSWORD || 'password';
   const passwordHash = await bcrypt.hash(password, 10);
 
   const name = clean.split('@')[0];
@@ -42,7 +38,7 @@ async function main() {
   });
 
   console.log(`Sukses: Staff admin ${staff.email} dibuat.`);
-  console.log('Password tersimpan aman dalam bentuk hash.');
+  console.log(`Password: ${password}`);
 }
 
 main()

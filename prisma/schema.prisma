@@ -99,11 +99,14 @@ model PlagiarismRequest {
   nim              String
   fullName         String
   email            String
+  whatsapp         String
   studyProgram     String
   workType         String    // Skripsi | Tesis | Disertasi | Artikel
+  advisor          String
   title            String    @db.Text
   fileName         String    @db.Text
   filePath         String    @db.Text
+  revisionNumber   Int       @default(1)
   status           String    @default("PENDING") // PENDING | PROCESSING | COMPLETED | REJECTED
   similarityScore  Int?
   resultFilePath   String?   @db.Text
@@ -117,6 +120,18 @@ model PlagiarismRequest {
   @@index([createdAt])
 }
 
+
+model Student {
+  id           String   @id @default(cuid())
+  nim          String   @unique
+  fullName     String
+  studyProgram String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([fullName])
+  @@index([studyProgram])
+}
 
 model Member {
   id              String   @id @default(cuid())
@@ -137,6 +152,27 @@ model Member {
   updatedAt       DateTime @updatedAt
 
   @@index([nim])
+  @@index([status])
+}
+
+model RoomReservation {
+  id              String   @id @default(cuid())
+  reservationCode String   @unique
+  responsibleNim  String
+  responsibleName String
+  participantNims String   @db.Text
+  usageDate      DateTime
+  startTime      String
+  endTime        String
+  participantCount Int
+  room           String
+  purpose        String   @db.Text
+  status         String   @default("BOOKED") // BOOKED | ACTIVE | COMPLETED | CANCELLED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([responsibleNim])
+  @@index([usageDate])
   @@index([status])
 }
 
