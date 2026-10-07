@@ -5,7 +5,7 @@ const getSecret = () => {
   if (secret.length < 32 && process.env.NODE_ENV === 'production') {
     throw new Error('SESSION_SECRET must be at least 32 characters in production');
   }
-  return secret;
+  return secret.trim();
 };
 
 const SEP = '.';

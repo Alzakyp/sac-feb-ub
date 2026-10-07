@@ -13,6 +13,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Email atau password salah.' }, { status: 401 });
   }
   const response = NextResponse.json({ success: true, user: { name: staff.name, email: staff.email, role: staff.role } });
-  response.cookies.set('sac_session', createSession(staff.id, staff.role), { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 60 * 60 * 8 });
+  // ponytail: server is currently accessed through HTTP LAN; switch to true after HTTPS is deployed.
+  response.cookies.set('sac_session', createSession(staff.id, staff.role), {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: false,
+    path: '/',
+    maxAge: 60 * 60 * 8,
+  });
   return response;
 }
