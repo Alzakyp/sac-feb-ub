@@ -36,8 +36,13 @@ export function date(value: unknown): Date | null {
     const parsed = new Date(input);
     return Number.isNaN(parsed.valueOf()) ? null : parsed;
   }
-  const [, day, month, year, hour = '0', minute = '0', second = '0'] = match;
-  return new Date(Date.UTC(+year, +month - 1, +day, +hour - 7, +minute, +second));
+  const [, first, secondPart, year, hour = '0', minute = '0', second = '0'] = match;
+  // Google Sheets exports locale-dependent dates. Values with first > 12 are DD/MM; otherwise use MM/DD.
+  const firstNumber = Number(first);
+  const secondNumber = Number(secondPart);
+  const day = firstNumber > 12 ? firstNumber : secondNumber;
+  const month = firstNumber > 12 ? secondNumber : firstNumber;
+  return new Date(Date.UTC(+year, month - 1, day, +hour - 7, +minute, +second));
 }
 
 export async function fetchRows(source: keyof typeof SHEETS): Promise<SheetRow[]> {
