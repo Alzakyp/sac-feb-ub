@@ -69,6 +69,12 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit,
         orderBy: [{ id: 'asc' }],
+        select: {
+          id: true, nomor: true, nama: true, nim: true, prodi: true, judul: true,
+          judulEn: true, jenis: true, pembimbing: true, penguji1: true, penguji2: true,
+          bagianAwalUrl: true, bagianIsiUrl: true, bagianAkhirUrl: true,
+          viewCount: true, downloadCount: true, createdAt: true,
+        },
       }),
     ]);
 

@@ -9,14 +9,18 @@ generator client {
 
 model VisitorLog {
   id                 String    @id @default(cuid())
-  identityNumber     String    // NIM / NIK pengunjung
-  fullName           String    // Nama lengkap pengunjung
-  studyProgram       String    // Program studi / institusi
+  sourceKey          String?   @unique // SHA-256 date+NIM+time for idempotent sync
+  identityNumber     String // NIM / NIK pengunjung
+  fullName           String // Nama lengkap pengunjung
+  studyProgram       String // Program studi / institusi
+  bagLocker          String? // Loker Tas dari sheet
+  shoeLocker         String? // Loker Sepatu dari sheet
+  adminName          String? // Petugas admin dari sheet
   checkInTime        DateTime  @default(now())
   checkOutTime       DateTime?
   status             String    @default("ACTIVE") // ACTIVE = Sedang di ruangan, COMPLETED = Selesai berkunjung
   purpose            String?   @default("SAC Room Visit")
-  satisfactionRating Int?      // Skala 1–5 bintang penilaian pengunjung
+  satisfactionRating Int? // Skala 1–5 bintang penilaian pengunjung
   feedbackNotes      String?   @db.Text // Masukan / kritik / ulasan fasilitas
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
@@ -34,26 +38,35 @@ model ResourceAccessLog {
 }
 
 model RepositoryDocument {
-  id             String   @id @default(cuid())
-  nomor          String?  @db.Text // SACRBI_ID / nomor arsip
-  nama           String   // Nama mahasiswa penulis
-  nim            String   // NIM mahasiswa
-  prodi          String   // S1 Manajemen, S1 Akuntansi, S1 Ekonomi Islam, dll.
-  judul          String   @db.Text // Judul naskah Bahasa Indonesia
-  judulEn        String?  @db.Text // Judul Bahasa Inggris
-  jenis          String   @default("Skripsi") // Skripsi, Tesis, Disertasi
+  id             String    @id @default(cuid())
+  sourceKey      String?   @unique // SHA-256 atau nomor berkas unik untuk idempotent sync
+  nomor          String?   @db.Text // SACRBI_ID / Nomor Berkas arsip
+  nama           String // Nama mahasiswa penulis
+  nim            String // NIM mahasiswa
+  prodi          String // S1 Manajemen, S1 Akuntansi, S1 Ekonomi Islam, dll.
+  judul          String    @db.Text // Judul naskah Bahasa Indonesia
+  judulEn        String?   @db.Text // Judul Bahasa Inggris
+  jenis          String    @default("Skripsi") // Skripsi, Tesis, Disertasi
   pembimbing     String?
+  koPromotor1    String?
+  koPromotor2    String?
   penguji1       String?
   penguji2       String?
-  bagianAwalUrl  String?  @db.Text // Link Google Drive Cover & Abstrak
-  bagianIsiUrl   String?  @db.Text // Link Google Drive Bab 1-5
-  bagianAkhirUrl String?  @db.Text // Link Google Drive Daftar Pustaka & Lampiran
-  viewCount      Int      @default(0)
-  downloadCount  Int      @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  penguji3       String?
+  penguji4       String?
+  bagianAwalUrl  String?   @db.Text // Link Google Drive Cover & Abstrak
+  bagianIsiUrl   String?   @db.Text // Link Google Drive Bab 1-5
+  bagianAkhirUrl String?   @db.Text // Link Google Drive Daftar Pustaka & Lampiran
+  pernyataanUrl  String?   @db.Text // Link Surat Pernyataan
+  whatsapp       String? // Kontak mahasiswa (khusus backoffice)
+  email          String? // Kontak mahasiswa (khusus backoffice)
+  submittedAt    DateTime?
+  viewCount      Int       @default(0)
+  downloadCount  Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  activities     RepositoryActivityLog[]
+  activities RepositoryActivityLog[]
 
   @@index([judul(length: 191)])
   @@index([nim])
@@ -62,18 +75,18 @@ model RepositoryDocument {
 }
 
 model RepositoryActivityLog {
-  id           String              @id @default(cuid())
-  documentId   String?
-  document     RepositoryDocument? @relation(fields: [documentId], references: [id], onDelete: SetNull)
-  nim          String?             // Opsional jika terdeteksi dari session/storage
-  nama         String?
-  prodi        String?
-  kataKunci    String?             @db.Text // Kata kunci pencarian yang dimasukkan
-  aktifitas    String              @db.Text // SEARCH, VIEW_DETAIL, CLICK_AWAL, CLICK_ISI, CLICK_AKHIR, DOWNLOAD
-  device       String?             // PC, Mobile, Tablet (via ua-parser-js)
-  browser      String?             // Chrome, Safari, Firefox, dll.
-  ipAddress    String?
-  createdAt    DateTime            @default(now())
+  id         String              @id @default(cuid())
+  documentId String?
+  document   RepositoryDocument? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  nim        String? // Opsional jika terdeteksi dari session/storage
+  nama       String?
+  prodi      String?
+  kataKunci  String?             @db.Text // Kata kunci pencarian yang dimasukkan
+  aktifitas  String              @db.Text // SEARCH, VIEW_DETAIL, CLICK_AWAL, CLICK_ISI, CLICK_AKHIR, DOWNLOAD
+  device     String? // PC, Mobile, Tablet (via ua-parser-js)
+  browser    String? // Chrome, Safari, Firefox, dll.
+  ipAddress  String?
+  createdAt  DateTime            @default(now())
 
   @@index([aktifitas(length: 191)])
   @@index([createdAt])
@@ -94,32 +107,31 @@ model Staff {
 }
 
 model PlagiarismRequest {
-  id               String    @id @default(cuid())
-  requestNumber    String    @unique // Format: PLG-YYYY-XXXX
-  nim              String
-  fullName         String
-  email            String
-  whatsapp         String
-  studyProgram     String
-  workType         String    // Skripsi | Tesis | Disertasi | Artikel
-  advisor          String
-  title            String    @db.Text
-  fileName         String    @db.Text
-  filePath         String    @db.Text
-  revisionNumber   Int       @default(1)
-  status           String    @default("PENDING") // PENDING | PROCESSING | COMPLETED | REJECTED
-  similarityScore  Int?
-  resultFilePath   String?   @db.Text
-  staffNotes       String?   @db.Text
-  processedAt      DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  requestNumber   String    @unique // Format: PLG-YYYY-XXXX
+  nim             String
+  fullName        String
+  email           String
+  whatsapp        String
+  studyProgram    String
+  workType        String // Skripsi | Tesis | Disertasi | Artikel
+  advisor         String
+  title           String    @db.Text
+  fileName        String    @db.Text
+  filePath        String    @db.Text
+  revisionNumber  Int       @default(1)
+  status          String    @default("PENDING") // PENDING | PROCESSING | COMPLETED | REJECTED
+  similarityScore Int?
+  resultFilePath  String?   @db.Text
+  staffNotes      String?   @db.Text
+  processedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@index([nim])
   @@index([status])
   @@index([createdAt])
 }
-
 
 model Student {
   id           String   @id @default(cuid())
@@ -134,42 +146,105 @@ model Student {
 }
 
 model Member {
-  id              String   @id @default(cuid())
-  memberType      String   // Mahasiswa FEB-UB | Non FEB-UB | Dosen/Tendik FEB-UB
-  fullName        String
-  nim             String   @unique
-  studyLevel      String?
-  studyProgram    String?
-  whatsapp        String
-  email           String   @unique
-  mailingAddress  String   @db.Text
-  identityType    String
-  passwordHash    String
-  selfiePath      String?  @db.Text
-  identityPath    String?  @db.Text
-  status          String   @default("PENDING") // PENDING | ACTIVE | REJECTED | INACTIVE
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  memberType     String
+  fullName       String
+  nim            String   @unique
+  studyLevel     String?
+  studyProgram   String?
+  whatsapp       String
+  email          String   @unique
+  mailingAddress String   @db.Text
+  identityType   String
+  passwordHash   String
+  selfiePath     String?  @db.Text
+  identityPath   String?  @db.Text
+  status         String   @default("PENDING")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([nim])
   @@index([status])
 }
 
+model MembershipRecord {
+  id             String    @id @default(cuid())
+  sourceKey      String    @unique // SHA-256 row signature
+  registeredAt   DateTime?
+  adminName      String?
+  memberType     String    @default("Mahasiswa") // Mahasiswa FEB-UB, Non FEB-UB, dll.
+  nim            String
+  fullName       String
+  studyProgram   String?
+  whatsapp       String?
+  email          String?
+  mailingAddress String?   @db.Text
+  identityType   String?
+  identityPhoto  String?   @db.Text // Link Drive (khusus backoffice)
+  selfiePhoto    String?   @db.Text // Link Drive (khusus backoffice)
+  status         String    @default("ACTIVE")
+  activeDate     DateTime?
+  validUntil     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([nim])
+  @@index([fullName])
+  @@index([memberType])
+  @@index([status])
+}
+
+model DepositRecord {
+  id                 String    @id @default(cuid())
+  sourceKey          String    @unique // SHA-256 row signature
+  submittedAt        DateTime?
+  workType           String    @default("Skripsi")
+  fullName           String
+  nim                String
+  studyProgram       String?
+  whatsapp           String?
+  email              String?
+  title              String    @db.Text
+  initialSectionUrl  String?   @db.Text
+  mainSectionUrl     String?   @db.Text
+  finalSectionUrl    String?   @db.Text
+  proofNumber        String? // Nomor Bukti
+  revisionNotes      String?   @db.Text
+  checkDate          DateTime?
+  checkTime          String?
+  hardcopySubmitted  Boolean   @default(false)
+  hardcopyDate       DateTime?
+  hardcopyProofUrl   String?   @db.Text
+  validationDate     DateTime?
+  plagiarismScore    String? // Persentase plagiasi Turnitin
+  emailMissingNotice Boolean   @default(false)
+  proofSent          Boolean   @default(false)
+  downloadProofUrl   String?   @db.Text
+  driveFolderUrl     String?   @db.Text
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([nim])
+  @@index([fullName])
+  @@index([proofNumber])
+  @@index([workType])
+}
+
 model RoomReservation {
-  id              String   @id @default(cuid())
-  reservationCode String   @unique
-  responsibleNim  String
-  responsibleName String
-  participantNims String   @db.Text
-  usageDate      DateTime
-  startTime      String
-  endTime        String
+  id               String   @id @default(cuid())
+  reservationCode  String   @unique
+  responsibleNim   String
+  responsibleName  String
+  participantNims  String   @db.Text
+  usageDate        DateTime
+  startTime        String
+  endTime          String
   participantCount Int
-  room           String
-  purpose        String   @db.Text
-  status         String   @default("BOOKED") // BOOKED | ACTIVE | COMPLETED | CANCELLED
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  room             String
+  purpose          String   @db.Text
+  status           String   @default("BOOKED") // BOOKED | ACTIVE | COMPLETED | CANCELLED
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@index([responsibleNim])
   @@index([usageDate])
@@ -177,20 +252,20 @@ model RoomReservation {
 }
 
 model TicketReport {
-  id               String    @id @default(cuid())
-  ticketNumber     String    @unique
-  fullName         String
-  identityNumber   String
-  email            String
-  phone            String?
-  category         String
-  description      String    @db.Text
-  attachmentUrl    String?   @db.Text // URL foto bukti kendala
-  status           String    @default("OPEN") // OPEN | IN_PROGRESS | RESOLVED
-  staffNotes       String?   @db.Text
-  resolvedAt       DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  id             String    @id @default(cuid())
+  ticketNumber   String    @unique
+  fullName       String
+  identityNumber String
+  email          String
+  phone          String?
+  category       String
+  description    String    @db.Text
+  attachmentUrl  String?   @db.Text // URL foto bukti kendala
+  status         String    @default("OPEN") // OPEN | IN_PROGRESS | RESOLVED
+  staffNotes     String?   @db.Text
+  resolvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@index([identityNumber])
   @@index([status])
@@ -200,16 +275,16 @@ model TicketReport {
 model BookCollection {
   id                  String   @id @default(cuid())
   inventoryNumber     String?  @unique // No. Inventaris
-  registerNumber      String?  // Register
+  registerNumber      String? // Register
   title               String   @db.Text // Judul
   author              String?  @db.Text // Pengarang
-  edition             String?  // Edisi
-  publicationPlace    String?  // Tempat Terbit
-  publisher           String?  // Penerbit
-  publicationYear     Int?     // Tahun
+  edition             String? // Edisi
+  publicationPlace    String? // Tempat Terbit
+  publisher           String? // Penerbit
+  publicationYear     Int? // Tahun
   physicalDescription String?  @db.Text // Deskripsi fisik
-  isbn                String?  // ISBN
-  ddc                 String?  // Klasifikasi DDC
+  isbn                String? // ISBN
+  ddc                 String? // Klasifikasi DDC
   subject             String?  @db.Text // Subjek
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -223,9 +298,9 @@ model BookCollection {
 model ScientificWorkDeposit {
   id                  String    @id @default(cuid())
   depositNumber       String    @unique // Format: DEP-26-XXXX
-  identityNumber      String    // NIM
+  identityNumber      String // NIM
   fullName            String
-  degreeLevel         String    // S1, S2, S3, Profesi, Other
+  degreeLevel         String // S1, S2, S3, Profesi, Other
   studyProgram        String?
   whatsappCountryCode String    @default("+62")
   whatsappNumber      String
@@ -233,7 +308,7 @@ model ScientificWorkDeposit {
   mailingAddress      String    @db.Text
   titleId             String    @db.Text
   titleEn             String?   @db.Text
-  workType            String    // Skripsi, Tesis, Disertasi
+  workType            String // Skripsi, Tesis, Disertasi
   advisor             String?
   examiner1           String?
   examiner2           String?

@@ -11,8 +11,8 @@ export async function GET() {
     });
 
     // 2. Hitung Pengajuan Serah Simpan Menunggu Verifikasi (PENDING)
-    const pendingDepositsCount = await prisma.scientificWorkDeposit.count({
-      where: { verificationStatus: 'PENDING' },
+    const pendingDepositsCount = await prisma.depositRecord.count({
+      where: { validationDate: null },
     });
 
     // 3. Hitung Total Staf Terdaftar
@@ -22,7 +22,12 @@ export async function GET() {
     const openReportsCount = await prisma.ticketReport.count({ where: { status: 'OPEN' } });
 
     // 5. Hitung Total Aktivitas E-Resource & Repositori
-    const totalActivityCount = await prisma.repositoryActivityLog.count();
+    const [totalActivityCount, totalMemberships, totalDeposits, totalRepository] = await Promise.all([
+      prisma.repositoryActivityLog.count(),
+      prisma.membershipRecord.count(),
+      prisma.depositRecord.count(),
+      prisma.repositoryDocument.count(),
+    ]);
 
     // 6. Pengunjung Terbaru Hari Ini (5 Terakhir)
     const recentVisitors = await prisma.visitorLog.findMany({
@@ -31,9 +36,9 @@ export async function GET() {
     });
 
     // 7. Antrean Serah Simpan Prioritas (5 Naskah PENDING terlama)
-    const priorityDeposits = await prisma.scientificWorkDeposit.findMany({
-      where: { verificationStatus: 'PENDING' },
-      orderBy: { createdAt: 'asc' },
+    const priorityDeposits = await prisma.depositRecord.findMany({
+      where: { validationDate: null },
+      orderBy: { submittedAt: 'asc' },
       take: 5,
     });
 
@@ -47,11 +52,8 @@ export async function GET() {
       },
     });
 
-    const todayApprovedDeposits = await prisma.scientificWorkDeposit.count({
-      where: {
-        verificationStatus: 'APPROVED',
-        updatedAt: { gte: startOfToday },
-      },
+    const todayApprovedDeposits = await prisma.depositRecord.count({
+      where: { validationDate: { gte: startOfToday } },
     });
 
     return NextResponse.json({
@@ -65,6 +67,9 @@ export async function GET() {
           totalActivityCount,
           todayTotalVisitors,
           todayApprovedDeposits,
+          totalMemberships,
+          totalDeposits,
+          totalRepository,
         },
         recentVisitors,
         priorityDeposits,

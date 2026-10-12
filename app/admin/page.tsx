@@ -41,6 +41,37 @@ function ReportManagementPanel() {
   </div>;
 }
 
+function SheetDataPanel({ dataset, title }: { dataset: 'memberships' | 'deposits' | 'visitors'; title: string }) {
+  const [data, setData] = useState<any[]>([]);
+  const [q, setQ] = useState('');
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const load = useCallback(async () => {
+    setLoading(true);
+    const res = await fetch(`/api/backoffice/sheets/${dataset}?q=${encodeURIComponent(q)}&page=${page}`);
+    const json = await res.json();
+    if (json.success) { setData(json.data); setTotal(json.total); }
+    setLoading(false);
+  }, [dataset, q, page]);
+  useEffect(() => { const timer = setTimeout(load, 250); return () => clearTimeout(timer); }, [load]);
+  async function sync() {
+    setSyncing(true);
+    const res = await fetch('/api/backoffice/sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dataset }) });
+    const json = await res.json(); setSyncing(false);
+    alert(json.success ? `Sinkronisasi ${title} selesai.` : json.error); if (json.success) load();
+  }
+  return <div className="space-y-4">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <label className="w-full sm:max-w-md"><span className="sr-only">Cari {title}</span><input value={q} onChange={e => { setQ(e.target.value); setPage(1); }} placeholder={`Cari data ${title}...`} className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-400" /></label>
+      <div className="flex items-center gap-3"><strong className="text-sm text-slate-600">{total.toLocaleString('id-ID')} data</strong><button onClick={sync} disabled={syncing} className="min-h-11 rounded-xl bg-[#0B2546] px-4 text-xs font-bold text-white disabled:opacity-50">{syncing ? 'Menyinkronkan…' : 'Sinkron Google Sheet'}</button></div>
+    </div>
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-4">Nama / NIM</th><th className="p-4">Program / Jenis</th><th className="p-4">Tanggal</th><th className="p-4">Status / Judul</th></tr></thead><tbody className="divide-y divide-slate-100">{loading ? <tr><td colSpan={4} className="p-10 text-center">Memuat…</td></tr> : data.length === 0 ? <tr><td colSpan={4} className="p-10 text-center text-slate-400">Belum ada data.</td></tr> : data.map(row => <tr key={row.id} className="align-top hover:bg-amber-50/40"><td className="p-4"><b className="block text-[#0B2546]">{row.fullName}</b><span className="text-xs text-slate-500">{row.nim || row.identityNumber}</span></td><td className="p-4">{row.studyProgram || row.memberType || row.workType || '-'}</td><td className="p-4 text-xs">{new Date(row.registeredAt || row.submittedAt || row.checkInTime).toLocaleString('id-ID')}</td><td className="max-w-md p-4"><span className="line-clamp-2">{row.title || row.status || (row.checkOutTime ? 'Selesai' : 'Tercatat')}</span></td></tr>)}</tbody></table></div></div>
+    <div className="flex justify-end gap-2"><button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="min-h-11 rounded-xl border px-4 disabled:opacity-40">Sebelumnya</button><span className="grid min-h-11 place-items-center px-3 text-sm font-bold">{page} / {Math.max(1, Math.ceil(total / 25))}</span><button disabled={page * 25 >= total} onClick={() => setPage(p => p + 1)} className="min-h-11 rounded-xl border px-4 disabled:opacity-40">Berikutnya</button></div>
+  </div>;
+}
+
 function RepositoryManagementPanel() {
   const [data, setData] = useState<any[]>([]);
   const [q, setQ] = useState('');
@@ -567,9 +598,8 @@ function StaffManagementPanel() {
 }
 
 export default function AdminDashboardPage() {
-  // Navigation tabs: 'overview' | 'visitors' | 'deposits' | 'reports' | 'staff' | 'repository' | 'books'
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'visitors' | 'deposits' | 'reports' | 'staff' | 'repository' | 'books'
+    'overview' | 'visitors' | 'deposits' | 'memberships' | 'depositRecords' | 'visitorHistory' | 'reports' | 'staff' | 'repository' | 'books'
   >('overview');
 
   const [loading, setLoading] = useState(true);
@@ -883,6 +913,9 @@ export default function AdminDashboardPage() {
               { id: 'reports', label: 'Lapor Kendala', icon: 'support_agent', badge: overviewData?.kpis?.openReportsCount ? `${overviewData.kpis.openReportsCount}` : null, badgeColor: 'bg-rose-500' },
               { id: 'staff', label: 'Kelola Staf', icon: 'manage_accounts', badge: null },
               { id: 'repository', label: 'Kelola Repositori', icon: 'auto_stories', badge: null },
+              { id: 'memberships', label: 'Data Keanggotaan', icon: 'badge', badge: null },
+              { id: 'depositRecords', label: 'Bukti Serah Simpan', icon: 'verified', badge: null },
+              { id: 'visitorHistory', label: 'Riwayat Buku Tamu', icon: 'history', badge: null },
               { id: 'books', label: 'Kelola Buku', icon: 'library_books', badge: null },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
@@ -959,6 +992,9 @@ export default function AdminDashboardPage() {
               {activeTab === 'reports' && 'Kelola Laporan Kendala'}
               {activeTab === 'staff' && 'Kelola Akun Staf'}
               {activeTab === 'repository' && 'Manajemen Database Repositori'}
+              {activeTab === 'memberships' && 'Database Keanggotaan SAC'}
+              {activeTab === 'depositRecords' && 'Arsip Bukti Serah Simpan'}
+              {activeTab === 'visitorHistory' && 'Riwayat Check-In / Buku Tamu'}
               {activeTab === 'books' && 'Manajemen Katalog Buku Fisik'}
             </h1>
             <p className="text-xs text-slate-500 font-medium">
@@ -1794,6 +1830,9 @@ export default function AdminDashboardPage() {
           {/* ================================================================= */}
           {/* TAB 7: KATALOG BUKU FISIK                                         */}
           {/* ================================================================= */}
+          {activeTab === 'memberships' && <SheetDataPanel dataset="memberships" title="Keanggotaan" />}
+          {activeTab === 'depositRecords' && <SheetDataPanel dataset="deposits" title="Bukti Serah Simpan" />}
+          {activeTab === 'visitorHistory' && <SheetDataPanel dataset="visitors" title="Buku Tamu" />}
           {activeTab === 'books' && <BookManagementPanel />}
         </main>
       </div>
