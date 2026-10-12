@@ -6,13 +6,23 @@ const prisma = new PrismaClient();
 export type Dataset = keyof typeof SHEETS;
 
 export async function syncSheet(dataset: Dataset) {
+  console.log(`[${dataset}] Mengunduh data Google Sheet...`);
   const rows = await fetchRows(dataset);
+  console.log(`[${dataset}] Berhasil mengunduh ${rows.length.toLocaleString('id-ID')} baris.`);
+
   const map = { repository: repositoryRow, memberships: membershipRow, deposits: depositRow, visitors: visitorRow }[dataset];
   const required = { repository: ['Timestamp', 'NIM', 'Judul'], memberships: ['Tanggal', 'NIM', 'Nama'], deposits: ['Tanggal', 'NIM', 'Nomor Bukti'], visitors: ['Tanggal', 'Check-In', 'NIM'] }[dataset];
   if (!rows.length || required.some((column) => !(column in rows[0]))) throw new Error(`${dataset}: kolom wajib tidak ditemukan: ${required.join(', ')}`);
   let added = 0, updated = 0, skipped = 0;
   const seen = new Set<string>();
-  for (const row of rows) {
+  const total = rows.length;
+
+  for (let i = 0; i < total; i++) {
+    const row = rows[i];
+    if (i > 0 && i % 1000 === 0) {
+      console.log(`[${dataset}] Memproses baris ${i.toLocaleString('id-ID')} / ${total.toLocaleString('id-ID')} (tambah: ${added}, update: ${updated}, skip: ${skipped})...`);
+    }
+
     if (required.some((column) => !String(row[column] ?? '').trim())) { skipped++; continue; }
     const record = map(row);
     if (seen.has(record.sourceKey)) { skipped++; continue; }
@@ -43,7 +53,9 @@ export async function syncSheet(dataset: Dataset) {
       else { await prisma.visitorLog.create({ data }); added++; }
     }
   }
-  return { dataset, rows: rows.length, added, updated, skipped };
+  const summary = { dataset, rows: total, added, updated, skipped };
+  console.log(`[${dataset}] Selesai! Ringkasan:`, summary);
+  return summary;
 }
 
 export async function closeSync() { await prisma.$disconnect(); }
