@@ -70,6 +70,15 @@ export default function Navbar({ onChatClick }: NavbarProps) {
         <nav className="hidden xl:flex items-center gap-1.5">
           {navLinks.map((item) => {
             const active = isActive(item.href);
+            if (item.href === '/serah-simpan') return <div key={item.href} className="group relative">
+              <Link href="/serah-simpan" className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${active ? 'bg-slate-100 font-bold text-[#0B2546]' : 'text-slate-600 hover:bg-slate-100/70 hover:text-[#0B2546]'}`} aria-haspopup="true">
+                Serah Simpan <span aria-hidden="true" className="material-symbols-outlined text-base">expand_more</span>
+              </Link>
+              <div className="invisible absolute left-0 top-full z-50 w-64 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"><div className="rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
+                <Link href="/serah-simpan" className="block rounded-lg px-3 py-3 text-xs font-semibold text-slate-700 hover:bg-amber-50 focus:bg-amber-50">Pengajuan Serah Simpan</Link>
+                <Link href="/serah-simpan/lacak" className="block rounded-lg px-3 py-3 text-xs font-semibold text-slate-700 hover:bg-amber-50 focus:bg-amber-50">Lacak Progres & Download Bukti</Link>
+              </div></div>
+            </div>;
             return (
               <Link
                 key={item.href}
@@ -145,6 +154,11 @@ export default function Navbar({ onChatClick }: NavbarProps) {
           <div className="grid grid-cols-1 gap-1">
             {navLinks.map((item) => {
               const active = isActive(item.href);
+              if (item.href === '/serah-simpan') return <div key={item.href} className="rounded-lg bg-slate-50 p-2">
+                <span className="block px-2 py-1 text-xs font-bold uppercase tracking-wide text-slate-500">Serah Simpan</span>
+                <Link href="/serah-simpan" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-amber-50">Pengajuan Serah Simpan</Link>
+                <Link href="/serah-simpan/lacak" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-amber-50">Lacak Progres & Download Bukti</Link>
+              </div>;
               return (
                 <Link
                   key={item.href}
