@@ -11,6 +11,8 @@ import {
   formatTimeOnly,
 } from '@/lib/utils';
 import ComingSoonNotice, { ComingSoonDetails } from '@/components/ComingSoonNotice';
+import { depositWorkflow } from '@/lib/deposit-workflow';
+import { validateDepositDecision } from '@/lib/deposit-decision';
 
 function ReportManagementPanel() {
   const [tickets, setTickets] = useState<any[]>([]);
@@ -696,7 +698,7 @@ export default function AdminDashboardPage() {
   const [hardcopyReceived, setHardcopyReceived] = useState(false);
   const [revisionNotes, setRevisionNotes] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
-  const [showRevisionForm, setShowRevisionForm] = useState(false);
+  const [decision, setDecision] = useState<'APPROVED' | 'REVISION_NEEDED' | 'REJECTED'>('APPROVED');
 
   // =========================================================================
   // TAB 4: MEMBERS STATE
@@ -844,13 +846,13 @@ export default function AdminDashboardPage() {
     setActionLoading(true);
 
     try {
+      const decisionError = validateDepositDecision({ status, notes: revisionNotes, degreeLevel: selectedDeposit.degreeLevel, hardcopy: hardcopyReceived });
+      if (decisionError) { alert(decisionError); setActionLoading(false); return; }
       const payload: any = {
         verificationStatus: status,
         hardcopySubmitted: hardcopyReceived,
       };
-      if (status === 'REVISION_NEEDED') {
-        payload.revisionNotes = revisionNotes;
-      }
+      payload.revisionNotes = status === 'APPROVED' ? null : revisionNotes;
 
       const res = await fetch(`/api/admin/deposits/${selectedDeposit.id}`, {
         method: 'PATCH',
@@ -861,7 +863,7 @@ export default function AdminDashboardPage() {
       const json = await res.json();
       if (json.success) {
         setSelectedDeposit(null);
-        setShowRevisionForm(false);
+        setDecision('APPROVED');
         setRevisionNotes('');
         await Promise.all([fetchDeposits(), fetchOverview()]);
       } else {
@@ -879,7 +881,7 @@ export default function AdminDashboardPage() {
     setSelectedDeposit(deposit);
     setHardcopyReceived(Boolean(deposit.hardcopySubmitted));
     setRevisionNotes(deposit.revisionNotes || '');
-    setShowRevisionForm(false);
+    setDecision(deposit.verificationStatus === 'REVISION_NEEDED' || deposit.verificationStatus === 'REJECTED' ? deposit.verificationStatus : 'APPROVED');
   };
 
   return (
@@ -1064,9 +1066,9 @@ export default function AdminDashboardPage() {
           {activeTab === 'overview' && (
             <div className="space-y-6">
               {/* 4 KARTU KPI UTAMA */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-reduce:animate-none">
                 {/* KPI 1 */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between transition motion-safe:hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none">
                   <div>
                     <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                       Pengunjung di Ruangan
@@ -1086,7 +1088,7 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {/* KPI 2 */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between transition motion-safe:hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none">
                   <div>
                     <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                       Menunggu Verifikasi
@@ -1105,7 +1107,7 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {/* KPI 3 */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between transition motion-safe:hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none">
                   <div>
                     <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                       Total Staf
@@ -1124,7 +1126,7 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {/* KPI 4 */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between transition motion-safe:hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none">
                   <div>
                     <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                       Aktivitas E-Resource
@@ -1497,7 +1499,7 @@ export default function AdminDashboardPage() {
                               </span>
                             </td>
                             <td className="p-3.5 whitespace-nowrap">
-                              {d.hardcopySubmitted ? (
+                              {d.degreeLevel === 'S1' ? <span className="text-slate-500">Tidak wajib</span> : d.hardcopySubmitted ? (
                                 <span className="px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px] flex items-center gap-1 w-fit">
                                   <span className="material-symbols-outlined text-[12px]">check</span>
                                   <span>Diterima</span>
@@ -1509,33 +1511,14 @@ export default function AdminDashboardPage() {
                               )}
                             </td>
                             <td className="p-3.5 whitespace-nowrap">
-                              {d.verificationStatus === 'PENDING' && (
-                                <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[10px]">
-                                  PENDING
-                                </span>
-                              )}
-                              {d.verificationStatus === 'APPROVED' && (
-                                <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-[10px]">
-                                  DISETUJUI
-                                </span>
-                              )}
-                              {d.verificationStatus === 'REVISION_NEEDED' && (
-                                <span className="px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300 font-bold text-[10px]">
-                                  PERLU REVISI
-                                </span>
-                              )}
-                              {d.verificationStatus === 'REJECTED' && (
-                                <span className="px-2.5 py-1 rounded-full bg-red-100 text-red-800 border border-red-300 font-bold text-[10px]">
-                                  DITOLAK
-                                </span>
-                              )}
+                              <span className={`px-2.5 py-1 rounded-full border font-bold text-[10px] ${depositWorkflow(d).tone === 'approved' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : depositWorkflow(d).tone === 'revision' || depositWorkflow(d).tone === 'rejected' ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-amber-100 text-amber-900 border-amber-300'}`}>{depositWorkflow(d).label}</span>
                             </td>
                             <td className="p-3.5 text-center">
                               <button
                                 onClick={() => openVerifyModal(d)}
                                 className="px-3 py-1.5 rounded-xl bg-[#0B2546] hover:bg-slate-900 text-amber-300 font-bold text-xs shadow-sm transition-colors cursor-pointer"
                               >
-                                Periksa &amp; Verifikasi
+                                Buka Detail
                               </button>
                             </td>
                           </tr>
@@ -1803,6 +1786,7 @@ export default function AdminDashboardPage() {
                         <th className="p-3">Program Studi</th>
                         <th className="p-3">Aktivitas</th>
                         <th className="p-3">Kata Kunci / Judul</th>
+                        <th className="p-3">Tujuan / Akses</th>
                         <th className="p-3">Perangkat / Browser</th>
                       </tr>
                     </thead>
@@ -1834,6 +1818,7 @@ export default function AdminDashboardPage() {
                             <td className="p-3 max-w-xs truncate text-slate-700">
                               {log.kataKunci || log.document?.judul || '-'}
                             </td>
+                            <td className="p-3 max-w-xs text-slate-600"><span className="font-bold">{log.accessType === 'READ' ? 'Baca' : log.accessType === 'DOWNLOAD' ? 'Unduh' : '-'}</span>{log.section ? ` • ${log.section}` : ''}<span className="block truncate text-[10px] text-slate-400" title={log.purpose || undefined}>{log.purpose || '-'}</span></td>
                             <td className="p-3 font-mono text-[11px] text-slate-500 whitespace-nowrap">
                               {log.device || 'PC'} • {log.browser || 'Browser'}
                             </td>
@@ -1841,7 +1826,7 @@ export default function AdminDashboardPage() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={6} className="p-8 text-center text-slate-400">
+                          <td colSpan={7} className="p-8 text-center text-slate-400">
                             Belum ada catatan aktivitas tercatat.
                           </td>
                         </tr>
@@ -2080,36 +2065,16 @@ export default function AdminDashboardPage() {
                   </label>
                 </div>
 
-                {/* Form Catatan Revisi Jika Minta Revisi */}
-                {showRevisionForm && (
-                  <div className="p-3 bg-rose-50 rounded-xl border border-rose-200 space-y-2">
-                    <label className="block font-bold text-rose-900 text-xs">
-                      Catatan Perbaikan Naskah untuk Mahasiswa:
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={revisionNotes}
-                      onChange={(e) => setRevisionNotes(e.target.value)}
-                      placeholder="Tuliskan catatan perbaikan (contoh: Lembar pengesahan belum ditandatangani Kaprodi, abstrak bahasa Inggris hilang, dsb)..."
-                      className="w-full p-2.5 rounded-xl border border-rose-300 bg-white text-xs outline-none focus:ring-2 focus:ring-rose-200 resize-none font-medium"
-                    />
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => setShowRevisionForm(false)}
-                        className="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-white text-xs font-semibold"
-                      >
-                        Batal
-                      </button>
-                      <button
-                        onClick={() => handleUpdateDepositStatus('REVISION_NEEDED')}
-                        disabled={actionLoading || !revisionNotes.trim()}
-                        className="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-sm transition-colors disabled:opacity-50 cursor-pointer"
-                      >
-                        Kirim Catatan Revisi
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
+                  <h4 className="font-bold text-[#0B2546]">Keputusan pemeriksaan</h4>
+                  <div className="grid gap-2 sm:grid-cols-3">{([
+                    ['APPROVED', 'Softcopy valid', 'emerald'],
+                    ['REVISION_NEEDED', 'Minta revisi', 'amber'],
+                    ['REJECTED', 'Tolak pengajuan', 'rose'],
+                  ] as const).map(([value, label, tone]) => <label key={value} className={`cursor-pointer rounded-xl border p-3 text-xs font-bold ${decision === value ? `border-${tone}-500 bg-${tone}-50` : 'border-slate-200'}`}><input className="sr-only" type="radio" name="decision" checked={decision === value} onChange={() => setDecision(value)} />{label}</label>)}</div>
+                  {decision !== 'APPROVED' && <><label className="block text-xs font-bold text-slate-700">Catatan untuk mahasiswa <span className="text-rose-600">(wajib)</span></label><textarea rows={3} value={revisionNotes} onChange={(e) => setRevisionNotes(e.target.value)} placeholder="Jelaskan perbaikan atau alasan penolakan..." className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-amber-400" /></>}
+                  <button onClick={() => handleUpdateDepositStatus(decision)} disabled={actionLoading || (decision !== 'APPROVED' && !revisionNotes.trim())} className="min-h-11 w-full rounded-xl bg-[#0B2546] px-4 text-sm font-bold text-white disabled:opacity-50">{actionLoading ? 'Menyimpan…' : 'Simpan keputusan'}</button>
+                </div>
               </div>
 
               {/* Footer Modal: Action Buttons */}
@@ -2121,41 +2086,7 @@ export default function AdminDashboardPage() {
                   Tutup
                 </button>
 
-                <div className="flex items-center gap-2">
-                  {/* Tombol Merah: Tolak */}
-                  <button
-                    onClick={() => {
-                      if (confirm('Yakin ingin menolak pengajuan serah simpan ini?')) {
-                        handleUpdateDepositStatus('REJECTED');
-                      }
-                    }}
-                    disabled={actionLoading}
-                    className="px-3.5 py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold text-xs transition-colors cursor-pointer"
-                  >
-                    Tolak Pengajuan
-                  </button>
-
-                  {/* Tombol Kuning: Minta Revisi */}
-                  {!showRevisionForm && (
-                    <button
-                      onClick={() => setShowRevisionForm(true)}
-                      disabled={actionLoading}
-                      className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs transition-colors cursor-pointer"
-                    >
-                      Minta Revisi
-                    </button>
-                  )}
-
-                  {/* Tombol Hijau: Setujui */}
-                  <button
-                    onClick={() => handleUpdateDepositStatus('APPROVED')}
-                    disabled={actionLoading}
-                    className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">check</span>
-                    <span>Setujui (Approve)</span>
-                  </button>
-                </div>
+                <p className="text-[11px] text-slate-500">Pilih keputusan dan simpan melalui panel pemeriksaan di atas.</p>
               </div>
             </motion.div>
           </div>

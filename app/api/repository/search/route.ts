@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '15', 10)));
 
   // Generate unique cache key
-  const cacheKey = `repo:search:${encodeURIComponent(q.toLowerCase())}:${encodeURIComponent(prodi.toLowerCase())}:${encodeURIComponent(jenis.toLowerCase())}:${page}:${limit}`;
+  const cacheKey = `repo:search:v2:${encodeURIComponent(q.toLowerCase())}:${encodeURIComponent(prodi.toLowerCase())}:${encodeURIComponent(jenis.toLowerCase())}:${page}:${limit}`;
 
   // 1. Check Redis Cache
   const cachedData = await getCache<any>(cacheKey);
@@ -82,7 +82,12 @@ export async function GET(request: NextRequest) {
     const duration = (performance.now() - startTime).toFixed(1);
 
     const responsePayload = {
-      data: documents,
+      data: documents.map(({ bagianAwalUrl, bagianIsiUrl, bagianAkhirUrl, ...document }) => ({
+        ...document,
+        hasBagianAwal: Boolean(bagianAwalUrl),
+        hasBagianIsi: Boolean(bagianIsiUrl),
+        hasBagianAkhir: Boolean(bagianAkhirUrl),
+      })), 
       pagination: {
         page,
         limit,

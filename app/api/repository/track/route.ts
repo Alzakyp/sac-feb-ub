@@ -6,6 +6,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { documentId, aktifitas, kataKunci, nim, nama, prodi } = body;
+    if (aktifitas !== 'SEARCH' || documentId) {
+      return NextResponse.json({ error: 'Gunakan verifikasi akses repositori.' }, { status: 403 });
+    }
 
     if (!aktifitas) {
       return NextResponse.json(
@@ -42,38 +45,14 @@ export async function POST(request: NextRequest) {
         documentId: documentId || null,
         aktifitas: String(aktifitas).toUpperCase(),
         kataKunci: kataKunci ? String(kataKunci).trim() : null,
-        nim: nim ? String(nim).trim() : null,
-        nama: nama ? String(nama).trim() : null,
-        prodi: prodi ? String(prodi).trim() : null,
+        nim: null,
+        nama: null,
+        prodi: null,
         device,
         browser,
         ipAddress,
       },
     });
-
-    // Increment document counters if relevant
-    if (documentId) {
-      const actUpper = String(aktifitas).toUpperCase();
-      const isDownloadAction =
-        actUpper === 'DOWNLOAD' ||
-        actUpper === 'CLICK_AWAL' ||
-        actUpper === 'CLICK_ISI' ||
-        actUpper === 'CLICK_AKHIR';
-
-      const isViewAction = actUpper === 'VIEW_DETAIL';
-
-      if (isDownloadAction || isViewAction) {
-        await prisma.repositoryDocument.update({
-          where: { id: documentId },
-          data: {
-            downloadCount: isDownloadAction ? { increment: 1 } : undefined,
-            viewCount: isViewAction ? { increment: 1 } : undefined,
-          },
-        }).catch((e) => {
-          console.warn('[Track] Could not increment document counter:', e.message);
-        });
-      }
-    }
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

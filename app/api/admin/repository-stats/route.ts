@@ -45,15 +45,11 @@ export async function GET(request: NextRequest) {
         take: limit,
         skip: (page - 1) * limit,
         orderBy: { createdAt: 'desc' },
-        include: {
-          document: {
-            select: {
-              id: true,
-              judul: true,
-              nomor: true,
-              jenis: true,
-            },
-          },
+        select: {
+          id: true, documentId: true, nim: true, nama: true, prodi: true,
+          kataKunci: true, aktifitas: true, purpose: true, accessType: true,
+          section: true, device: true, browser: true, createdAt: true,
+          document: { select: { id: true, judul: true, nomor: true, jenis: true } },
         },
       }),
       prisma.resourceAccessLog.groupBy({

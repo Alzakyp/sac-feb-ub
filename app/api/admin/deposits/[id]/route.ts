@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { validateDepositDecision } from '@/lib/deposit-decision';
 
 const updateDepositSchema = z.object({
   verificationStatus: z.enum(['PENDING', 'APPROVED', 'REVISION_NEEDED', 'REJECTED']),
@@ -49,6 +50,14 @@ export async function PATCH(
       );
     }
 
+    const decisionError = validateDepositDecision({
+      status: verificationStatus,
+      notes: revisionNotes || '',
+      degreeLevel: existing.degreeLevel,
+      hardcopy: hardcopySubmitted ?? existing.hardcopySubmitted,
+    });
+    if (decisionError) return NextResponse.json({ success: false, error: decisionError }, { status: 400 });
+
     const updateData: any = {
       verificationStatus,
       updatedAt: new Date(),
@@ -64,10 +73,8 @@ export async function PATCH(
 
     if (verificationStatus === 'APPROVED') {
       updateData.verifiedAt = new Date();
-      if (!existing.certificateUrl) {
-        const certCode = existing.depositNumber.replace('DEP-26-', '');
-        updateData.certificateUrl = `/certificates/CERT-26-${certCode}.pdf`;
-      }
+      // Bukti baru tersedia setelah file benar-benar dibuat/diunggah petugas.
+      updateData.revisionNotes = null;
     } else if (verificationStatus === 'REVISION_NEEDED' || verificationStatus === 'REJECTED') {
       updateData.verifiedAt = null;
     }

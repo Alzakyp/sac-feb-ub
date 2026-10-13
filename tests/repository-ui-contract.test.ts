@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const ui = readFileSync(new URL('../app/repository/page.tsx', import.meta.url), 'utf8');
+assert.match(ui, /fetch\('\/api\/repository\/access'/);
+assert.match(ui, /NIM \/ Student ID/);
+assert.match(ui, /Tujuan \/ Purpose/);
+assert.match(ui, /Baca Saja \/ Read/);
+assert.match(ui, /Unduh \/ Download/);
+assert.doesNotMatch(ui, /window\.open\(url,/);
+const api = readFileSync(new URL('../app/api/repository/search/route.ts', import.meta.url), 'utf8');
+assert.match(api, /repo:search:v2:/);
+assert.match(api, /hasBagianAwal/);
+console.log('Repository UI contract passed.');

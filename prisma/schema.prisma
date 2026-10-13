@@ -82,7 +82,10 @@ model RepositoryActivityLog {
   nama       String?
   prodi      String?
   kataKunci  String?             @db.Text // Kata kunci pencarian yang dimasukkan
-  aktifitas  String              @db.Text // SEARCH, VIEW_DETAIL, CLICK_AWAL, CLICK_ISI, CLICK_AKHIR, DOWNLOAD
+  aktifitas  String              @db.Text // SEARCH, VIEW_DETAIL, CLICK_AWAL, CLICK_ISI, CLICK_AKHIR, DOWNLOAD, READ
+  purpose    String?             @db.Text // Tujuan pembacaan / pengunduhan naskah
+  accessType String? // READ | DOWNLOAD
+  section    String? // AWAL | ISI | AKHIR
   device     String? // PC, Mobile, Tablet (via ua-parser-js)
   browser    String? // Chrome, Safari, Firefox, dll.
   ipAddress  String?

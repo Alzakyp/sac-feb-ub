@@ -19,9 +19,9 @@ interface RepositoryDocument {
   pembimbing: string | null;
   penguji1: string | null;
   penguji2: string | null;
-  bagianAwalUrl: string | null;
-  bagianIsiUrl: string | null;
-  bagianAkhirUrl: string | null;
+  hasBagianAwal: boolean;
+  hasBagianIsi: boolean;
+  hasBagianAkhir: boolean;
   viewCount: number;
   downloadCount: number;
 }
@@ -107,6 +107,13 @@ export default function RepositoryPage() {
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState<SearchResponse | null>(null);
   const [lastTrackedQuery, setLastTrackedQuery] = useState('');
+  const [accessRequest, setAccessRequest] = useState<{ documentId: string; section: 'AWAL' | 'ISI' | 'AKHIR'; title: string } | null>(null);
+  const [accessNim, setAccessNim] = useState('');
+  const [accessPurpose, setAccessPurpose] = useState('');
+  const [accessType, setAccessType] = useState<'READ' | 'DOWNLOAD'>('READ');
+  const [accessError, setAccessError] = useState('');
+  const [accessLoading, setAccessLoading] = useState(false);
+  const [accessUrl, setAccessUrl] = useState('');
 
   // Toast notification for file tracking feedback
   const [toast, setToast] = useState<{ show: boolean; message: string }>({
@@ -124,6 +131,10 @@ export default function RepositoryPage() {
   };
 
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const accessTriggerRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!accessRequest) accessTriggerRef.current?.focus();
+  }, [accessRequest]);
 
   const triggerToast = (message: string) => {
     setToast({ show: true, message });
@@ -211,36 +222,36 @@ export default function RepositoryPage() {
     fetchDocuments(1, kw, selectedProdi, selectedJenis);
   };
 
-  const handleFileClick = (
-    docId: string,
-    url: string | null,
-    type: 'CLICK_AWAL' | 'CLICK_ISI' | 'CLICK_AKHIR',
-    label: string
-  ) => {
-    if (!url) {
-      handleTriggerComingSoon({
-        title: `Berkas ${label} Belum Tersedia Online`,
-        category: 'Kurasi Arsip Repositori FEB UB',
-        description:
-          'Naskah karya ilmiah ini sedang dalam proses alih media digital berkas repositori atau berstatus pembatasan embargo publikasi fakultas. Naskah cetak fisik dapat dibaca langsung di SAC Gedung F Pascasarjana Lantai 1.',
-        estimatedRelease: 'Digitalisasi Bertahap Tahun Akademik 2026',
-        alternative:
-          'Silakan kunjungi Meja Resepsionis SAC Gedung F Pascasarjana Lantai 1 dengan membawa KTM Anda untuk membaca naskah fisik di Ruang Baca Hening.',
-      });
+  const handleFileClick = (docId: string, available: boolean, section: 'AWAL' | 'ISI' | 'AKHIR', title: string) => {
+    if (!available) {
+      triggerToast('Berkas belum tersedia online.');
       return;
     }
-
-    // Open file in new tab immediately
-    window.open(url, '_blank', 'noopener,noreferrer');
-
-    // Fire tracking asynchronously
-    trackActivity({
-      documentId: docId,
-      aktifitas: type,
-    });
-
-    triggerToast(`Membuka ${label} (Aktivitas dicatat ke sistem)`);
+    accessTriggerRef.current = document.activeElement as HTMLElement;
+    setAccessRequest({ documentId: docId, section, title });
+    setAccessError('');
+    setAccessUrl('');
   };
+
+  async function requestAccess(event: React.FormEvent) {
+    event.preventDefault();
+    if (!accessRequest) return;
+    setAccessLoading(true);
+    setAccessError('');
+    try {
+      const response = await fetch('/api/repository/access', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId: accessRequest.documentId, section: accessRequest.section, nim: accessNim, purpose: accessPurpose, accessType }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || 'Akses gagal.');
+      setAccessUrl(result.url);
+      window.open(result.url, '_blank', 'noopener,noreferrer');
+      triggerToast('Akses dicatat. Jika tab baru diblokir, gunakan tautan di bawah.');
+    } catch (error) {
+      setAccessError(error instanceof Error ? error.message : 'Akses gagal.');
+    } finally { setAccessLoading(false); }
+  }
 
   const getJenisBadgeColor = (jenis: string) => {
     const j = jenis.toLowerCase();
@@ -255,6 +266,29 @@ export default function RepositoryPage() {
 
   return (
     <div className="min-h-screen bg-surface font-sans text-on-surface">
+      {accessRequest && <div className="fixed inset-0 z-[70] grid place-items-center bg-slate-950/60 p-4" onClick={() => !accessLoading && setAccessRequest(null)}>
+        <section role="dialog" aria-modal="true" aria-labelledby="repository-access-title" className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl" onClick={event => event.stopPropagation()} onKeyDown={event => {
+          if (event.key === 'Escape' && !accessLoading) setAccessRequest(null);
+          if (event.key === 'Tab') {
+            const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('input:not(:disabled), textarea, button:not(:disabled), a[href]'));
+            const first = controls[0], last = controls[controls.length - 1];
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+            else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+          }
+        }}>
+          <h2 id="repository-access-title" className="text-xl font-bold text-[#0B2546]">Verifikasi Identitas / Identity Verification</h2>
+          <p className="mt-2 text-sm text-slate-600">Verifikasi NIM diperlukan sebelum membuka resource Repository FEB-UB.</p>
+          <p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm font-semibold text-slate-800">{accessRequest.title}</p>
+          <form onSubmit={requestAccess} className="mt-5 space-y-4">
+            <label className="block text-sm font-bold text-slate-700">NIM / Student ID<input autoFocus required maxLength={32} value={accessNim} onChange={event => setAccessNim(event.target.value)} className="mt-2 w-full rounded-xl border border-slate-300 p-3 font-normal outline-none focus:ring-2 focus:ring-amber-400" placeholder="Nomor Induk Mahasiswa" /></label>
+            <label className="block text-sm font-bold text-slate-700">Tujuan / Purpose<textarea required maxLength={500} value={accessPurpose} onChange={event => setAccessPurpose(event.target.value)} rows={2} className="mt-2 w-full rounded-xl border border-slate-300 p-3 font-normal outline-none focus:ring-2 focus:ring-amber-400" placeholder="Tugas mata kuliah, referensi karya ilmiah..." /></label>
+            <fieldset><legend className="text-sm font-bold text-slate-700">Pilihan Akses / Access Type</legend><div className="mt-2 flex gap-4 text-sm"><label className="flex items-center gap-2"><input type="radio" name="accessType" checked={accessType === 'READ'} onChange={() => setAccessType('READ')} />Baca Saja / Read</label><label className="flex items-center gap-2"><input type="radio" name="accessType" checked={accessType === 'DOWNLOAD'} onChange={() => setAccessType('DOWNLOAD')} />Unduh / Download</label></div></fieldset>
+            {accessError && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{accessError}</p>}
+            {accessUrl && <a href={accessUrl} target="_blank" rel="noopener noreferrer" className="block rounded-xl bg-emerald-50 p-3 text-sm font-bold text-emerald-800">Buka berkas terverifikasi ↗</a>}
+            <div className="flex justify-end gap-3"><button type="button" disabled={accessLoading} onClick={() => setAccessRequest(null)} className="min-h-11 rounded-xl border px-4 text-sm">Batal / Cancel</button><button disabled={accessLoading} className="min-h-11 rounded-xl bg-[#0B2546] px-4 text-sm font-bold text-white disabled:opacity-50">{accessLoading ? 'Memverifikasi…' : 'Verifikasi & Buka'}</button></div>
+          </form>
+        </section>
+      </div>}
       {/* Toast Notification */}
       <AnimatePresence>
         {toast.show && (
@@ -552,13 +586,13 @@ export default function RepositoryPage() {
                         onClick={() =>
                           handleFileClick(
                             doc.id,
-                            doc.bagianAwalUrl,
-                            'CLICK_AWAL',
-                            'Bagian Awal (Abstrak)'
+                            doc.hasBagianAwal,
+                            'AWAL',
+                            doc.judul
                           )
                         }
                         className={`px-2 py-2 rounded-lg text-[10px] font-bold text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                          doc.bagianAwalUrl
+                          doc.hasBagianAwal
                             ? 'bg-surface-container hover:bg-primary-container hover:text-on-primary text-primary border border-outline-variant'
                             : 'bg-surface-container-low text-slate-400 cursor-not-allowed opacity-60'
                         }`}
@@ -573,13 +607,13 @@ export default function RepositoryPage() {
                         onClick={() =>
                           handleFileClick(
                             doc.id,
-                            doc.bagianIsiUrl,
-                            'CLICK_ISI',
-                            'Bagian Isi (Bab 1–5)'
+                            doc.hasBagianIsi,
+                            'ISI',
+                            doc.judul
                           )
                         }
                         className={`px-2 py-2 rounded-lg text-[10px] font-bold text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                          doc.bagianIsiUrl
+                          doc.hasBagianIsi
                             ? 'bg-secondary/15 hover:bg-secondary text-[#0B2546] border border-secondary/40 font-extrabold'
                             : 'bg-surface-container-low text-slate-400 cursor-not-allowed opacity-60'
                         }`}
@@ -594,13 +628,13 @@ export default function RepositoryPage() {
                         onClick={() =>
                           handleFileClick(
                             doc.id,
-                            doc.bagianAkhirUrl,
-                            'CLICK_AKHIR',
-                            'Bagian Akhir (Daftar Pustaka)'
+                            doc.hasBagianAkhir,
+                            'AKHIR',
+                            doc.judul
                           )
                         }
                         className={`px-2 py-2 rounded-lg text-[10px] font-bold text-center flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                          doc.bagianAkhirUrl
+                          doc.hasBagianAkhir
                             ? 'bg-surface-container hover:bg-primary-container hover:text-on-primary text-primary border border-outline-variant'
                             : 'bg-surface-container-low text-slate-400 cursor-not-allowed opacity-60'
                         }`}

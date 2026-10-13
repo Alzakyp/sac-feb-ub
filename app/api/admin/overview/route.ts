@@ -10,9 +10,9 @@ export async function GET() {
       where: { status: 'ACTIVE' },
     });
 
-    // 2. Hitung Pengajuan Serah Simpan Menunggu Verifikasi (PENDING)
-    const pendingDepositsCount = await prisma.depositRecord.count({
-      where: { validationDate: null },
+    // 2. Hitung Pengajuan Serah Simpan Menunggu Verifikasi (PENDING antrean web baru)
+    const pendingDepositsCount = await prisma.scientificWorkDeposit.count({
+      where: { verificationStatus: 'PENDING' },
     });
 
     // 3. Hitung Total Staf Terdaftar
@@ -35,10 +35,10 @@ export async function GET() {
       take: 5,
     });
 
-    // 7. Antrean Serah Simpan Prioritas (5 Naskah PENDING terlama)
-    const priorityDeposits = await prisma.depositRecord.findMany({
-      where: { validationDate: null },
-      orderBy: { submittedAt: 'asc' },
+    // 7. Antrean Serah Simpan Prioritas (5 Naskah PENDING pengajuan baru terlama)
+    const priorityDeposits = await prisma.scientificWorkDeposit.findMany({
+      where: { verificationStatus: 'PENDING' },
+      orderBy: { createdAt: 'asc' },
       take: 5,
     });
 
@@ -52,8 +52,11 @@ export async function GET() {
       },
     });
 
-    const todayApprovedDeposits = await prisma.depositRecord.count({
-      where: { validationDate: { gte: startOfToday } },
+    const todayApprovedDeposits = await prisma.scientificWorkDeposit.count({
+      where: {
+        verificationStatus: 'APPROVED',
+        updatedAt: { gte: startOfToday },
+      },
     });
 
     return NextResponse.json({
