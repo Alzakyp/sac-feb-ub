@@ -610,6 +610,22 @@ export default function AdminDashboardPage() {
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
+
+  async function logout() {
+    setLoggingOut(true);
+    setLogoutError('');
+    try {
+      const response = await fetch('/api/backoffice/logout', { method: 'POST' });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error('Logout gagal. Silakan coba kembali.');
+      window.location.assign('/backoffice/login');
+    } catch {
+      setLogoutError('Logout gagal. Periksa koneksi, lalu coba kembali.');
+      setLoggingOut(false);
+    }
+  }
   const [currentTime, setCurrentTime] = useState<string>('');
 
   // Clock effect
@@ -973,14 +989,18 @@ export default function AdminDashboardPage() {
                 <span className="text-[9px] text-slate-400 font-mono">Node F2-SRV • Live</span>
               </div>
             </div>
-            <Link
-              href="/"
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-              title="Kembali ke Beranda Publik"
+            <button
+              type="button"
+              onClick={logout}
+              disabled={loggingOut}
+              className="min-h-11 min-w-11 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-amber-400"
+              title={loggingOut ? 'Sedang keluar…' : 'Keluar dari akun admin'}
+              aria-label={loggingOut ? 'Sedang keluar…' : 'Keluar dari akun admin'}
             >
-              <span className="material-symbols-outlined text-[18px]">logout</span>
-            </Link>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">logout</span>
+            </button>
           </div>
+          {logoutError && <p role="alert" className="text-xs text-rose-300">{logoutError}</p>}
         </div>
       </aside>
 
