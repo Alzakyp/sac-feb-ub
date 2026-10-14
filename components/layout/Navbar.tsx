@@ -204,12 +204,12 @@ export default function Navbar({ onChatClick }: NavbarProps) {
             )}
 
             <Link
-              href="/register"
+              href="/anggota/login"
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-[#0B2546] text-white font-bold text-sm shadow-md"
             >
-              <span className="material-symbols-outlined text-[18px] text-amber-400">how_to_reg</span>
-              <span>Daftar Anggota SAC</span>
+              <span className="material-symbols-outlined text-[18px] text-amber-400">login</span>
+              <span>Masuk Anggota SAC</span>
             </Link>
           </div>
         </div>

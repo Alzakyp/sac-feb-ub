@@ -172,6 +172,7 @@ model Member {
 
 model MembershipRecord {
   id             String    @id @default(cuid())
+  passwordHash   String?
   sourceKey      String    @unique // SHA-256 row signature
   registeredAt   DateTime?
   adminName      String?

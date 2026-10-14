@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useId } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { exportDepositReceiptPDF, DepositReceiptData } from '@/lib/utils';
@@ -55,6 +55,7 @@ export default function SerahSimpanPage() {
   const [isNewStudentForm, setIsNewStudentForm] = useState(false);
 
   // Student Form Data
+  const [memberLoggedIn, setMemberLoggedIn] = useState(false);
   const [studentData, setStudentData] = useState({
     identityNumber: '',
     fullName: '',
@@ -125,6 +126,16 @@ export default function SerahSimpanPage() {
   }[lang];
 
   // Handler for NIM Verification
+  useEffect(() => {
+    fetch('/api/members/me').then(async response => {
+      if (!response.ok) return;
+      const { data } = await response.json();
+      setMemberLoggedIn(true);
+      setVerifiedMember({ identityNumber: data.nim, fullName: data.fullName, degreeLevel: 'S1', studyProgram: data.studyProgram || 'FEB UB', whatsapp: '', whatsappCountryCode: '+62', email: data.email || '', originAddress: '' });
+      setStudentData(previous => ({ ...previous, identityNumber: data.nim, fullName: data.fullName, studyProgram: data.studyProgram || previous.studyProgram, email: data.email || previous.email }));
+    }).catch(() => undefined);
+  }, []);
+
   const handleVerifyNim = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanNim = searchNim.replace(/\s+/g, '').trim();
@@ -947,6 +958,7 @@ export default function SerahSimpanPage() {
                             <input
                               type="text"
                               value={studentData.identityNumber}
+                              readOnly={memberLoggedIn}
                               disabled
                               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100 font-mono font-bold text-slate-600 cursor-not-allowed outline-none"
                             />
@@ -961,6 +973,7 @@ export default function SerahSimpanPage() {
                               type="text"
                               required
                               value={studentData.fullName}
+                              readOnly={memberLoggedIn}
                               onChange={(e) =>
                                 setStudentData({ ...studentData, fullName: e.target.value })
                               }
@@ -999,6 +1012,7 @@ export default function SerahSimpanPage() {
                             </label>
                             <select
                               value={studentData.studyProgram}
+                              disabled={memberLoggedIn}
                               onChange={(e) =>
                                 setStudentData({ ...studentData, studyProgram: e.target.value })
                               }

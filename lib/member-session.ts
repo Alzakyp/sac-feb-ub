@@ -1,0 +1,7 @@
+import { createHmac, timingSafeEqual } from 'node:crypto';
+
+export type MemberSession = { source: 'member' | 'sheet'; accountId: string; nim: string };
+const maxAge = 8 * 60 * 60 * 1000;
+function secret() { const value = (process.env.SESSION_SECRET || 'fallback-secret-for-development-32chars').trim(); if (process.env.NODE_ENV === 'production' && value.length < 32) throw new Error('SESSION_SECRET must be at least 32 characters in production'); return value; }
+export function createMemberSession(data: MemberSession) { const payload = Buffer.from(JSON.stringify({ ...data, ts: Date.now() })).toString('base64url'); return `${payload}.${createHmac('sha256', secret()).update(payload).digest('base64url')}`; }
+export function verifyMemberSession(token = ''): MemberSession | null { try { const [payload, signature, extra] = token.split('.'); if (!payload || !signature || extra) return null; const expected = createHmac('sha256', secret()).update(payload).digest('base64url'); const a = Buffer.from(signature), b = Buffer.from(expected); if (a.length !== b.length || !timingSafeEqual(a, b)) return null; const data = JSON.parse(Buffer.from(payload, 'base64url').toString()); if (!['member', 'sheet'].includes(data.source) || !data.accountId || !data.nim || Date.now() - data.ts > maxAge) return null; return { source: data.source, accountId: data.accountId, nim: data.nim }; } catch { return null; } }

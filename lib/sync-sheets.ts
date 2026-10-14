@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 import { fetchRows, type SHEETS } from './sheets';
 import { repositoryRow, membershipRow, depositRow, visitorRow } from './sheet-mappers';
 
@@ -37,10 +38,12 @@ export async function syncSheet(dataset: Dataset) {
       if (existing) { await prisma.repositoryDocument.update({ where: { id: existing.id }, data }); updated++; }
       else { await prisma.repositoryDocument.create({ data }); added++; }
     } else if (dataset === 'memberships') {
-      const data = membershipRow(row);
-      const existing = await prisma.membershipRecord.findUnique({ where: { sourceKey: data.sourceKey }, select: { id: true } });
-      if (existing) { await prisma.membershipRecord.update({ where: { id: existing.id }, data }); updated++; }
-      else { await prisma.membershipRecord.create({ data }); added++; }
+      const { password, ...data } = membershipRow(row);
+      const existing = await prisma.membershipRecord.findUnique({ where: { sourceKey: data.sourceKey }, select: { id: true, passwordHash: true } });
+      // ponytail: existing hashes are retained; reimport a changed Sheet password only through an explicit reset workflow.
+      const passwordHash = password && !existing?.passwordHash ? await bcrypt.hash(password, 10) : undefined;
+      if (existing) { await prisma.membershipRecord.update({ where: { id: existing.id }, data: { ...data, ...(passwordHash ? { passwordHash } : {}) } }); updated++; }
+      else { await prisma.membershipRecord.create({ data: { ...data, passwordHash: passwordHash || null } }); added++; }
     } else if (dataset === 'deposits') {
       const data = depositRow(row);
       const existing = await prisma.depositRecord.findUnique({ where: { sourceKey: data.sourceKey }, select: { id: true } });

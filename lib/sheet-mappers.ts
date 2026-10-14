@@ -6,7 +6,7 @@ export function repositoryRow(row: SheetRow) {
 }
 
 export function membershipRow(row: SheetRow) {
-  return { sourceKey: key(row.Tanggal, row.Jam, row.NIM, row.Email), registeredAt: date(`${text(row.Tanggal) || ''} ${text(row.Jam) || ''}`), adminName: text(row.Admin), memberType: text(row['Jenis Anggota']) || 'Mahasiswa', nim: text(row.NIM) || '-', fullName: text(row.Nama) || '-', studyProgram: text(row['Program Studi']), whatsapp: text(row.Whatsapp), email: text(row.Email), mailingAddress: text(row['Alamat Surat']), identityType: text(row.Identitas), identityPhoto: url(row['Foto Identitas']), selfiePhoto: url(row['Foto Selfie']), status: text(row.Status) || 'ACTIVE', activeDate: date(row['Tanggal Aktif']), validUntil: date(row['Berlaku Sampai']) };
+  return { password: text(row.Password), sourceKey: key(row.Tanggal, row.Jam, row.NIM, row.Email), registeredAt: date(`${text(row.Tanggal) || ''} ${text(row.Jam) || ''}`), adminName: text(row.Admin), memberType: text(row['Jenis Anggota']) || 'Mahasiswa', nim: text(row.NIM) || '-', fullName: text(row.Nama) || '-', studyProgram: text(row['Program Studi']), whatsapp: text(row.Whatsapp), email: text(row.Email), mailingAddress: text(row['Alamat Surat']), identityType: text(row.Identitas), identityPhoto: url(row['Foto Identitas']), selfiePhoto: url(row['Foto Selfie']), status: text(row.Status) || 'ACTIVE', activeDate: date(row['Tanggal Aktif']), validUntil: date(row['Berlaku Sampai']) };
 }
 
 export function depositRow(row: SheetRow) {

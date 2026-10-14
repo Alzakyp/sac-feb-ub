@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { verifyMemberSession } from '@/lib/member-session';
 import fs from 'fs';
 import path from 'path';
 
@@ -88,14 +89,18 @@ export async function POST(request: NextRequest) {
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
 
-      const rawIdentity = String(formData.get('identityNumber') || '').trim();
+      const memberSession = verifyMemberSession(request.cookies.get('sac_member_session')?.value);
+      const profile = memberSession ? (memberSession.source === 'member'
+        ? await prisma.member.findUnique({ where: { id: memberSession.accountId }, select: { nim: true, fullName: true, studyProgram: true, email: true } })
+        : await prisma.membershipRecord.findUnique({ where: { id: memberSession.accountId }, select: { nim: true, fullName: true, studyProgram: true, email: true } })) : null;
+      const rawIdentity = profile?.nim || String(formData.get('identityNumber') || '').trim();
       const cleanedIdentityNumber = rawIdentity.replace(/\s+/g, '');
-      const fullName = String(formData.get('fullName') || '').trim();
+      const fullName = profile?.fullName || String(formData.get('fullName') || '').trim();
       const degreeLevel = String(formData.get('degreeLevel') || '').trim();
-      const studyProgram = formData.get('studyProgram') ? String(formData.get('studyProgram')) : null;
+      const studyProgram = profile?.studyProgram || (formData.get('studyProgram') ? String(formData.get('studyProgram')) : null);
       const whatsappCountryCode = String(formData.get('whatsappCountryCode') || '+62').trim();
       const whatsappNumber = String(formData.get('whatsappNumber') || '').trim();
-      const email = String(formData.get('email') || '').toLowerCase().trim();
+      const email = profile?.email || String(formData.get('email') || '').toLowerCase().trim();
       const mailingAddress = String(formData.get('mailingAddress') || '').trim();
       const titleId = String(formData.get('titleId') || '').trim();
       const titleEn = formData.get('titleEn') ? String(formData.get('titleEn')).trim() : null;
