@@ -323,6 +323,11 @@ model ScientificWorkDeposit {
   verificationStatus  String    @default("PENDING") // PENDING, APPROVED, REVISION_NEEDED
   revisionNotes       String?   @db.Text
   certificateUrl      String?   @db.Text
+  proofNumber         String?   @unique
+  proofIssuedAt       DateTime?
+  plagiarismScore     String?
+  completeness        String?
+  proofVersion        Int       @default(0)
   verifiedAt          DateTime?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt

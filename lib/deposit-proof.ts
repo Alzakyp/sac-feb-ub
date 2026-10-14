@@ -1,0 +1,12 @@
+export function escapeHtml(value: unknown) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!));
+}
+export function proofNumber(depositNumber: string, date: Date) {
+  return `${depositNumber}/KIM.02/SAC.1/TH.${date.getFullYear()}`;
+}
+export function proofHtml(data: { proofNumber: string | null; fullName: string; identityNumber: string; studyProgram: string | null; titleId: string; createdAt: Date; verifiedAt: Date | null; plagiarismScore: string | null; completeness: string | null }) {
+  const e = escapeHtml;
+  const date = (value: Date | null) => value ? value.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) : '-';
+  // ponytail: printable HTML; add server-generated PDF when signed template assets are available.
+  return `<!doctype html><html lang="id"><meta charset="utf-8"><title>Bukti Serah Simpan ${e(data.proofNumber)}</title><style>body{font:14px Arial,sans-serif;color:#0b2546;max-width:720px;margin:40px auto;padding:24px}header{border-bottom:3px solid #0b2546;padding-bottom:16px}h1{text-align:center;font-size:22px}dl{display:block}dt{font-weight:bold;margin-top:12px}dd{margin:4px 0}table{width:100%;border-collapse:collapse}td,th{border:1px solid #bbb;padding:12px}button{padding:12px;background:#0b2546;color:white;border:0;border-radius:8px}@media print{button{display:none}body{margin:0;max-width:none}}</style><header><b>FAKULTAS EKONOMI DAN BISNIS UNIVERSITAS BRAWIJAYA</b><p>SELF ACCESS CENTRE</p></header><h1>BUKTI SERAH SIMPAN<br>KARYA ILMIAH MAHASISWA</h1><p style="text-align:center">No. ${e(data.proofNumber)}</p><p>Self Access Centre (SAC) Fakultas Ekonomi dan Bisnis Universitas Brawijaya telah menerima karya ilmiah dari:</p><dl><dt>Nama</dt><dd>${e(data.fullName)}</dd><dt>NIM</dt><dd>${e(data.identityNumber)}</dd><dt>Program studi</dt><dd>${e(data.studyProgram)}</dd><dt>Tanggal unggah</dt><dd>${e(date(data.createdAt))}</dd><dt>Judul</dt><dd>${e(data.titleId)}</dd></dl><p>Telah dilakukan pemeriksaan di SAC FEB UB pada ${e(date(data.verifiedAt))} dengan hasil:</p><table><tr><th>Similarity</th><th>Kelengkapan</th></tr><tr><td>${e(data.plagiarismScore || 'Not Checked')}</td><td>${e(data.completeness || 'Lengkap')}</td></tr></table><p>Demikian bukti serah simpan ini dibuat untuk digunakan sebagaimana mestinya.</p><button onclick="window.print()">Cetak / Simpan PDF</button></html>`;
+}

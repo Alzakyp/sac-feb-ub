@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifySession } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  if (!verifySession(request.cookies.get('sac_session')?.value || '')) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status') || 'all';
