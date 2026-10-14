@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
           hardcopySubmitted: true,
           revisionNotes: true,
           certificateUrl: true,
+          proofNumber: true,
           createdAt: true,
           verifiedAt: true,
         },
@@ -62,7 +63,8 @@ export async function POST(req: NextRequest) {
         status: item.verificationStatus,
         hardcopy: item.hardcopySubmitted,
         notes: item.revisionNotes,
-        downloadUrl: item.certificateUrl,
+        downloadUrl: item.verificationStatus === 'PROOF_ISSUED' ? `/api/serah-simpan/proof/${item.id}` : item.certificateUrl,
+        proofNumber: item.proofNumber,
         date: item.createdAt,
       })),
       ...archive.map((item) => ({

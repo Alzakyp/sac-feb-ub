@@ -23,8 +23,14 @@ export async function GET(req: NextRequest, context: { params: Promise<{ dataset
   }
   if (dataset === 'deposits') {
     const where = { ...(q ? { OR: [{ nim: { contains: q } }, { fullName: { contains: q } }, { title: { contains: q } }] } : {}), ...(Object.keys(range).length ? { submittedAt: range } : {}) }; 
-    const [total, data] = await Promise.all([prisma.depositRecord.count({ where }), prisma.depositRecord.findMany({ where, skip, take: limit, orderBy: { submittedAt: 'desc' } })]);
-    return NextResponse.json({ success: true, total, page, limit, data });
+    const currentWhere = { verificationStatus: 'PROOF_ISSUED', ...(q ? { OR: [{ identityNumber: { contains: q } }, { fullName: { contains: q } }, { titleId: { contains: q } }, { proofNumber: { contains: q } }] } : {}), ...(Object.keys(range).length ? { proofIssuedAt: range } : {}) };
+    const [archiveTotal, currentTotal, archive, current] = await Promise.all([
+      prisma.depositRecord.count({ where }), prisma.scientificWorkDeposit.count({ where: currentWhere }),
+      prisma.depositRecord.findMany({ where, take: skip + limit, orderBy: { submittedAt: 'desc' } }),
+      prisma.scientificWorkDeposit.findMany({ where: currentWhere, take: skip + limit, orderBy: { proofIssuedAt: 'desc' }, select: { id: true, fullName: true, identityNumber: true, studyProgram: true, workType: true, titleId: true, proofNumber: true, proofIssuedAt: true, plagiarismScore: true } }),
+    ]);
+    const data = [...archive.map(row => ({ ...row, source: 'SHEET' })), ...current.map(row => ({ ...row, source: 'APLIKASI', nim: row.identityNumber, title: row.titleId, submittedAt: row.proofIssuedAt, downloadProofUrl: `/api/serah-simpan/proof/${row.id}` }))].sort((a, b) => new Date(b.submittedAt || 0).getTime() - new Date(a.submittedAt || 0).getTime()).slice(skip, skip + limit);
+    return NextResponse.json({ success: true, total: archiveTotal + currentTotal, page, limit, data });
   }
   if (dataset === 'visitors') {
     const where = { ...(q ? { OR: [{ identityNumber: { contains: q } }, { fullName: { contains: q } }, { studyProgram: { contains: q } }] } : {}), ...(Object.keys(range).length ? { checkInTime: range } : {}) }; 

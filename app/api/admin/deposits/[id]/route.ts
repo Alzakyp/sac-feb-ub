@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { validateDepositDecision } from '@/lib/deposit-decision';
+import { verifySession } from '@/lib/session';
 
 const updateDepositSchema = z.object({
   verificationStatus: z.enum(['PENDING', 'APPROVED', 'REVISION_NEEDED', 'REJECTED']),
@@ -13,6 +14,7 @@ export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  if (!verifySession(request.cookies.get('sac_session')?.value || '')) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   try {
     const { id } = await context.params;
 
@@ -50,6 +52,7 @@ export async function PATCH(
       );
     }
 
+    if (existing.verificationStatus === 'PROOF_ISSUED') return NextResponse.json({ success: false, error: 'Bukti sudah terbit; keputusan tidak dapat diubah.' }, { status: 409 });
     const decisionError = validateDepositDecision({
       status: verificationStatus,
       notes: revisionNotes || '',
