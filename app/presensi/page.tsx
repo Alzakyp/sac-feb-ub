@@ -141,7 +141,6 @@ export default function PresensiPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-sac-network': 'local-sac', // Internal kiosk identifier
         },
         body: JSON.stringify({ identityNumber: trimmedNIM }),
       });
@@ -186,7 +185,7 @@ export default function PresensiPage() {
         type: 'ERROR',
         message:
           err.message ||
-          'Koneksi server gagal. Pastikan terhubung ke jaringan lokal SAC FEB UB.',
+          'Koneksi server gagal. Periksa sambungan internet lalu coba lagi.',
       });
     } finally {
       setLoading(false);

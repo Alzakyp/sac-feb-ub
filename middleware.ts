@@ -34,11 +34,11 @@ export async function middleware(request: NextRequest) {
       request.headers.get('x-real-ip') ||
       request.headers.get('cf-connecting-ip') ||
       (request as any).ip ||
-      '127.0.0.1';
+      '';
 
     const allowedConfig =
       process.env.SAC_ALLOWED_IPS ||
-      '127.0.0.1,::1,localhost,::ffff:127.0.0.1,10.22.,192.168.';
+      '127.0.0.1,::1,localhost,::ffff:127.0.0.1,10.22.';
     const allowedList = allowedConfig
       .split(',')
       .map((s) => s.trim())
@@ -56,9 +56,7 @@ export async function middleware(request: NextRequest) {
       return clientIp === allowed || clientIp.startsWith(allowed);
     });
 
-    const internalBypass = request.headers.get('x-sac-network') === 'local-sac';
-
-    if (!isAllowed && !internalBypass) {
+    if (!isAllowed) {
       // Jika request API, kembalikan JSON 403
       if (pathname.startsWith('/api/')) {
         return NextResponse.json(
