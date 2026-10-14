@@ -447,6 +447,7 @@ function StaffManagementPanel() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('PETUGAS');
   const [error, setError] = useState('');
+  const [showCreate, setShowCreate] = useState(false);
   const [selfRole, setSelfRole] = useState('ADMIN');
   const [editStaff, setEditStaff] = useState<any | null>(null);
   const [resetId, setResetId] = useState<string | null>(null);
@@ -478,6 +479,7 @@ function StaffManagementPanel() {
     setName('');
     setEmail('');
     setPassword('');
+    setShowCreate(false);
     load();
   }
 
@@ -513,49 +515,7 @@ function StaffManagementPanel() {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={create} className="rounded-2xl bg-white p-5 border border-slate-200 shadow-sm space-y-3">
-        <h2 className="font-bold text-sm text-[#0B2546]">Tambah Staf Baru</h2>
-        {error && <p className="text-xs text-red-600 font-semibold">{error}</p>}
-        <div className="grid gap-3 sm:grid-cols-4">
-          <input
-            required
-            placeholder="Nama lengkap"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="rounded-xl border border-slate-300 p-2 text-xs"
-          />
-          <input
-            required
-            type="email"
-            placeholder="Email UB (nama@ub.ac.id)"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="rounded-xl border border-slate-300 p-2 text-xs"
-          />
-          <input
-            required
-            type="password"
-            placeholder="Password (min 8 karakter)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="rounded-xl border border-slate-300 p-2 text-xs"
-          />
-          <div className="flex gap-2">
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="rounded-xl border border-slate-300 p-2 text-xs bg-white w-full"
-            >
-              <option value="PETUGAS">PETUGAS</option>
-              <option value="ADMIN">ADMIN</option>
-              {selfRole === 'PROGRAMMER' && <option value="PROGRAMMER">PROGRAMMER</option>}
-            </select>
-            <button className="rounded-xl bg-[#0B2546] px-4 py-2 text-xs font-semibold text-white whitespace-nowrap">
-              Simpan
-            </button>
-          </div>
-        </div>
-      </form>
+      <div className="flex justify-end"><button onClick={() => { setError(''); setShowCreate(true); }} className="min-h-11 rounded-xl bg-[#0B2546] px-4 text-sm font-bold text-white">Tambah Staf</button></div>
 
       <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
         <table className="w-full text-left text-xs">
@@ -620,6 +580,7 @@ function StaffManagementPanel() {
           </tbody>
         </table>
       </div>
+      {showCreate && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4"><form onSubmit={create} className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-2xl"><h3 className="text-lg font-bold text-[#0B2546]">Tambah Staf Baru</h3>{error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}<label className="block text-sm font-bold">Nama lengkap<input required autoFocus value={name} onChange={e => setName(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Email<input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Password<input required minLength={8} type="password" value={password} onChange={e => setPassword(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Role<select value={role} onChange={e => setRole(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3"><option value="PETUGAS">PETUGAS</option><option value="ADMIN">ADMIN</option>{selfRole === 'PROGRAMMER' && <option value="PROGRAMMER">PROGRAMMER</option>}</select></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setShowCreate(false)} className="min-h-11 rounded-xl border px-4">Batal</button><button className="min-h-11 rounded-xl bg-[#0B2546] px-4 font-bold text-white">Simpan</button></div></form></div>}
       {editStaff && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><form onSubmit={async event => { event.preventDefault(); if (editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER') return; const response = await fetch(`/api/backoffice/staff/${editStaff.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: editStaff.name, role: editStaff.role }) }); const result = await response.json(); if (!response.ok) { setError(result.error || 'Simpan gagal.'); return; } setEditStaff(null); load(); }} className="w-full max-w-sm space-y-4 rounded-2xl bg-white p-6 shadow-xl"><h3 className="text-lg font-bold text-[#0B2546]">Detail / Edit Staf</h3><p className="text-xs text-slate-500">{editStaff.email}</p>{error && <p role="alert" className="text-sm text-rose-700">{error}</p>}<label className="block text-sm font-bold">Nama<input required value={editStaff.name} disabled={editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER'} onChange={event => setEditStaff({ ...editStaff, name: event.target.value })} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Role<select value={editStaff.role} disabled={editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER'} onChange={event => setEditStaff({ ...editStaff, role: event.target.value })} className="mt-1 min-h-11 w-full rounded-xl border p-3"><option value="PETUGAS">PETUGAS</option><option value="ADMIN">ADMIN</option>{selfRole === 'PROGRAMMER' && <option value="PROGRAMMER">PROGRAMMER</option>}</select></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setEditStaff(null)} className="min-h-11 rounded-xl border px-4">Tutup</button>{(editStaff.role !== 'PROGRAMMER' || selfRole === 'PROGRAMMER') && <button className="min-h-11 rounded-xl bg-[#0B2546] px-4 font-bold text-white">Simpan</button>}</div></form></div>}
       {resetId && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><form onSubmit={(e) => { e.preventDefault(); reset(resetId); }} className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"><h3 className="font-bold text-[#0B2546]">Reset Password Staf</h3><input required minLength={8} type="password" value={resetPassword} onChange={(e) => setResetPassword(e.target.value)} placeholder="Password baru (min. 8 karakter)" className="mt-4 w-full rounded-xl border p-3 text-sm"/><div className="mt-4 flex justify-end gap-2"><button type="button" onClick={() => setResetId(null)} className="rounded-lg border px-3 py-2 text-xs">Batal</button><button className="rounded-lg bg-[#0B2546] px-3 py-2 text-xs font-bold text-white">Simpan</button></div></form></div>}
     </div>
