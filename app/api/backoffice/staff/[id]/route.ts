@@ -30,6 +30,7 @@ export async function PATCH(request: NextRequest, { params }: Context) {
     if (body.password.length < 8) return NextResponse.json({ success: false, error: 'Password minimal 8 karakter.' }, { status: 400 });
     data.passwordHash = await bcrypt.hash(body.password, 10);
   }
+  if (target.role === 'ADMIN' && target.active && (data.active === false || (data.role && data.role !== 'ADMIN')) && await prisma.staff.count({ where: { role: 'ADMIN', active: true } }) <= 1) return NextResponse.json({ success: false, error: 'Admin aktif terakhir tidak dapat dinonaktifkan atau diturunkan rolenya.' }, { status: 400 });
   const staff = await prisma.staff.update({ where: { id }, data, select: { id: true, name: true, email: true, role: true, active: true, createdAt: true } }).catch(() => null);
   if (!staff) return NextResponse.json({ success: false, error: 'Staf tidak ditemukan.' }, { status: 404 });
   return NextResponse.json({ success: true, data: staff });
