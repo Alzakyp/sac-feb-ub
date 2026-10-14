@@ -29,12 +29,13 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/presensi') || pathname.startsWith('/api/presensi')) {
     // Ambil client IP dari header umum reverse proxy / edge
     const forwardedFor = request.headers.get('x-forwarded-for');
-    const clientIp =
+    const clientIp = (
       (forwardedFor ? forwardedFor.split(',')[0].trim() : null) ||
       request.headers.get('x-real-ip') ||
       request.headers.get('cf-connecting-ip') ||
       (request as any).ip ||
-      '';
+      ''
+    ).replace(/^::ffff:(?=\d+\.\d+\.\d+\.\d+$)/i, '');
 
     const allowedConfig =
       process.env.SAC_ALLOWED_IPS ||
