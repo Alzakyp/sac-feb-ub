@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 
@@ -232,15 +231,7 @@ export default function PcaPage() {
               </p>
             </div>
 
-            <div className="shrink-0 flex flex-col gap-2 w-full md:w-auto">
-              <Link
-                href="/presensi"
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#0B2546] hover:bg-slate-900 text-white font-bold text-xs shadow-sm transition-colors"
-              >
-                <span className="material-symbols-outlined text-[16px] text-amber-400">qr_code_scanner</span>
-                <span>Kios Presensi Ruangan</span>
-              </Link>
-            </div>
+
           </div>
         </section>
       </main>

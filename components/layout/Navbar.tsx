@@ -90,7 +90,7 @@ export default function Navbar({ onChatClick }: NavbarProps) {
               </Link>
               <div className="invisible absolute right-0 top-full z-50 w-56 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"><div className="rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
                 <Link href="/lapor" className="block rounded-lg px-3 py-3 text-xs font-semibold text-slate-700 hover:bg-amber-50 focus:bg-amber-50">Lapor Kendala</Link>
-                <Link href="/pca" className="block rounded-lg px-3 py-3 text-xs font-semibold text-slate-700 hover:bg-amber-50 focus:bg-amber-50">Layanan Disabilitas (PCA)</Link>
+                <Link href="/pca" className="block rounded-lg px-3 py-3 text-xs font-semibold text-slate-700 hover:bg-amber-50 focus:bg-amber-50">Printer Corner</Link>
                 <Link href="/statistik" className="block rounded-lg px-3 py-3 text-xs font-semibold text-slate-700 hover:bg-amber-50 focus:bg-amber-50">Statistik SAC</Link>
               </div></div>
             </div>;
@@ -193,7 +193,7 @@ export default function Navbar({ onChatClick }: NavbarProps) {
               if (item.href === '/lapor') return <div key={item.href} className="rounded-lg bg-slate-50 p-2">
                 <span className="block px-2 py-1 text-xs font-bold uppercase tracking-wide text-slate-500">Bantuan & Informasi</span>
                 <Link href="/lapor" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-amber-50">Lapor Kendala</Link>
-                <Link href="/pca" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-amber-50">Layanan Disabilitas (PCA)</Link>
+                <Link href="/pca" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-amber-50">Printer Corner</Link>
                 <Link href="/statistik" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-amber-50">Statistik SAC</Link>
               </div>;
               return (
