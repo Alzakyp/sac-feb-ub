@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { UAParser } from 'ua-parser-js';
 import { prisma } from '@/lib/prisma';
 import { getRepositorySectionUrl, validateRepositoryAccess } from '@/lib/repository-access';
+import { memberProfile } from '@/lib/member-profile';
 
 const noStore = { 'Cache-Control': 'no-store' };
 
@@ -9,7 +10,9 @@ export async function POST(request: NextRequest) {
   const input = validateRepositoryAccess(await request.json().catch(() => null));
   if (!input) return NextResponse.json({ success: false, error: 'Data akses tidak valid.' }, { status: 400, headers: noStore });
 
-  const student = await prisma.student.findUnique({ where: { nim: input.nim } });
+  const profile = await memberProfile(request.cookies.get('sac_member_session')?.value);
+  const nimToVerify = profile?.nim || input.nim;
+  const student = await prisma.student.findUnique({ where: { nim: nimToVerify } });
   if (!student) return NextResponse.json({ success: false, error: 'Anda tidak mendapatkan akses ini.' }, { status: 403, headers: noStore });
 
   const document = await prisma.repositoryDocument.findUnique({

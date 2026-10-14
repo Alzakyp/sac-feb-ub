@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -10,7 +10,12 @@ interface NavbarProps {
 
 export default function Navbar({ onChatClick }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [memberLoggedIn, setMemberLoggedIn] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    fetch('/api/members/me').then(response => setMemberLoggedIn(response.ok)).catch(() => setMemberLoggedIn(false));
+  }, [pathname]);
 
   const navLinks = [
     { href: '/', label: 'Beranda' },
@@ -79,6 +84,16 @@ export default function Navbar({ onChatClick }: NavbarProps) {
                 <Link href="/serah-simpan/lacak" className="block rounded-lg px-3 py-3 text-xs font-semibold text-slate-700 hover:bg-amber-50 focus:bg-amber-50">Lacak Progres & Download Bukti</Link>
               </div></div>
             </div>;
+            if (item.href === '/lapor') return <div key={item.href} className="group relative">
+              <Link href="/lapor" className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${active ? 'bg-slate-100 font-bold text-[#0B2546]' : 'text-slate-600 hover:bg-slate-100/70 hover:text-[#0B2546]'}`} aria-haspopup="true">
+                Bantuan <span aria-hidden="true" className="material-symbols-outlined text-base">expand_more</span>
+              </Link>
+              <div className="invisible absolute right-0 top-full z-50 w-56 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"><div className="rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
+                <Link href="/lapor" className="block rounded-lg px-3 py-3 text-xs font-semibold text-slate-700 hover:bg-amber-50 focus:bg-amber-50">Lapor Kendala</Link>
+                <Link href="/pca" className="block rounded-lg px-3 py-3 text-xs font-semibold text-slate-700 hover:bg-amber-50 focus:bg-amber-50">Layanan Disabilitas (PCA)</Link>
+                <Link href="/statistik" className="block rounded-lg px-3 py-3 text-xs font-semibold text-slate-700 hover:bg-amber-50 focus:bg-amber-50">Statistik SAC</Link>
+              </div></div>
+            </div>;
             return (
               <Link
                 key={item.href}
@@ -98,6 +113,22 @@ export default function Navbar({ onChatClick }: NavbarProps) {
 
         {/* Right Action Buttons - visible on xl (>= 1280px) */}
         <div className="hidden xl:flex items-center gap-2.5 shrink-0">
+          <div className="group relative">
+            <Link
+              href="/anggota/login"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0B2546] hover:bg-[#14365d] text-white text-xs font-bold transition-all shadow-2xs whitespace-nowrap cursor-pointer active:scale-95"
+              aria-haspopup="true"
+            >
+              <span className="material-symbols-outlined text-[16px] text-amber-400">person</span>
+              <span>Keanggotaan</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-base">expand_more</span>
+            </Link>
+            <div className="invisible absolute right-0 top-full z-50 w-56 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+              <div className="rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
+                {memberLoggedIn ? <Link href="/anggota" className="block rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-700 hover:bg-amber-50 focus:bg-amber-50">Dashboard Personal</Link> : <><Link href="/anggota/login" className="block rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-700 hover:bg-amber-50 focus:bg-amber-50">Masuk Akun Anggota</Link><Link href="/pendaftaran" className="block rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-700 hover:bg-amber-50 focus:bg-amber-50">Pendaftaran Anggota Baru</Link></>} 
+              </div>
+            </div>
+          </div>
           {onChatClick ? (
             <button
               type="button"
@@ -159,6 +190,12 @@ export default function Navbar({ onChatClick }: NavbarProps) {
                 <Link href="/serah-simpan" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-amber-50">Pengajuan Serah Simpan</Link>
                 <Link href="/serah-simpan/lacak" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-amber-50">Lacak Progres & Download Bukti</Link>
               </div>;
+              if (item.href === '/lapor') return <div key={item.href} className="rounded-lg bg-slate-50 p-2">
+                <span className="block px-2 py-1 text-xs font-bold uppercase tracking-wide text-slate-500">Bantuan & Informasi</span>
+                <Link href="/lapor" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-amber-50">Lapor Kendala</Link>
+                <Link href="/pca" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-amber-50">Layanan Disabilitas (PCA)</Link>
+                <Link href="/statistik" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-amber-50">Statistik SAC</Link>
+              </div>;
               return (
                 <Link
                   key={item.href}
@@ -203,14 +240,10 @@ export default function Navbar({ onChatClick }: NavbarProps) {
               </Link>
             )}
 
-            <Link
-              href="/anggota/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-[#0B2546] text-white font-bold text-sm shadow-md"
-            >
-              <span className="material-symbols-outlined text-[18px] text-amber-400">login</span>
-              <span>Masuk Anggota SAC</span>
-            </Link>
+            <div className="rounded-lg bg-slate-50 p-2">
+              <span className="block px-2 py-1 text-xs font-bold uppercase tracking-wide text-slate-500">Layanan Anggota</span>
+              {memberLoggedIn ? <Link href="/anggota" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-amber-50">Dashboard Personal</Link> : <><Link href="/anggota/login" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-amber-50">Masuk Akun Anggota</Link><Link href="/pendaftaran" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-amber-50">Pendaftaran Anggota Baru</Link></>}
+            </div>
           </div>
         </div>
       )}

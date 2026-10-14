@@ -109,6 +109,7 @@ export default function RepositoryPage() {
   const [lastTrackedQuery, setLastTrackedQuery] = useState('');
   const [accessRequest, setAccessRequest] = useState<{ documentId: string; section: 'AWAL' | 'ISI' | 'AKHIR'; title: string } | null>(null);
   const [accessNim, setAccessNim] = useState('');
+  const [memberLoggedIn, setMemberLoggedIn] = useState(false);
   const [accessPurpose, setAccessPurpose] = useState('');
   const [accessType, setAccessType] = useState<'READ' | 'DOWNLOAD'>('READ');
   const [accessError, setAccessError] = useState('');
@@ -132,6 +133,14 @@ export default function RepositoryPage() {
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const accessTriggerRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    fetch('/api/members/me').then(async response => {
+      if (!response.ok) return;
+      const result = await response.json();
+      setAccessNim(result.data.nim);
+      setMemberLoggedIn(true);
+    }).catch(() => undefined);
+  }, []);
   useEffect(() => {
     if (!accessRequest) accessTriggerRef.current?.focus();
   }, [accessRequest]);
@@ -273,7 +282,7 @@ export default function RepositoryPage() {
         }}>
           <header className="bg-[#0B2546] px-6 py-6 text-white sm:px-7"><div className="flex items-center gap-4"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-400 text-[#0B2546] shadow-sm"><span className="material-symbols-outlined text-[26px] leading-none" aria-hidden="true">verified_user</span></span><div className="min-w-0"><p className="text-[11px] font-bold uppercase tracking-[.16em] text-amber-300">Repository FEB-UB</p><h2 id="repository-access-title" className="mt-1 text-xl font-extrabold">Verifikasi Identitas</h2><p className="mt-1 text-sm text-slate-200">Identity verification before resource access.</p></div></div></header>
           <form onSubmit={requestAccess} className="space-y-6 p-6 sm:p-7"><div className="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Dokumen dipilih</p><p className="mt-1 line-clamp-3 text-sm font-bold leading-6 text-[#0B2546]" title={accessRequest.title}>{accessRequest.title}</p><p className="mt-2 text-xs text-slate-500">Verifikasi NIM diperlukan sebelum membuka berkas.</p></div>
-            <label className="block text-sm font-bold text-slate-800">NIM <span className="font-normal text-slate-500">/ Student ID</span><input autoFocus required maxLength={32} value={accessNim} onChange={event => setAccessNim(event.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 font-normal outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100" placeholder="Nomor Induk Mahasiswa" /></label>
+            <label className="block text-sm font-bold text-slate-800">NIM <span className="font-normal text-slate-500">/ Student ID</span><input autoFocus required maxLength={32} value={accessNim} readOnly={memberLoggedIn} onChange={event => setAccessNim(event.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 font-normal outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100" placeholder="Nomor Induk Mahasiswa" /></label>
             <label className="block text-sm font-bold text-slate-800">Tujuan <span className="font-normal text-slate-500">/ Purpose</span><textarea required maxLength={500} value={accessPurpose} onChange={event => setAccessPurpose(event.target.value)} rows={2} className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-3 font-normal outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100" placeholder="Contoh: referensi penulisan skripsi atau tugas mata kuliah" /></label>
             <fieldset><legend className="text-sm font-bold text-slate-800">Pilihan akses <span className="font-normal text-slate-500">/ Access type</span></legend><div className="mt-3 grid gap-3 sm:grid-cols-2"><label className={`flex min-h-28 cursor-pointer items-center gap-4 rounded-2xl border p-4 transition ${accessType === 'READ' ? 'border-[#0B2546] bg-blue-50 ring-1 ring-[#0B2546]' : 'border-slate-200 hover:border-slate-400'}`}><input type="radio" className="sr-only" name="accessType" checked={accessType === 'READ'} onChange={() => setAccessType('READ')} /><span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#0B2546] text-white"><span className="material-symbols-outlined text-[26px] leading-none" aria-hidden="true">menu_book</span></span><span className="min-w-0"><span className="block font-bold text-slate-900">Baca saja</span><span className="mt-1 block text-xs text-slate-500">Read in browser</span></span></label><label className={`flex min-h-28 cursor-pointer items-center gap-4 rounded-2xl border p-4 transition ${accessType === 'DOWNLOAD' ? 'border-amber-500 bg-amber-50 ring-1 ring-amber-500' : 'border-slate-200 hover:border-slate-400'}`}><input type="radio" className="sr-only" name="accessType" checked={accessType === 'DOWNLOAD'} onChange={() => setAccessType('DOWNLOAD')} /><span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-amber-100 text-amber-800"><span className="material-symbols-outlined text-[26px] leading-none" aria-hidden="true">download</span></span><span className="min-w-0"><span className="block font-bold text-slate-900">Unduh</span><span className="mt-1 block text-xs text-slate-500">Download document</span></span></label></div></fieldset>
             {accessError && <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900"><p className="font-bold">{accessError}</p><p className="mt-1 text-xs">Periksa kembali NIM Anda. Jika tetap bermasalah, hubungi petugas SAC.</p></div>}
