@@ -23,7 +23,9 @@ type ProgressItem = {
 const statusLabels: Record<string, string> = {
   PENDING: 'Menunggu pemeriksaan',
   REVISION_NEEDED: 'Perlu perbaikan',
-  APPROVED: 'Selesai',
+  APPROVED: 'Disetujui, menunggu bukti',
+  RESUBMITTED: 'Revisi diajukan ulang',
+  PROOF_ISSUED: 'Bukti terbit',
   REJECTED: 'Ditolak',
 };
 

@@ -1387,7 +1387,7 @@ export default function AdminDashboardPage() {
                   >
                     <option value="all">Semua Status ({depositCounts.total})</option>
                     <option value="PENDING">Menunggu Verifikasi ({depositCounts.pending})</option>
-                    <option value="APPROVED">Disetujui / Approved ({depositCounts.approved})</option>
+                    <option value="APPROVED">Disetujui, menunggu bukti ({depositCounts.approved})</option>
                     <option value="REVISION_NEEDED">
                       Perlu Revisi ({depositCounts.revision})
                     </option>
