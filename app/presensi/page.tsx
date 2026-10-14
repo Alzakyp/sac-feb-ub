@@ -19,6 +19,7 @@ interface StatusNotification {
   type: 'CHECK_IN' | 'CHECK_OUT' | 'STILL_IN' | 'ERROR';
   message: string;
   data?: PresensiResponseData;
+  registerUrl?: string;
 }
 
 export default function PresensiPage() {
@@ -151,6 +152,7 @@ export default function PresensiPage() {
         setNotification({
           type: 'ERROR',
           message: result.error || 'Terjadi kesalahan saat memproses presensi.',
+          registerUrl: result.code === 'NOT_REGISTERED' ? result.registerUrl : undefined,
         });
       } else {
         setNotification({
@@ -436,6 +438,12 @@ export default function PresensiPage() {
                       <p className="text-xs sm:text-sm font-semibold leading-relaxed">
                         {notification.message}
                       </p>
+                      {notification.registerUrl && (
+                        <p className="mt-3 text-xs sm:text-sm">
+                          Jika Anda mahasiswa FEB UB, hubungi petugas SAC untuk memeriksa data master mahasiswa. Jika belum menjadi anggota,{' '}
+                          <Link href={notification.registerUrl} className="font-bold underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2">daftar anggota SAC</Link> terlebih dahulu. Presensi tersedia setelah keanggotaan disetujui.
+                        </p>
+                      )}
 
                       {/* Details Box */}
                       {notification.data && (

@@ -25,9 +25,24 @@ export async function POST(request: Request) {
       );
     }
 
-    // Data keanggotaan telah dihapus; presensi memakai identitas input pengguna.
-    const fullName = String(body.fullName || 'Mahasiswa FEB UB').trim();
-    const studyProgram = String(body.studyProgram || 'FEB UB').trim();
+    const [student, member] = await Promise.all([
+      prisma.student.findUnique({ where: { nim: identityNumber }, select: { fullName: true, studyProgram: true } }),
+      prisma.member.findUnique({ where: { nim: identityNumber }, select: { fullName: true, studyProgram: true, status: true } }),
+    ]);
+    const visitor = student || (member?.status === 'APPROVED' ? member : null);
+    if (!visitor) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'NOT_REGISTERED',
+          error: 'NIM belum terdaftar untuk presensi SAC.',
+          registerUrl: '/pendaftaran',
+        },
+        { status: 404 }
+      );
+    }
+    const fullName = visitor.fullName;
+    const studyProgram = visitor.studyProgram || 'FEB UB';
 
     // 3. Cek Sesi Aktif:
     // Query VisitorLog dengan filter: identityNumber dan status = "ACTIVE".
