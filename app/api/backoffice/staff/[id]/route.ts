@@ -7,7 +7,7 @@ type Context = { params: Promise<{ id: string }> };
 
 function adminOnly(request: NextRequest) {
   const session = verifySession(request.cookies.get('sac_session')?.value || '');
-  return session?.role === 'ADMIN' ? session : null;
+  return session && ['ADMIN', 'PROGRAMMER'].includes(session.role) ? session : null;
 }
 
 export async function PATCH(request: NextRequest, { params }: Context) {
@@ -15,9 +15,13 @@ export async function PATCH(request: NextRequest, { params }: Context) {
   if (!session) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   const { id } = await params;
   const body = await request.json().catch(() => ({}));
+  const target = await prisma.staff.findUnique({ where: { id } });
+  if (!target) return NextResponse.json({ success: false, error: 'Staf tidak ditemukan.' }, { status: 404 });
+  if (session.role !== 'PROGRAMMER' && target.role === 'PROGRAMMER') return NextResponse.json({ success: false, error: 'Role PROGRAMMER hanya dapat dikelola programmer.' }, { status: 403 });
   const data: { name?: string; role?: string; active?: boolean; passwordHash?: string } = {};
   if (typeof body.name === 'string' && body.name.trim()) data.name = body.name.trim();
-  if (body.role === 'ADMIN' || body.role === 'PETUGAS') data.role = body.role;
+  if (body.role === 'PROGRAMMER' && session.role !== 'PROGRAMMER') return NextResponse.json({ success: false, error: 'Role PROGRAMMER hanya dapat dikelola programmer.' }, { status: 403 });
+  if (body.role === 'ADMIN' || body.role === 'PETUGAS' || (session.role === 'PROGRAMMER' && body.role === 'PROGRAMMER')) data.role = body.role;
   if (typeof body.active === 'boolean') {
     if (id === session.staffId && body.active === false) return NextResponse.json({ success: false, error: 'Tidak dapat menonaktifkan akun sendiri.' }, { status: 400 });
     data.active = body.active;
@@ -38,6 +42,7 @@ export async function DELETE(request: NextRequest, { params }: Context) {
   if (id === session.staffId) return NextResponse.json({ success: false, error: 'Tidak dapat menghapus akun sendiri.' }, { status: 400 });
   const target = await prisma.staff.findUnique({ where: { id } });
   if (!target) return NextResponse.json({ success: false, error: 'Staf tidak ditemukan.' }, { status: 404 });
+  if (session.role !== 'PROGRAMMER' && target.role === 'PROGRAMMER') return NextResponse.json({ success: false, error: 'Role PROGRAMMER hanya dapat dikelola programmer.' }, { status: 403 });
   if (target.role === 'ADMIN' && await prisma.staff.count({ where: { role: 'ADMIN', active: true } }) <= 1) return NextResponse.json({ success: false, error: 'Admin aktif terakhir tidak dapat dihapus.' }, { status: 400 });
   await prisma.staff.delete({ where: { id } });
   return NextResponse.json({ success: true });

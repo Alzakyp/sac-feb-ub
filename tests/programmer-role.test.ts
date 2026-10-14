@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const list = readFileSync(new URL('../app/api/backoffice/staff/route.ts', import.meta.url), 'utf8');
+const item = readFileSync(new URL('../app/api/backoffice/staff/[id]/route.ts', import.meta.url), 'utf8');
+const seed = readFileSync(new URL('../scripts/seed-programmer.ts', import.meta.url), 'utf8');
+assert.match(list, /\['ADMIN', 'PROGRAMMER'\]/);
+assert.match(item, /target\.role === 'PROGRAMMER'/);
+assert.match(item, /session\.role !== 'PROGRAMMER'/);
+assert.match(seed, /PROGRAMMER_PASSWORD/);
+assert.doesNotMatch(seed, /iniPassword123@/);
+console.log('Programmer role contract passed.');

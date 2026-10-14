@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 
 function adminOnly(request: NextRequest) {
   const session = verifySession(request.cookies.get('sac_session')?.value || '');
-  if (!session || session.role !== 'ADMIN') return null;
+  if (!session || !['ADMIN', 'PROGRAMMER'].includes(session.role)) return null;
   return session;
 }
 
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     orderBy: { createdAt: 'desc' },
     select: { id: true, email: true, name: true, role: true, active: true, createdAt: true },
   });
-  return NextResponse.json({ success: true, data: staff });
+  return NextResponse.json({ success: true, data: staff, role: session.role });
 }
 
 /** POST /api/sac-staff/staff — tambah staf baru */
@@ -29,12 +29,12 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const email = String(body.email || '').trim().toLowerCase();
   const name = String(body.name || '').trim();
-  const role = body.role === 'ADMIN' ? 'ADMIN' : 'PETUGAS';
+  const role = session.role === 'PROGRAMMER' && body.role === 'PROGRAMMER' ? 'PROGRAMMER' : body.role === 'ADMIN' ? 'ADMIN' : 'PETUGAS';
   const password = String(body.password || '');
 
   if (!email || !name || !password) return NextResponse.json({ success: false, error: 'Email, nama, dan password wajib diisi.' }, { status: 400 });
   if (password.length < 8) return NextResponse.json({ success: false, error: 'Password minimal 8 karakter.' }, { status: 400 });
-  if (!email.endsWith('@ub.ac.id') && !email.endsWith('@student.ub.ac.id')) return NextResponse.json({ success: false, error: 'Email harus domain UB (@ub.ac.id).' }, { status: 400 });
+  if (role !== 'PROGRAMMER' && !email.endsWith('@ub.ac.id') && !email.endsWith('@student.ub.ac.id')) return NextResponse.json({ success: false, error: 'Email harus domain UB (@ub.ac.id).' }, { status: 400 });
 
   const exists = await prisma.staff.findUnique({ where: { email } });
   if (exists) return NextResponse.json({ success: false, error: 'Email sudah terdaftar.' }, { status: 409 });

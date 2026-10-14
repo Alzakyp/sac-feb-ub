@@ -47,16 +47,19 @@ function SheetDataPanel({ dataset, title }: { dataset: 'memberships' | 'deposits
   const [data, setData] = useState<any[]>([]);
   const [q, setQ] = useState('');
   const [page, setPage] = useState(1);
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
   const [total, setTotal] = useState(0);
+  const [selectedRecord, setSelectedRecord] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/backoffice/sheets/${dataset}?q=${encodeURIComponent(q)}&page=${page}`);
+    const res = await fetch(`/api/backoffice/sheets/${dataset}?q=${encodeURIComponent(q)}&page=${page}&from=${from}&to=${to}`);
     const json = await res.json();
     if (json.success) { setData(json.data); setTotal(json.total); }
     setLoading(false);
-  }, [dataset, q, page]);
+  }, [dataset, q, page, from, to]);
   useEffect(() => { const timer = setTimeout(load, 250); return () => clearTimeout(timer); }, [load]);
   async function sync() {
     setSyncing(true);
@@ -64,19 +67,31 @@ function SheetDataPanel({ dataset, title }: { dataset: 'memberships' | 'deposits
     const json = await res.json(); setSyncing(false);
     alert(json.success ? `Sinkronisasi ${title} selesai.` : json.error); if (json.success) load();
   }
+  async function downloadExcel() {
+    const res = await fetch(`/api/backoffice/sheets/${dataset}?q=${encodeURIComponent(q)}&limit=5000&from=${from}&to=${to}`);
+    const json = await res.json();
+    if (!json.success || !json.data.length) { alert('Tidak ada data.'); return; }
+    const { exportFebUbExcel } = await import('@/lib/admin-export');
+    exportFebUbExcel(title, json.data.map((row: any) => ({
+      Nama: row.fullName || '-', NIM: row.nim || row.identityNumber || '-', Prodi: row.studyProgram || row.workType || row.memberType || '-',
+      Tanggal: row.registeredAt || row.submittedAt || row.checkInTime || '-', Status_Bukti: row.proofNumber || row.status || row.title || '-',
+      Tautan_Berkas: row.downloadProofUrl || row.driveFolderUrl || row.mainSectionUrl || '-',
+    })), from, to);
+  }
   return <div className="space-y-4">
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <label className="w-full sm:max-w-md"><span className="sr-only">Cari {title}</span><input value={q} onChange={e => { setQ(e.target.value); setPage(1); }} placeholder={`Cari data ${title}...`} className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-400" /></label>
-      <div className="flex items-center gap-3"><strong className="text-sm text-slate-600">{total.toLocaleString('id-ID')} data</strong><button onClick={sync} disabled={syncing} className="min-h-11 rounded-xl bg-[#0B2546] px-4 text-xs font-bold text-white disabled:opacity-50">{syncing ? 'Menyinkronkan…' : 'Sinkron Google Sheet'}</button></div>
+      <div className="flex w-full flex-wrap gap-2 sm:max-w-2xl"><label className="min-w-48 flex-1"><span className="sr-only">Cari {title}</span><input value={q} onChange={e => { setQ(e.target.value); setPage(1); }} placeholder={`Cari data ${title}...`} className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-400" /></label><label className="text-xs text-slate-500">Dari<input type="date" value={from} onChange={e => { setFrom(e.target.value); setPage(1); }} className="ml-1 rounded-xl border border-slate-300 p-2 text-xs" /></label><label className="text-xs text-slate-500">Sampai<input type="date" value={to} onChange={e => { setTo(e.target.value); setPage(1); }} className="ml-1 rounded-xl border border-slate-300 p-2 text-xs" /></label></div>
+      <div className="flex items-center gap-3"><strong className="text-sm text-slate-600">{total.toLocaleString('id-ID')} data</strong><button onClick={downloadExcel} className="min-h-11 rounded-xl border border-slate-300 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50">Export Excel</button><button onClick={sync} disabled={syncing} className="min-h-11 rounded-xl bg-[#0B2546] px-4 text-xs font-bold text-white disabled:opacity-50">{syncing ? 'Menyinkronkan…' : 'Sinkron Google Sheet'}</button></div>
     </div>
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-4">Nama / NIM</th><th className="p-4">Program / Jenis</th><th className="p-4">Tanggal</th><th className="p-4">Status / Bukti</th></tr></thead><tbody className="divide-y divide-slate-100">{loading ? <tr><td colSpan={4} className="p-10 text-center">Memuat…</td></tr> : data.length === 0 ? <tr><td colSpan={4} className="p-10 text-center text-slate-400">Belum ada data.</td></tr> : data.map(row => {
       const rawDate = row.registeredAt || row.submittedAt || row.checkInTime;
       const parsedDate = rawDate ? new Date(rawDate) : null;
       const dateText = parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
       const proofText = row.proofNumber ? `${row.proofNumber} • ${row.title || 'Tanpa Judul'}` : (row.title || row.status || (row.checkOutTime ? 'Selesai' : 'Tercatat'));
-      return <tr key={row.id} className="align-top hover:bg-amber-50/40"><td className="p-4"><b className="block text-[#0B2546]">{row.fullName}</b><span className="text-xs text-slate-500">{row.nim || row.identityNumber}</span></td><td className="p-4">{row.studyProgram || row.memberType || row.workType || '-'}</td><td className="p-4 text-xs font-semibold">{dateText}</td><td className="max-w-md p-4"><span className="line-clamp-2">{proofText}</span></td></tr>;
+      return <tr key={row.id} onClick={() => dataset === 'deposits' && setSelectedRecord(row)} className={`align-top ${dataset === 'deposits' ? 'cursor-pointer hover:bg-amber-100/50' : 'hover:bg-amber-50/40'}`}><td className="p-4"><b className="block text-[#0B2546]">{row.fullName}</b><span className="text-xs text-slate-500">{row.nim || row.identityNumber}</span></td><td className="p-4">{row.studyProgram || row.memberType || row.workType || '-'}</td><td className="p-4 text-xs font-semibold">{dateText}</td><td className="max-w-md p-4"><span className="line-clamp-2">{proofText}</span></td></tr>;
     })}</tbody></table></div></div>
     <div className="flex justify-end gap-2"><button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="min-h-11 rounded-xl border px-4 disabled:opacity-40">Sebelumnya</button><span className="grid min-h-11 place-items-center px-3 text-sm font-bold">{page} / {Math.max(1, Math.ceil(total / 25))}</span><button disabled={page * 25 >= total} onClick={() => setPage(p => p + 1)} className="min-h-11 rounded-xl border px-4 disabled:opacity-40">Berikutnya</button></div>
+    {selectedRecord && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4" onClick={() => setSelectedRecord(null)}><div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}><h3 className="text-lg font-bold text-[#0B2546]">Detail Bukti Serah Simpan</h3><p className="mt-2 text-sm font-bold text-slate-800">{selectedRecord.title || 'Tanpa Judul'}</p><div className="mt-4 space-y-2 text-xs"><p><b>Nama:</b> {selectedRecord.fullName} ({selectedRecord.nim})</p><p><b>Nomor Bukti:</b> {selectedRecord.proofNumber || '-'}</p><p><b>Nilai Plagiasi:</b> {selectedRecord.plagiarismScore || '-'}</p><p><b>Catatan Revisi:</b> {selectedRecord.revisionNotes || '-'}</p></div><div className="mt-5 space-y-2 border-t pt-4 text-xs font-bold text-blue-700">{selectedRecord.downloadProofUrl && <a className="block hover:underline" href={selectedRecord.downloadProofUrl} target="_blank" rel="noopener noreferrer">Unduh Bukti Lengkap (Drive) ↗</a>}{selectedRecord.driveFolderUrl && <a className="block hover:underline" href={selectedRecord.driveFolderUrl} target="_blank" rel="noopener noreferrer">Folder Drive Berkas ↗</a>}{selectedRecord.initialSectionUrl && <a className="block hover:underline" href={selectedRecord.initialSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Awal ↗</a>}{selectedRecord.mainSectionUrl && <a className="block hover:underline" href={selectedRecord.mainSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Isi ↗</a>}{selectedRecord.finalSectionUrl && <a className="block hover:underline" href={selectedRecord.finalSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Akhir ↗</a>}</div><div className="mt-6 flex justify-end"><button onClick={() => setSelectedRecord(null)} className="min-h-10 rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-700">Tutup</button></div></div></div>}
   </div>;
 }
 
@@ -431,13 +446,14 @@ function StaffManagementPanel() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('PETUGAS');
   const [error, setError] = useState('');
+  const [selfRole, setSelfRole] = useState('ADMIN');
   const [resetId, setResetId] = useState<string | null>(null);
   const [resetPassword, setResetPassword] = useState('');
 
   const load = useCallback(async () => {
     const res = await fetch('/api/backoffice/staff');
     const json = await res.json();
-    if (json.success) setList(json.data);
+    if (json.success) { setList(json.data); setSelfRole(json.role); }
   }, []);
 
   useEffect(() => {
@@ -530,6 +546,7 @@ function StaffManagementPanel() {
             >
               <option value="PETUGAS">PETUGAS</option>
               <option value="ADMIN">ADMIN</option>
+              {selfRole === 'PROGRAMMER' && <option value="PROGRAMMER">PROGRAMMER</option>}
             </select>
             <button className="rounded-xl bg-[#0B2546] px-4 py-2 text-xs font-semibold text-white whitespace-nowrap">
               Simpan
@@ -569,7 +586,7 @@ function StaffManagementPanel() {
                   </span>
                 </td>
                 <td className="p-3.5 text-right space-x-3">
-                  <button
+                  {(s.role !== 'PROGRAMMER' || selfRole === 'PROGRAMMER') && <><button
                     onClick={() => toggle(s.id, s.active)}
                     className="text-xs text-blue-600 hover:underline font-medium"
                   >
@@ -586,7 +603,7 @@ function StaffManagementPanel() {
                     className="text-xs text-rose-600 hover:underline font-medium"
                   >
                     Hapus
-                  </button>
+                  </button></>}
                 </td>
               </tr>
             ))}
@@ -913,17 +930,6 @@ export default function AdminDashboardPage() {
             {[
               { id: 'overview', label: 'Overview', icon: 'dashboard', badge: null },
               {
-                id: 'visitors',
-                label: 'Presensi Ruangan',
-                icon: 'co_present',
-                badge:
-                  overviewData?.kpis?.activeVisitorsCount &&
-                  overviewData.kpis.activeVisitorsCount > 0
-                    ? `${overviewData.kpis.activeVisitorsCount}`
-                    : null,
-                badgeColor: 'bg-emerald-500',
-              },
-              {
                 id: 'deposits',
                 label: 'Serah Simpan',
                 icon: 'assignment_turned_in',
@@ -1015,7 +1021,7 @@ export default function AdminDashboardPage() {
           <div>
             <h1 className="text-lg font-black text-[#0B2546] capitalize flex items-center gap-2">
               {activeTab === 'overview' && 'Ringkasan Eksekutif Operasional'}
-              {activeTab === 'visitors' && 'Monitoring Kiosk Presensi Ruangan'}
+              {activeTab === 'visitors' && 'Riwayat Buku Tamu'}
               {activeTab === 'deposits' && 'Verifikasi Serah Simpan Karya Ilmiah'}
               {activeTab === 'reports' && 'Kelola Laporan Kendala'}
               {activeTab === 'staff' && 'Kelola Akun Staf'}
@@ -1159,7 +1165,7 @@ export default function AdminDashboardPage() {
                       </h3>
                     </div>
                     <button
-                      onClick={() => setActiveTab('visitors')}
+                      onClick={() => setActiveTab('visitorHistory')}
                       className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors"
                     >
                       Lihat Semua →
@@ -1269,7 +1275,7 @@ export default function AdminDashboardPage() {
           {/* ================================================================= */}
           {/* TAB 2: PRESENSI RUANGAN KIOSK (VISITOR LOG)                       */}
           {/* ================================================================= */}
-          {activeTab === 'visitors' && (
+          {false && activeTab === 'visitors' && (
             <div className="space-y-4">
               {/* TOOLBAR & OPERATIONAL CONTROLS */}
               <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">

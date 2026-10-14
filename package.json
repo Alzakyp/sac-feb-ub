@@ -12,6 +12,7 @@
     "seed:demo-deposits": "tsx scripts/seed-demo-deposits.ts",
     "import:katalog": "tsx scripts/import-katalog-buku.ts",
     "staff:create": "tsx scripts/create-staff.ts",
+    "seed:programmer": "tsx scripts/seed-programmer.ts",
     "import:repository": "tsx scripts/sync-sheet.ts repository",
     "import:membership": "tsx scripts/sync-sheet.ts memberships",
     "import:deposits": "tsx scripts/sync-sheet.ts deposits",
