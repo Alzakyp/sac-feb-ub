@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const ui = readFileSync(new URL('../components/admin/CrudPanel.tsx', import.meta.url), 'utf8');
+const api = readFileSync(new URL('../app/api/backoffice/repository/route.ts', import.meta.url), 'utf8');
+assert.match(ui, /displayRepositoryIdentity/);
+assert.match(ui, /Export Excel/);
+assert.match(ui, /type="date"/);
+assert.match(ui, /target="_blank"/);
+assert.match(api, /searchParams\.get\('jenis'\)/);
+assert.match(api, /searchParams\.get\('from'\)/);
+console.log('Repository CRUD features contract passed.');

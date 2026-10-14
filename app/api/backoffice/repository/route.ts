@@ -12,6 +12,11 @@ export async function GET(req: NextRequest) {
   if (!auth(req)) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   const { searchParams } = new URL(req.url);
   const q = (searchParams.get('q') || '').trim();
+  const jenis = (searchParams.get('jenis') || '').trim();
+  const prodi = (searchParams.get('prodi') || '').trim();
+  const from = searchParams.get('from') || '';
+  const to = searchParams.get('to') || '';
+  if ((from && !/^\d{4}-\d{2}-\d{2}$/.test(from)) || (to && !/^\d{4}-\d{2}-\d{2}$/.test(to)) || (from && Number.isNaN(Date.parse(from))) || (to && Number.isNaN(Date.parse(to)))) return NextResponse.json({ success: false, error: 'Tanggal tidak valid.' }, { status: 400 });
   const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
   const limit = Math.min(50, parseInt(searchParams.get('limit') || '20'));
   const skip = (page - 1) * limit;
@@ -26,11 +31,12 @@ export async function GET(req: NextRequest) {
         ],
       }
     : {};
+  const filters = { ...(where as object), ...(jenis ? { jenis } : {}), ...(prodi ? { prodi: { contains: prodi } } : {}), ...(from || to ? { createdAt: { ...(from ? { gte: new Date(`${from}T00:00:00`) } : {}), ...(to ? { lte: new Date(`${to}T23:59:59`) } : {}) } } : {}) };
 
   const [total, data] = await Promise.all([
-    prisma.repositoryDocument.count({ where }),
+    prisma.repositoryDocument.count({ where: filters }),
     prisma.repositoryDocument.findMany({
-      where,
+      where: filters,
       skip,
       take: limit,
       orderBy: { createdAt: 'desc' },
