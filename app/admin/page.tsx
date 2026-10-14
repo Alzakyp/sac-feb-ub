@@ -13,6 +13,7 @@ import {
 import ComingSoonNotice, { ComingSoonDetails } from '@/components/ComingSoonNotice';
 import { depositWorkflow } from '@/lib/deposit-workflow';
 import { validateDepositDecision } from '@/lib/deposit-decision';
+import CrudPanel from '@/components/admin/CrudPanel';
 
 function ReportManagementPanel() {
   const [tickets, setTickets] = useState<any[]>([]);
@@ -447,6 +448,7 @@ function StaffManagementPanel() {
   const [role, setRole] = useState('PETUGAS');
   const [error, setError] = useState('');
   const [selfRole, setSelfRole] = useState('ADMIN');
+  const [editStaff, setEditStaff] = useState<any | null>(null);
   const [resetId, setResetId] = useState<string | null>(null);
   const [resetPassword, setResetPassword] = useState('');
 
@@ -586,6 +588,7 @@ function StaffManagementPanel() {
                   </span>
                 </td>
                 <td className="p-3.5 text-right space-x-3">
+                  <button onClick={() => setEditStaff(s)} className="min-h-11 text-blue-700 hover:underline">Detail{(s.role !== 'PROGRAMMER' || selfRole === 'PROGRAMMER') ? ' / Edit' : ''}</button>
                   {(s.role !== 'PROGRAMMER' || selfRole === 'PROGRAMMER') && <><button
                     onClick={() => toggle(s.id, s.active)}
                     className="text-xs text-blue-600 hover:underline font-medium"
@@ -617,6 +620,7 @@ function StaffManagementPanel() {
           </tbody>
         </table>
       </div>
+      {editStaff && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><form onSubmit={async event => { event.preventDefault(); if (editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER') return; const response = await fetch(`/api/backoffice/staff/${editStaff.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: editStaff.name, role: editStaff.role }) }); const result = await response.json(); if (!response.ok) { setError(result.error || 'Simpan gagal.'); return; } setEditStaff(null); load(); }} className="w-full max-w-sm space-y-4 rounded-2xl bg-white p-6 shadow-xl"><h3 className="text-lg font-bold text-[#0B2546]">Detail / Edit Staf</h3><p className="text-xs text-slate-500">{editStaff.email}</p>{error && <p role="alert" className="text-sm text-rose-700">{error}</p>}<label className="block text-sm font-bold">Nama<input required value={editStaff.name} disabled={editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER'} onChange={event => setEditStaff({ ...editStaff, name: event.target.value })} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Role<select value={editStaff.role} disabled={editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER'} onChange={event => setEditStaff({ ...editStaff, role: event.target.value })} className="mt-1 min-h-11 w-full rounded-xl border p-3"><option value="PETUGAS">PETUGAS</option><option value="ADMIN">ADMIN</option>{selfRole === 'PROGRAMMER' && <option value="PROGRAMMER">PROGRAMMER</option>}</select></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setEditStaff(null)} className="min-h-11 rounded-xl border px-4">Tutup</button>{(editStaff.role !== 'PROGRAMMER' || selfRole === 'PROGRAMMER') && <button className="min-h-11 rounded-xl bg-[#0B2546] px-4 font-bold text-white">Simpan</button>}</div></form></div>}
       {resetId && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><form onSubmit={(e) => { e.preventDefault(); reset(resetId); }} className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"><h3 className="font-bold text-[#0B2546]">Reset Password Staf</h3><input required minLength={8} type="password" value={resetPassword} onChange={(e) => setResetPassword(e.target.value)} placeholder="Password baru (min. 8 karakter)" className="mt-4 w-full rounded-xl border p-3 text-sm"/><div className="mt-4 flex justify-end gap-2"><button type="button" onClick={() => setResetId(null)} className="rounded-lg border px-3 py-2 text-xs">Batal</button><button className="rounded-lg bg-[#0B2546] px-3 py-2 text-xs font-bold text-white">Simpan</button></div></form></div>}
     </div>
   );
@@ -1656,7 +1660,7 @@ export default function AdminDashboardPage() {
           {/* ================================================================= */}
           {activeTab === 'repository' && (
             <div className="space-y-6">
-              <RepositoryManagementPanel />
+              <CrudPanel kind="repository" />
               {/* REKAPITULASI KLIK JURNAL INTERNASIONAL */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -1847,10 +1851,10 @@ export default function AdminDashboardPage() {
           {/* ================================================================= */}
           {/* TAB 7: KATALOG BUKU FISIK                                         */}
           {/* ================================================================= */}
-          {activeTab === 'memberships' && <SheetDataPanel dataset="memberships" title="Keanggotaan" />}
+          {activeTab === 'memberships' && <CrudPanel kind="members" />}
           {activeTab === 'depositRecords' && <SheetDataPanel dataset="deposits" title="Bukti Serah Simpan" />}
           {activeTab === 'visitorHistory' && <SheetDataPanel dataset="visitors" title="Buku Tamu" />}
-          {activeTab === 'books' && <BookManagementPanel />}
+          {activeTab === 'books' && <CrudPanel kind="books" />}
         </main>
       </div>
 

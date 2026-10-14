@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import { bookInput, repositoryInput, membershipInput, safeRecord } from '../lib/backoffice-input';
+assert.equal(bookInput.safeParse({ title: ' ' }).success, false);
+assert.equal(bookInput.safeParse({ title: 'Book', publicationYear: 1 }).success, false);
+assert.equal(bookInput.safeParse({ title: 'Book', passwordHash: 'leak' }).success, true);
+assert.equal('passwordHash' in bookInput.parse({ title: 'Book', passwordHash: 'leak' }), false);
+assert.equal(repositoryInput.safeParse({ judul: 'X', nama: 'A', nim: '12345', prodi: 'FEB', jenis: 'Skripsi', bagianIsiUrl: 'javascript:alert(1)' }).success, false);
+assert.equal(membershipInput.safeParse({ fullName: 'Test', nim: '12345', email: 'invalid', memberType: 'Student', status: 'ACTIVE' }).success, false);
+assert.equal('passwordHash' in safeRecord({ passwordHash: 'secret', fullName: 'A' }), false);
+console.log('CRUD input validation passed.');

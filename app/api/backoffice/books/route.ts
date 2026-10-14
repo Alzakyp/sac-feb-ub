@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifySession } from '@/lib/session';
+import { bookInput } from '@/lib/backoffice-input';
 
 function auth(req: NextRequest) { return verifySession(req.cookies.get('sac_session')?.value || ''); }
 
@@ -17,8 +18,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   if (!auth(req)) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-  const body = await req.json().catch(() => ({}));
-  if (!body.title) return NextResponse.json({ success: false, error: 'Judul buku wajib diisi.' }, { status: 400 });
-  const data = await prisma.bookCollection.create({ data: { title: String(body.title), author: body.author || null, publisher: body.publisher || null, publicationYear: Number.isInteger(body.publicationYear) ? body.publicationYear : null, isbn: body.isbn || null, ddc: body.ddc || null, subject: body.subject || null } });
-  return NextResponse.json({ success: true, data });
+  const parsed = bookInput.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ success: false, error: parsed.error.issues[0]?.message || 'Data tidak valid.' }, { status: 400 });
+  const data = await prisma.bookCollection.create({ data: parsed.data }).catch(() => null);
+  return data ? NextResponse.json({ success: true, data }, { status: 201 }) : NextResponse.json({ success: false, error: 'Nomor inventaris sudah digunakan.' }, { status: 409 });
 }
