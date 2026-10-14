@@ -13,7 +13,7 @@ export async function GET(req: NextRequest, { params }: Context) {
     select: { id: true, memberType: true, fullName: true, nim: true, studyLevel: true, studyProgram: true, whatsapp: true, email: true, mailingAddress: true, identityType: true, status: true, createdAt: true, selfiePath: true, identityPath: true },
   });
   if (!member) return NextResponse.json({ success: false, error: 'Anggota tidak ditemukan.' }, { status: 404 });
-  return NextResponse.json({ success: true, data: { ...member, identityPhoto: member.identityPath, selfiePhoto: member.selfiePath } });
+  return NextResponse.json({ success: true, data: { ...member, identityPhoto: member.identityPath ? `/api/backoffice/members/${id}/files/identity` : null, selfiePhoto: member.selfiePath ? `/api/backoffice/members/${id}/files/selfie` : null } });
 }
 
 export async function PATCH(req: NextRequest, { params }: Context) {
