@@ -10,7 +10,7 @@ type Row = Record<string, any>;
 const config: Record<Kind, { title: string; fields: string[]; required: string[] }> = {
   repository: { title: 'Repositori', fields: ['nama', 'nim', 'judul', 'judulEn', 'prodi', 'jenis', 'pembimbing', 'koPromotor1', 'koPromotor2', 'penguji1', 'penguji2', 'penguji3', 'penguji4', 'bagianAwalUrl', 'bagianIsiUrl', 'bagianAkhirUrl', 'pernyataanUrl'], required: ['nama', 'nim', 'judul', 'prodi', 'jenis'] },
   books: { title: 'Buku', fields: ['title', 'inventoryNumber', 'registerNumber', 'author', 'edition', 'publisher', 'publicationPlace', 'publicationYear', 'physicalDescription', 'isbn', 'ddc', 'subject'], required: ['title'] },
-  members: { title: 'Anggota Website', fields: ['fullName', 'nim', 'email', 'memberType', 'studyProgram', 'studyLevel', 'whatsapp', 'mailingAddress', 'identityType', 'identityPhoto', 'selfiePhoto', 'status'], required: ['fullName', 'nim', 'email', 'memberType', 'status'] },
+  members: { title: 'Anggota', fields: ['fullName', 'nim', 'email', 'memberType', 'studyProgram', 'studyLevel', 'whatsapp', 'mailingAddress', 'identityType', 'identityPhoto', 'selfiePhoto', 'status'], required: ['fullName', 'nim', 'email', 'memberType', 'status'] },
   'membership-records': { title: 'Arsip Anggota', fields: ['fullName', 'nim', 'email', 'memberType', 'studyProgram', 'whatsapp', 'mailingAddress', 'identityType', 'identityPhoto', 'selfiePhoto', 'status', 'activeDate', 'validUntil'], required: ['fullName', 'nim', 'memberType', 'status'] },
 };
 const labels: Record<string, string> = { fullName: 'Nama lengkap', nim: 'NIM', email: 'Email', memberType: 'Jenis anggota', identityPhoto: 'Foto identitas', selfiePhoto: 'Foto selfie', studyProgram: 'Program studi', studyLevel: 'Jenjang', whatsapp: 'WhatsApp', mailingAddress: 'Alamat surat', identityType: 'Jenis identitas', status: 'Status', activeDate: 'Tanggal aktif', validUntil: 'Berlaku sampai', nama: 'Nama penulis', judul: 'Judul', judulEn: 'Judul Inggris', prodi: 'Program studi', jenis: 'Jenis karya', pembimbing: 'Pembimbing', koPromotor1: 'Ko-promotor 1', koPromotor2: 'Ko-promotor 2', penguji1: 'Penguji 1', penguji2: 'Penguji 2', penguji3: 'Penguji 3', penguji4: 'Penguji 4', bagianAwalUrl: 'URL bagian awal', bagianIsiUrl: 'URL bagian isi', bagianAkhirUrl: 'URL bagian akhir', pernyataanUrl: 'URL pernyataan', title: 'Judul buku', inventoryNumber: 'Nomor inventaris', registerNumber: 'Nomor register', author: 'Pengarang', edition: 'Edisi', publisher: 'Penerbit', publicationPlace: 'Tempat terbit', publicationYear: 'Tahun terbit', physicalDescription: 'Deskripsi fisik', isbn: 'ISBN', ddc: 'DDC', subject: 'Subjek', password: 'Password awal (minimal 8 karakter)' };
@@ -22,7 +22,7 @@ export function displayRepositoryIdentity(row: Row) {
 }
 
 export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 'books' | 'members' }) {
-  const [kind, setKind] = useState<Kind>(initialKind);
+  const [kind] = useState<Kind>(initialKind);
   const [rows, setRows] = useState<Row[]>([]);
   const [q, setQ] = useState('');
   const [status, setStatus] = useState('');
@@ -38,9 +38,11 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
   const [mode, setMode] = useState<'detail' | 'edit' | 'create'>('detail');
   const [busy, setBusy] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
-  const settings = config[kind];
+  const settings = config[selected?.recordKind === 'membership-records' ? 'membership-records' : kind];
   const isMembership = kind === 'members' || kind === 'membership-records';
   const endpoint = `/api/backoffice/${kind}`;
+  const isUnifiedMembers = initialKind === 'members';
+  const rowEndpoint = (row: Row) => isUnifiedMembers && row.recordKind === 'membership-records' ? '/api/backoffice/membership-records' : endpoint;
   const sheet = (row: Row) => row.sourceKey && !row.sourceKey.startsWith('local:');
   const name = (row: Row) => kind === 'repository' ? displayRepositoryIdentity(row).nama : (row.fullName || row.title || row.judul || row.id);
   const load = useCallback(async () => {
@@ -58,10 +60,10 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
   async function open(row: Row, nextMode: 'detail' | 'edit') {
     setError('');
     try {
-      const response = await fetch(`${endpoint}/${row.id}`);
+      const response = await fetch(`${rowEndpoint(row)}/${row.id}`);
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Detail gagal dimuat.');
-      setSelected(kind === 'repository' ? { ...result.data, ...displayRepositoryIdentity(result.data) } : result.data); setMode(nextMode); setTimeout(() => dialog.current?.showModal(), 0);
+      setSelected(kind === 'repository' ? { ...result.data, ...displayRepositoryIdentity(result.data) } : { ...result.data, recordKind: row.recordKind }); setMode(nextMode); setTimeout(() => dialog.current?.showModal(), 0);
     } catch (error) { setError(error instanceof Error ? error.message : 'Koneksi gagal.'); }
   }
   function startCreate() { setError(''); setMode('create'); setSelected({ status: 'PENDING', jenis: 'Skripsi', memberType: 'Mahasiswa' }); setTimeout(() => dialog.current?.showModal(), 0); }
@@ -76,7 +78,7 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
         const value = selected[field];
         payload[field] = field === 'publicationYear' ? (value === '' || value == null ? null : Number(value)) : (value ?? '');
       }
-      const response = await fetch(mode === 'create' ? endpoint : `${endpoint}/${selected.id}`, { method: mode === 'create' ? 'POST' : 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const response = await fetch(mode === 'create' ? endpoint : `${rowEndpoint(selected)}/${selected.id}`, { method: mode === 'create' ? 'POST' : 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Penyimpanan gagal.');
       dialog.current?.close(); setSelected(null); await load();
@@ -87,7 +89,7 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
     if (!confirm(`Hapus ${name(row)}?${sheet(row) ? `\n${sheetWarning}` : ''}`)) return;
     setBusy(true); setError('');
     try {
-      const response = await fetch(`${endpoint}/${row.id}`, { method: 'DELETE' });
+      const response = await fetch(`${rowEndpoint(row)}/${row.id}`, { method: 'DELETE' });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Hapus gagal.');
       await load();
@@ -124,15 +126,7 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
   const icon = kind === 'repository' ? 'docs.svg' : kind === 'books' ? 'table.svg' : 'user-circle.svg';
   return <section className="space-y-4">
     <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-xs dark:border-gray-800 dark:bg-white/[0.03]">
-      {initialKind === 'members' && (
-        <label className="text-xs font-bold text-gray-700 dark:text-gray-300">
-          Sumber
-          <select className={inputClass} value={kind} onChange={event => { setKind(event.target.value as Kind); setPage(1); }}>
-            <option value="members">Pendaftaran website</option>
-            <option value="membership-records">Arsip Google Sheet / lokal</option>
-          </select>
-        </label>
-      )}
+
       <label className="min-w-52 flex-1 text-xs font-bold text-gray-700 dark:text-gray-300">
         <span className="sr-only">Cari {settings.title}</span>
         <div className="relative">
@@ -193,7 +187,7 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
       <Button disabled={busy} onClick={startCreate} className="min-h-11">
         Tambah {settings.title}
       </Button>
-      {(kind === 'repository' || kind === 'membership-records') && (
+      {(kind === 'repository' || isUnifiedMembers) && (
         <button
           disabled={busy}
           className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 text-xs font-bold text-gray-700 shadow-xs hover:bg-gray-50 disabled:opacity-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -219,7 +213,7 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
           </TableHeader>
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
             {rows.map(row => (
-              <tr key={row.id} onClick={() => open(row, 'detail')} className="cursor-pointer align-top transition-colors hover:bg-gray-50/75 dark:hover:bg-white/[0.02]">
+              <tr key={`${row.recordKind || kind}:${row.id}`} onClick={() => open(row, 'detail')} className="cursor-pointer align-top transition-colors hover:bg-gray-50/75 dark:hover:bg-white/[0.02]">
                 <td className="max-w-sm p-4">
                   <div className="flex items-start gap-3">
                     <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
@@ -238,11 +232,11 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
                   <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
                     sheet(row)
                       ? 'border-warning-500/20 bg-warning-50 text-warning-600 dark:border-warning-500/20 dark:bg-warning-50 dark:text-warning-600'
-                      : kind === 'members'
+                      : row.source === 'WEB'
                       ? 'border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-blue-300'
                       : 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-300'
                   }`}>
-                    {sheet(row) ? 'SHEET' : kind === 'members' ? 'WEB' : 'LOCAL'}
+                    {row.source || (sheet(row) ? 'SHEET' : kind === 'members' ? 'WEB' : 'LOCAL')}
                   </span>
                 </td>
                 <td className="whitespace-nowrap p-4 text-right" onClick={event => event.stopPropagation()}>
