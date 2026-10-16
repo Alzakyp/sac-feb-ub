@@ -37,12 +37,12 @@ function ReportManagementPanel() {
   }
 
   return <div className="space-y-4">
-    <div className="flex justify-between items-center rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+    <div className="flex justify-between items-center rounded-2xl border border-gray-200 bg-white p-5 shadow-xs dark:border-gray-800 dark:bg-white/[0.03]">
       <p className="text-sm font-bold text-gray-900 dark:text-white/90">{tickets.length} tiket</p>
-      <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-slate-300 p-2 text-xs bg-white"><option value="ALL">Semua Status</option><option value="OPEN">Baru</option><option value="IN_PROGRESS">Diproses</option><option value="RESOLVED">Selesai</option></select>
+      <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-gray-200 dark:border-gray-800 p-2 text-xs bg-white"><option value="ALL">Semua Status</option><option value="OPEN">Baru</option><option value="IN_PROGRESS">Diproses</option><option value="RESOLVED">Selesai</option></select>
     </div>
-    <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm"><table className="w-full text-left text-xs"><thead className="bg-slate-50 text-slate-500 uppercase text-[11px]"><tr><th className="p-3">Tiket</th><th className="p-3">Pengadu</th><th className="p-3">Kategori</th><th className="p-3">Laporan</th><th className="p-3">Status</th><th className="p-3" /></tr></thead><tbody className="divide-y divide-slate-100">{tickets.map((t) => <tr key={t.id}><td className="p-3 font-mono font-bold text-gray-900 dark:text-white/90">{t.ticketNumber}</td><td className="p-3"><p className="font-bold">{t.fullName}</p><p className="text-slate-500">{t.identityNumber}</p></td><td className="p-3">{t.category}</td><td className="p-3 max-w-xs line-clamp-2">{t.description}</td><td className="p-3"><span className="rounded bg-amber-50 px-2 py-1 font-bold text-[10px] text-amber-800">{t.status}</span></td><td className="p-3 text-right"><button onClick={() => { setSelected(t); setNotes(t.staffNotes || ''); }} className="text-blue-600 hover:underline">Tanggapi</button></td></tr>)}{tickets.length === 0 && <tr><td colSpan={6} className="p-8 text-center text-slate-400">Belum ada laporan.</td></tr>}</tbody></table></div>
-    {selected && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"><p className="text-xs font-bold text-amber-700">{selected.ticketNumber}</p><h3 className="mt-2 font-bold text-gray-900 dark:text-white/90">{selected.category}</h3><p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm leading-6">{selected.description}</p><textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} placeholder="Tulis tanggapan untuk mahasiswa..." className="mt-4 w-full rounded-xl border p-3 text-sm" /><div className="mt-4 flex flex-wrap justify-end gap-2"><button onClick={() => setSelected(null)} className="rounded-lg border px-3 py-2 text-xs">Batal</button><button onClick={() => update('IN_PROGRESS')} className="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold">Proses</button><button onClick={() => update('RESOLVED')} className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white">Kirim Jawaban & Selesai</button></div></div></div>}
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs dark:border-gray-800 dark:bg-white/[0.03]"><table className="w-full text-left text-xs"><thead className="bg-gray-50/75 text-gray-500 uppercase tracking-wider text-[11px] dark:bg-gray-800/40 dark:text-gray-400"><tr><th className="p-3">Tiket</th><th className="p-3">Pengadu</th><th className="p-3">Kategori</th><th className="p-3">Laporan</th><th className="p-3">Status</th><th className="p-3" /></tr></thead><tbody className="divide-y divide-gray-100 dark:divide-gray-800">{tickets.map((t) => <tr key={t.id}><td className="p-3 font-mono font-bold text-gray-900 dark:text-white/90">{t.ticketNumber}</td><td className="p-3"><p className="font-bold">{t.fullName}</p><p className="text-slate-500">{t.identityNumber}</p></td><td className="p-3">{t.category}</td><td className="p-3 max-w-xs line-clamp-2">{t.description}</td><td className="p-3"><span className="rounded bg-amber-50 px-2 py-1 font-bold text-[10px] text-amber-800">{t.status}</span></td><td className="p-3 text-right"><button onClick={() => { setSelected(t); setNotes(t.staffNotes || ''); }} className="text-blue-600 hover:underline">Tanggapi</button></td></tr>)}{tickets.length === 0 && <tr><td colSpan={6} className="p-8 text-center text-slate-400">Belum ada laporan.</td></tr>}</tbody></table></div>
+    {selected && <div className="fixed inset-0 z-50 grid place-items-center bg-gray-950/50 p-4"><div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"><p className="text-xs font-bold text-amber-700">{selected.ticketNumber}</p><h3 className="mt-2 font-bold text-gray-900 dark:text-white/90">{selected.category}</h3><p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm leading-6">{selected.description}</p><textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} placeholder="Tulis tanggapan untuk mahasiswa..." className="mt-4 w-full rounded-xl border p-3 text-sm" /><div className="mt-4 flex flex-wrap justify-end gap-2"><button onClick={() => setSelected(null)} className="rounded-lg border px-3 py-2 text-xs">Batal</button><button onClick={() => update('IN_PROGRESS')} className="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold">Proses</button><button onClick={() => update('RESOLVED')} className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white">Kirim Jawaban & Selesai</button></div></div></div>}
   </div>;
 }
 
@@ -82,19 +82,19 @@ function SheetDataPanel({ dataset, title }: { dataset: 'memberships' | 'deposits
     })), from, to);
   }
   return <div className="space-y-4">
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex w-full flex-wrap gap-2 sm:max-w-2xl"><label className="min-w-48 flex-1"><span className="sr-only">Cari {title}</span><input value={q} onChange={e => { setQ(e.target.value); setPage(1); }} placeholder={`Cari data ${title}...`} className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-400" /></label><label className="text-xs text-slate-500">Dari<input type="date" value={from} onChange={e => { setFrom(e.target.value); setPage(1); }} className="ml-1 rounded-xl border border-slate-300 p-2 text-xs" /></label><label className="text-xs text-slate-500">Sampai<input type="date" value={to} onChange={e => { setTo(e.target.value); setPage(1); }} className="ml-1 rounded-xl border border-slate-300 p-2 text-xs" /></label></div>
-      <div className="flex items-center gap-3"><strong className="text-sm text-slate-600">{total.toLocaleString('id-ID')} data</strong><button onClick={downloadExcel} className="min-h-11 rounded-xl border border-slate-300 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50">Export Excel</button><button onClick={sync} disabled={syncing} className="min-h-11 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white disabled:opacity-50">{syncing ? 'Menyinkronkan…' : 'Sinkron Google Sheet'}</button></div>
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs dark:border-gray-800 dark:bg-white/[0.03] flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex w-full flex-wrap gap-2 sm:max-w-2xl"><label className="min-w-48 flex-1"><span className="sr-only">Cari {title}</span><input value={q} onChange={e => { setQ(e.target.value); setPage(1); }} placeholder={`Cari data ${title}...`} className="w-full rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-400" /></label><label className="text-xs text-slate-500">Dari<input type="date" value={from} onChange={e => { setFrom(e.target.value); setPage(1); }} className="ml-1 rounded-xl border border-gray-200 dark:border-gray-800 p-2 text-xs" /></label><label className="text-xs text-slate-500">Sampai<input type="date" value={to} onChange={e => { setTo(e.target.value); setPage(1); }} className="ml-1 rounded-xl border border-gray-200 dark:border-gray-800 p-2 text-xs" /></label></div>
+      <div className="flex items-center gap-3"><strong className="text-sm text-slate-600">{total.toLocaleString('id-ID')} data</strong><button onClick={downloadExcel} className="min-h-11 rounded-xl border border-gray-200 dark:border-gray-800 px-3 text-xs font-bold text-slate-700 hover:bg-gray-50 dark:hover:bg-gray-800">Export Excel</button><button onClick={sync} disabled={syncing} className="min-h-11 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white disabled:opacity-50">{syncing ? 'Menyinkronkan…' : 'Sinkron Google Sheet'}</button></div>
     </div>
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs dark:border-gray-800 dark:bg-white/[0.03]"><div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-4">Nama / NIM</th><th className="p-4">Program / Jenis</th><th className="p-4">Tanggal</th><th className="p-4">Status / Bukti</th></tr></thead><tbody className="divide-y divide-slate-100">{loading ? <tr><td colSpan={4} className="p-10 text-center">Memuat…</td></tr> : data.length === 0 ? <tr><td colSpan={4} className="p-10 text-center text-slate-400">Belum ada data.</td></tr> : data.map(row => {
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs dark:border-gray-800 dark:bg-white/[0.03]"><div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-gray-50/75 text-xs uppercase tracking-wider text-gray-500 dark:bg-gray-800/40 dark:text-gray-400"><tr><th className="p-4">Nama / NIM</th><th className="p-4">Program / Jenis</th><th className="p-4">Tanggal</th><th className="p-4">Status / Bukti</th></tr></thead><tbody className="divide-y divide-gray-100 dark:divide-gray-800">{loading ? <tr><td colSpan={4} className="p-10 text-center">Memuat…</td></tr> : data.length === 0 ? <tr><td colSpan={4} className="p-10 text-center text-slate-400">Belum ada data.</td></tr> : data.map(row => {
       const rawDate = row.registeredAt || row.submittedAt || row.checkInTime;
       const parsedDate = rawDate ? new Date(rawDate) : null;
       const dateText = parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
       const proofText = row.proofNumber ? `${row.proofNumber} • ${row.title || 'Tanpa Judul'}` : (row.title || row.status || (row.checkOutTime ? 'Selesai' : 'Tercatat'));
-      return <tr key={row.id} onClick={() => dataset === 'deposits' && setSelectedRecord(row)} className={`align-top ${dataset === 'deposits' ? 'cursor-pointer hover:bg-amber-100/50' : 'hover:bg-amber-50/40'}`}><td className="p-4"><b className="block text-gray-900 dark:text-white/90">{row.fullName}</b><span className="text-xs text-slate-500">{row.nim || row.identityNumber}</span></td><td className="p-4">{row.studyProgram || row.memberType || row.workType || '-'}</td><td className="p-4 text-xs font-semibold">{dateText}</td><td className="max-w-md p-4"><span className="line-clamp-2">{proofText}</span></td></tr>;
+      return <tr key={row.id} onClick={() => dataset === 'deposits' && setSelectedRecord(row)} className={`align-top ${dataset === 'deposits' ? 'cursor-pointer hover:bg-blue-50/50 dark:hover:bg-blue-500/10' : 'hover:bg-gray-50 dark:hover:bg-white/[0.03]'}`}><td className="p-4"><b className="block text-gray-900 dark:text-white/90">{row.fullName}</b><span className="text-xs text-slate-500">{row.nim || row.identityNumber}</span></td><td className="p-4">{row.studyProgram || row.memberType || row.workType || '-'}</td><td className="p-4 text-xs font-semibold">{dateText}</td><td className="max-w-md p-4"><span className="line-clamp-2">{proofText}</span></td></tr>;
     })}</tbody></table></div></div>
     <div className="flex justify-end gap-2"><button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="min-h-11 rounded-xl border px-4 disabled:opacity-40">Sebelumnya</button><span className="grid min-h-11 place-items-center px-3 text-sm font-bold">{page} / {Math.max(1, Math.ceil(total / 25))}</span><button disabled={page * 25 >= total} onClick={() => setPage(p => p + 1)} className="min-h-11 rounded-xl border px-4 disabled:opacity-40">Berikutnya</button></div>
-    {selectedRecord && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4" onClick={() => setSelectedRecord(null)}><div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}><h3 className="text-lg font-bold text-gray-900 dark:text-white/90">Detail Bukti Serah Simpan</h3><p className="mt-2 text-sm font-bold text-slate-800">{selectedRecord.title || 'Tanpa Judul'}</p><div className="mt-4 space-y-2 text-xs"><p><b>Nama:</b> {selectedRecord.fullName} ({selectedRecord.nim})</p><p><b>Nomor Bukti:</b> {selectedRecord.proofNumber || '-'}</p><p><b>Nilai Plagiasi:</b> {selectedRecord.plagiarismScore || '-'}</p><p><b>Catatan Revisi:</b> {selectedRecord.revisionNotes || '-'}</p></div><div className="mt-5 space-y-2 border-t pt-4 text-xs font-bold text-blue-700">{selectedRecord.downloadProofUrl && <a className="block hover:underline" href={selectedRecord.downloadProofUrl} target="_blank" rel="noopener noreferrer">Unduh Bukti Lengkap (Drive) ↗</a>}{selectedRecord.driveFolderUrl && <a className="block hover:underline" href={selectedRecord.driveFolderUrl} target="_blank" rel="noopener noreferrer">Folder Drive Berkas ↗</a>}{selectedRecord.initialSectionUrl && <a className="block hover:underline" href={selectedRecord.initialSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Awal ↗</a>}{selectedRecord.mainSectionUrl && <a className="block hover:underline" href={selectedRecord.mainSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Isi ↗</a>}{selectedRecord.finalSectionUrl && <a className="block hover:underline" href={selectedRecord.finalSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Akhir ↗</a>}</div><div className="mt-6 flex justify-end"><button onClick={() => setSelectedRecord(null)} className="min-h-10 rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-700">Tutup</button></div></div></div>}
+    {selectedRecord && <div className="fixed inset-0 z-50 grid place-items-center bg-gray-950/60 p-4" onClick={() => setSelectedRecord(null)}><div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}><h3 className="text-lg font-bold text-gray-900 dark:text-white/90">Detail Bukti Serah Simpan</h3><p className="mt-2 text-sm font-bold text-slate-800">{selectedRecord.title || 'Tanpa Judul'}</p><div className="mt-4 space-y-2 text-xs"><p><b>Nama:</b> {selectedRecord.fullName} ({selectedRecord.nim})</p><p><b>Nomor Bukti:</b> {selectedRecord.proofNumber || '-'}</p><p><b>Nilai Plagiasi:</b> {selectedRecord.plagiarismScore || '-'}</p><p><b>Catatan Revisi:</b> {selectedRecord.revisionNotes || '-'}</p></div><div className="mt-5 space-y-2 border-t pt-4 text-xs font-bold text-blue-700">{selectedRecord.downloadProofUrl && <a className="block hover:underline" href={selectedRecord.downloadProofUrl} target="_blank" rel="noopener noreferrer">Unduh Bukti Lengkap (Drive) ↗</a>}{selectedRecord.driveFolderUrl && <a className="block hover:underline" href={selectedRecord.driveFolderUrl} target="_blank" rel="noopener noreferrer">Folder Drive Berkas ↗</a>}{selectedRecord.initialSectionUrl && <a className="block hover:underline" href={selectedRecord.initialSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Awal ↗</a>}{selectedRecord.mainSectionUrl && <a className="block hover:underline" href={selectedRecord.mainSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Isi ↗</a>}{selectedRecord.finalSectionUrl && <a className="block hover:underline" href={selectedRecord.finalSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Akhir ↗</a>}</div><div className="mt-6 flex justify-end"><button onClick={() => setSelectedRecord(null)} className="min-h-10 rounded-xl bg-gray-100 px-4 dark:bg-gray-800 text-xs font-bold text-slate-700">Tutup</button></div></div></div>}
   </div>;
 }
 
@@ -159,7 +159,7 @@ function RepositoryManagementPanel() {
             value={q}
             onChange={(e) => { setQ(e.target.value); setPage(1); }}
             placeholder="Cari judul, NIM, penulis, prodi..."
-            className="w-full pl-3 pr-3 py-2 rounded-xl border border-slate-300 text-xs outline-none"
+            className="w-full pl-3 pr-3 py-2 rounded-xl border border-gray-200 dark:border-gray-800 text-xs outline-none"
           />
         </div>
         <div className="flex items-center gap-3 self-end sm:self-auto">
@@ -175,7 +175,7 @@ function RepositoryManagementPanel() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs dark:border-gray-800 dark:bg-white/[0.03]">
         <table className="w-full text-left text-xs">
           <thead className="bg-gray-50 border-b border-gray-100 dark:bg-gray-800/50 dark:border-gray-800 text-slate-500 font-bold uppercase text-[11px]">
             <tr>
@@ -186,9 +186,9 @@ function RepositoryManagementPanel() {
               <th className="p-3 text-right">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
             {data.map((d) => (
-              <tr key={d.id} className="hover:bg-slate-50">
+              <tr key={d.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                 <td className="p-3">
                   <p className="font-bold text-slate-800">{d.nama}</p>
                   <p className="text-[11px] text-slate-500 font-mono">{d.nim}</p>
@@ -225,7 +225,7 @@ function RepositoryManagementPanel() {
       </div>
 
       {editDoc && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-gray-950/50 p-4">
           <form onSubmit={saveEdit} className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-xl space-y-3">
             <h3 className="font-bold text-sm text-gray-900 dark:text-white/90">Edit Data Karya</h3>
             <input required value={editDoc.nama} onChange={(e) => setEditDoc({ ...editDoc, nama: e.target.value })} placeholder="Nama" className="w-full rounded-xl border p-2 text-xs" />
@@ -301,7 +301,7 @@ function BookManagementPanel() {
             value={q}
             onChange={(e) => { setQ(e.target.value); setPage(1); }}
             placeholder="Cari judul buku, pengarang, ISBN, DDC..."
-            className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs outline-none focus:border-blue-600 focus:ring-1 focus:ring-[#0B2546]"
+            className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 dark:border-gray-800 text-xs outline-none focus:border-blue-600 focus:ring-1 focus:ring-[#0B2546]"
           />
           <span className="material-symbols-outlined absolute left-2.5 top-2.5 text-slate-400 text-[18px]">
             search
@@ -330,9 +330,9 @@ function BookManagementPanel() {
               <th className="p-3 text-right w-24">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
             {books.map((b) => (
-              <tr key={b.id} className="hover:bg-slate-50/80 transition-colors">
+              <tr key={b.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors">
                 <td className="p-3 font-mono align-top">
                   <p className="font-bold text-amber-700 text-xs">{b.ddc || '-'}</p>
                   <p className="text-[10px] text-slate-400 mt-0.5">{b.inventoryNumber || b.registerNumber || '-'}</p>
@@ -374,7 +374,7 @@ function BookManagementPanel() {
         <button
           disabled={page <= 1}
           onClick={() => setPage(page - 1)}
-          className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white font-medium hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
+          className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white font-medium hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
           Sebelumnya
         </button>
@@ -384,14 +384,14 @@ function BookManagementPanel() {
         <button
           disabled={page >= Math.ceil(total / 20)}
           onClick={() => setPage(page + 1)}
-          className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white font-medium hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
+          className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white font-medium hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
           Berikutnya
         </button>
       </div>
 
       {editBook && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 backdrop-blur-xs p-4">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-gray-950/60 backdrop-blur-xs p-4">
           <form onSubmit={save} className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-2xl border border-slate-200 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-bold text-sm text-gray-900 dark:text-white/90">{editBook.id ? 'Edit Buku' : 'Tambah Buku Baru'}</h3>
@@ -519,7 +519,7 @@ function StaffManagementPanel() {
     <div className="space-y-4">
       <div className="flex justify-end"><button onClick={() => { setError(''); setShowCreate(true); }} className="min-h-11 rounded-xl bg-blue-600 px-4 text-sm font-bold text-white">Tambah Staf</button></div>
 
-      <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs dark:border-gray-800 dark:bg-white/[0.03]">
         <table className="w-full text-left text-xs">
           <thead className="bg-gray-50 border-b border-gray-100 dark:bg-gray-800/50 dark:border-gray-800 text-[11px] font-bold uppercase text-slate-500">
             <tr>
@@ -530,9 +530,9 @@ function StaffManagementPanel() {
               <th className="p-3.5 text-right">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
             {list.map((s) => (
-              <tr key={s.id} className="hover:bg-slate-50">
+              <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                 <td className="p-3.5 font-bold text-slate-800">{s.name}</td>
                 <td className="p-3.5 text-slate-600 font-mono">{s.email}</td>
                 <td className="p-3.5">
@@ -582,9 +582,9 @@ function StaffManagementPanel() {
           </tbody>
         </table>
       </div>
-      {showCreate && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4"><form onSubmit={create} className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-2xl"><h3 className="text-lg font-bold text-gray-900 dark:text-white/90">Tambah Staf Baru</h3>{error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}<label className="block text-sm font-bold">Nama lengkap<input required autoFocus value={name} onChange={e => setName(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Email<input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Password<input required minLength={8} type="password" value={password} onChange={e => setPassword(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Role<select value={role} onChange={e => setRole(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3"><option value="PETUGAS">PETUGAS</option><option value="ADMIN">ADMIN</option>{selfRole === 'PROGRAMMER' && <option value="PROGRAMMER">PROGRAMMER</option>}</select></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setShowCreate(false)} className="min-h-11 rounded-xl border px-4">Batal</button><button className="min-h-11 rounded-xl bg-blue-600 px-4 font-bold text-white">Simpan</button></div></form></div>}
-      {editStaff && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><form onSubmit={async event => { event.preventDefault(); if (editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER') return; const response = await fetch(`/api/backoffice/staff/${editStaff.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: editStaff.name, role: editStaff.role }) }); const result = await response.json(); if (!response.ok) { setError(result.error || 'Simpan gagal.'); return; } setEditStaff(null); load(); }} className="w-full max-w-sm space-y-4 rounded-2xl bg-white p-6 shadow-xl"><h3 className="text-lg font-bold text-gray-900 dark:text-white/90">Detail / Edit Staf</h3><p className="text-xs text-slate-500">{editStaff.email}</p>{error && <p role="alert" className="text-sm text-rose-700">{error}</p>}<label className="block text-sm font-bold">Nama<input required value={editStaff.name} disabled={editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER'} onChange={event => setEditStaff({ ...editStaff, name: event.target.value })} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Role<select value={editStaff.role} disabled={editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER'} onChange={event => setEditStaff({ ...editStaff, role: event.target.value })} className="mt-1 min-h-11 w-full rounded-xl border p-3"><option value="PETUGAS">PETUGAS</option><option value="ADMIN">ADMIN</option>{selfRole === 'PROGRAMMER' && <option value="PROGRAMMER">PROGRAMMER</option>}</select></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setEditStaff(null)} className="min-h-11 rounded-xl border px-4">Tutup</button>{(editStaff.role !== 'PROGRAMMER' || selfRole === 'PROGRAMMER') && <button className="min-h-11 rounded-xl bg-blue-600 px-4 font-bold text-white">Simpan</button>}</div></form></div>}
-      {resetId && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><form onSubmit={(e) => { e.preventDefault(); reset(resetId); }} className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"><h3 className="font-bold text-gray-900 dark:text-white/90">Reset Password Staf</h3><input required minLength={8} type="password" value={resetPassword} onChange={(e) => setResetPassword(e.target.value)} placeholder="Password baru (min. 8 karakter)" className="mt-4 w-full rounded-xl border p-3 text-sm"/><div className="mt-4 flex justify-end gap-2"><button type="button" onClick={() => setResetId(null)} className="rounded-lg border px-3 py-2 text-xs">Batal</button><button className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white">Simpan</button></div></form></div>}
+      {showCreate && <div className="fixed inset-0 z-50 grid place-items-center bg-gray-950/60 p-4"><form onSubmit={create} className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-2xl"><h3 className="text-lg font-bold text-gray-900 dark:text-white/90">Tambah Staf Baru</h3>{error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}<label className="block text-sm font-bold">Nama lengkap<input required autoFocus value={name} onChange={e => setName(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Email<input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Password<input required minLength={8} type="password" value={password} onChange={e => setPassword(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Role<select value={role} onChange={e => setRole(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3"><option value="PETUGAS">PETUGAS</option><option value="ADMIN">ADMIN</option>{selfRole === 'PROGRAMMER' && <option value="PROGRAMMER">PROGRAMMER</option>}</select></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setShowCreate(false)} className="min-h-11 rounded-xl border px-4">Batal</button><button className="min-h-11 rounded-xl bg-blue-600 px-4 font-bold text-white">Simpan</button></div></form></div>}
+      {editStaff && <div className="fixed inset-0 z-50 grid place-items-center bg-gray-950/50 p-4"><form onSubmit={async event => { event.preventDefault(); if (editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER') return; const response = await fetch(`/api/backoffice/staff/${editStaff.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: editStaff.name, role: editStaff.role }) }); const result = await response.json(); if (!response.ok) { setError(result.error || 'Simpan gagal.'); return; } setEditStaff(null); load(); }} className="w-full max-w-sm space-y-4 rounded-2xl bg-white p-6 shadow-xl"><h3 className="text-lg font-bold text-gray-900 dark:text-white/90">Detail / Edit Staf</h3><p className="text-xs text-slate-500">{editStaff.email}</p>{error && <p role="alert" className="text-sm text-rose-700">{error}</p>}<label className="block text-sm font-bold">Nama<input required value={editStaff.name} disabled={editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER'} onChange={event => setEditStaff({ ...editStaff, name: event.target.value })} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Role<select value={editStaff.role} disabled={editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER'} onChange={event => setEditStaff({ ...editStaff, role: event.target.value })} className="mt-1 min-h-11 w-full rounded-xl border p-3"><option value="PETUGAS">PETUGAS</option><option value="ADMIN">ADMIN</option>{selfRole === 'PROGRAMMER' && <option value="PROGRAMMER">PROGRAMMER</option>}</select></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setEditStaff(null)} className="min-h-11 rounded-xl border px-4">Tutup</button>{(editStaff.role !== 'PROGRAMMER' || selfRole === 'PROGRAMMER') && <button className="min-h-11 rounded-xl bg-blue-600 px-4 font-bold text-white">Simpan</button>}</div></form></div>}
+      {resetId && <div className="fixed inset-0 z-50 grid place-items-center bg-gray-950/50 p-4"><form onSubmit={(e) => { e.preventDefault(); reset(resetId); }} className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"><h3 className="font-bold text-gray-900 dark:text-white/90">Reset Password Staf</h3><input required minLength={8} type="password" value={resetPassword} onChange={(e) => setResetPassword(e.target.value)} placeholder="Password baru (min. 8 karakter)" className="mt-4 w-full rounded-xl border p-3 text-sm"/><div className="mt-4 flex justify-end gap-2"><button type="button" onClick={() => setResetId(null)} className="rounded-lg border px-3 py-2 text-xs">Batal</button><button className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white">Simpan</button></div></form></div>}
     </div>
   );
 }
@@ -1049,7 +1049,7 @@ export default function AdminDashboardPage() {
                       value={visitorSearch}
                       onChange={(e) => setVisitorSearch(e.target.value)}
                       placeholder="Cari NIM / Nama..."
-                      className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-blue-600"
+                      className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-800 text-xs font-medium outline-none focus:border-blue-600"
                     />
                   </div>
 
@@ -1080,7 +1080,7 @@ export default function AdminDashboardPage() {
                         <th className="p-3.5">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                       {visitors.length > 0 ? (
                         visitors.map((v: any) => (
                           <tr key={v.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors">
@@ -1135,7 +1135,7 @@ export default function AdminDashboardPage() {
                   <select
                     value={depositStatusFilter}
                     onChange={(e) => setDepositStatusFilter(e.target.value)}
-                    className="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold bg-white text-slate-700 outline-none"
+                    className="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-800 text-xs font-bold bg-white text-slate-700 outline-none"
                   >
                     <option value="all">Semua Status ({depositCounts.total})</option>
                     <option value="PENDING">Menunggu Verifikasi ({depositCounts.pending})</option>
@@ -1150,7 +1150,7 @@ export default function AdminDashboardPage() {
                   <select
                     value={depositDegreeFilter}
                     onChange={(e) => setDepositDegreeFilter(e.target.value)}
-                    className="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold bg-white text-slate-700 outline-none"
+                    className="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-800 text-xs font-bold bg-white text-slate-700 outline-none"
                   >
                     <option value="all">Semua Jenjang</option>
                     <option value="S1">S1 (Skripsi)</option>
@@ -1170,7 +1170,7 @@ export default function AdminDashboardPage() {
                     value={depositSearch}
                     onChange={(e) => setDepositSearch(e.target.value)}
                     placeholder="Cari No. Reg / NIM / Judul..."
-                    className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-blue-600"
+                    className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-800 text-xs font-medium outline-none focus:border-blue-600"
                   />
                 </div>
               </div>
@@ -1191,7 +1191,7 @@ export default function AdminDashboardPage() {
                         <th className="p-3.5 text-center">Aksi</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                       {deposits.length > 0 ? (
                         deposits.map((d: any) => (
                           <tr key={d.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors">
@@ -1279,7 +1279,7 @@ export default function AdminDashboardPage() {
                   <select
                     value={memberTypeFilter}
                     onChange={(e) => setMemberTypeFilter(e.target.value)}
-                    className="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold bg-white text-slate-700 outline-none"
+                    className="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-800 text-xs font-bold bg-white text-slate-700 outline-none"
                   >
                     <option value="all">Semua Kategori Anggota</option>
                     <option value="Mahasiswa FEB-UB">Mahasiswa FEB-UB</option>
@@ -1298,7 +1298,7 @@ export default function AdminDashboardPage() {
                     value={memberSearch}
                     onChange={(e) => setMemberSearch(e.target.value)}
                     placeholder="Cari PIN / NIM / Nama..."
-                    className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-blue-600"
+                    className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-800 text-xs font-medium outline-none focus:border-blue-600"
                   />
                 </div>
               </div>
@@ -1320,7 +1320,7 @@ export default function AdminDashboardPage() {
                         <th className="p-3.5 text-center">Dokumen</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                       {members.length > 0 ? (
                         members.map((m: any) => (
                           <tr key={m.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors">
@@ -1513,10 +1513,10 @@ export default function AdminDashboardPage() {
                         <th className="p-3">Perangkat / Browser</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                       {repoStats?.logs && repoStats.logs.length > 0 ? (
                         repoStats.logs.slice(0, 15).map((log: any) => (
-                          <tr key={log.id} className="hover:bg-slate-50">
+                          <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                             <td className="p-3 font-mono text-slate-500 whitespace-nowrap">
                               {new Date(log.createdAt).toLocaleTimeString('id-ID', {
                                 hour: '2-digit',
@@ -1794,7 +1794,7 @@ export default function AdminDashboardPage() {
                     ['REVISION_NEEDED', 'Minta revisi', 'amber'],
                     ['REJECTED', 'Tolak pengajuan', 'rose'],
                   ] as const).map(([value, label, tone]) => <label key={value} className={`cursor-pointer rounded-xl border p-3 text-xs font-bold ${decision === value ? `border-${tone}-500 bg-${tone}-50` : 'border-slate-200'}`}><input className="sr-only" type="radio" name="decision" checked={decision === value} onChange={() => setDecision(value)} />{label}</label>)}</div>
-                  {decision !== 'APPROVED' && <><label className="block text-xs font-bold text-slate-700">Catatan untuk mahasiswa <span className="text-rose-600">(wajib)</span></label><textarea rows={3} value={revisionNotes} onChange={(e) => setRevisionNotes(e.target.value)} placeholder="Jelaskan perbaikan atau alasan penolakan..." className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-amber-400" /></>}
+                  {decision !== 'APPROVED' && <><label className="block text-xs font-bold text-slate-700">Catatan untuk mahasiswa <span className="text-rose-600">(wajib)</span></label><textarea rows={3} value={revisionNotes} onChange={(e) => setRevisionNotes(e.target.value)} placeholder="Jelaskan perbaikan atau alasan penolakan..." className="w-full rounded-xl border border-gray-200 dark:border-gray-800 p-3 text-sm outline-none focus:ring-2 focus:ring-amber-400" /></>}
                   <button onClick={() => handleUpdateDepositStatus(decision)} disabled={actionLoading || (decision !== 'APPROVED' && !revisionNotes.trim())} className="min-h-11 w-full rounded-xl bg-blue-600 px-4 text-sm font-bold text-white disabled:opacity-50">{actionLoading ? 'Menyimpan…' : 'Simpan keputusan'}</button>
                   {selectedDeposit.verificationStatus === 'APPROVED' && <button onClick={async () => { if (!confirm('Terbitkan bukti serah simpan sekarang?')) return; setActionLoading(true); const res = await fetch(`/api/admin/deposits/${selectedDeposit.id}/issue-proof`, { method: 'POST' }); const json = await res.json(); setActionLoading(false); if (json.success) { alert(`Bukti berhasil diterbitkan: ${json.data.proofNumber}`); setSelectedDeposit(null); await fetchDeposits(); } else { alert(json.error || 'Gagal menerbitkan bukti.'); } }} disabled={actionLoading} className="min-h-11 w-full rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50">{actionLoading ? 'Memproses…' : 'Terbitkan Bukti Serah Simpan'}</button>}
                   {selectedDeposit.verificationStatus === 'PROOF_ISSUED' && <a href={`/api/serah-simpan/proof/${selectedDeposit.id}`} target="_blank" rel="noopener noreferrer" className="grid min-h-11 w-full place-items-center rounded-xl border border-blue-300 bg-blue-50 px-4 text-sm font-bold text-blue-700 hover:bg-blue-100">Buka Bukti Resmi ↗</a>}
@@ -1848,7 +1848,7 @@ export default function AdminDashboardPage() {
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   onClick={() => setShowForceCheckoutModal(false)}
-                  className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors"
+                  className="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 text-slate-700 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors"
                 >
                   Batal
                 </button>

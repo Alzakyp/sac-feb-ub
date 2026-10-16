@@ -6,6 +6,11 @@ const login = readFileSync(new URL('../app/backoffice/login/page.tsx', import.me
 assert.match(admin, /<AdminShell/);
 assert.match(admin, /<StatCard/);
 assert.match(admin, /<Card/);
+const crud = readFileSync(new URL('../components/admin/CrudPanel.tsx', import.meta.url), 'utf8');
+assert.match(crud, /bg-gray-50\/75/);
+assert.match(crud, /backdrop:backdrop-blur-xs/);
+assert.doesNotMatch(crud, /hover:bg-amber-50\/40/);
+assert.doesNotMatch(crud, /border-slate-300/);
 assert.match(shell, /lg:hidden/);
 assert.match(shell, /logo-feb-black\.png/);
 assert.match(shell, /bg-gray-50/);
