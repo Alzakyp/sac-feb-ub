@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const dashboard = readFileSync('app/anggota/page.tsx', 'utf8');
+const schema = readFileSync('prisma/schema.prisma', 'utf8');
+assert.match(dashboard, /QRCodeSVG/);
+assert.match(dashboard, /profile\.nim/);
+assert.match(dashboard, /Kartu Anggota SAC/);
+assert.match(schema, /passwordResetTokenHash/);
+assert.match(schema, /passwordResetExpiresAt/);
+console.log('Member card/reset contract passed');
