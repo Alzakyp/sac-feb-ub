@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const api = readFileSync('app/api/backoffice/members/route.ts', 'utf8');
+const ui = readFileSync('components/admin/CrudPanel.tsx', 'utf8');
+assert.match(api, /membershipRecord\.findMany/);
+assert.match(api, /webNims/);
+assert.match(api, /recordKind/);
+assert.doesNotMatch(ui, /Pendaftaran website<\/option>/);
+assert.match(ui, /row\.recordKind/);
+console.log('Unified membership contract passed');

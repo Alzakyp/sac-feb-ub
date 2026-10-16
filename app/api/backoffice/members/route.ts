@@ -13,9 +13,22 @@ export async function GET(req: NextRequest) {
   const status = (searchParams.get('status') || '').trim();
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
   const limit = 25;
-  const where = { ...(q ? { OR: [{ fullName: { contains: q } }, { nim: { contains: q } }, { email: { contains: q } }] } : {}), ...(status ? { status } : {}) };
-  const [total, data] = await Promise.all([prisma.member.count({ where }), prisma.member.findMany({ where, skip: (page - 1) * limit, take: limit, orderBy: { createdAt: 'desc' }, select: { id: true, memberType: true, fullName: true, nim: true, studyProgram: true, whatsapp: true, email: true, status: true, createdAt: true } })]);
-  return NextResponse.json({ success: true, data, total, page, limit });
+  const memberWhere = { ...(q ? { OR: [{ fullName: { contains: q } }, { nim: { contains: q } }, { email: { contains: q } }] } : {}), ...(status ? { status } : {}) };
+  const recordWhere = { ...(q ? { OR: [{ fullName: { contains: q } }, { nim: { contains: q } }, { email: { contains: q } }] } : {}), ...(status ? { status } : {}) };
+
+  const [members, records] = await Promise.all([
+    prisma.member.findMany({ where: memberWhere, select: { id: true, memberType: true, fullName: true, nim: true, studyProgram: true, whatsapp: true, email: true, status: true, createdAt: true } }),
+    prisma.membershipRecord.findMany({ where: recordWhere, select: { id: true, sourceKey: true, memberType: true, fullName: true, nim: true, studyProgram: true, whatsapp: true, email: true, status: true, registeredAt: true } }),
+  ]);
+
+  // Web accounts take precedence for the same NIM because they support sign-in.
+  const webNims = new Set(members.map(member => member.nim));
+  const data = [
+    ...members.map(member => ({ ...member, recordKind: 'members', source: 'WEB' })),
+    ...records.filter(record => !webNims.has(record.nim)).map(record => ({ ...record, createdAt: record.registeredAt, recordKind: 'membership-records', source: record.sourceKey && !record.sourceKey.startsWith('local:') ? 'SHEET' : 'LOCAL' })),
+  ].sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+
+  return NextResponse.json({ success: true, data: data.slice((page - 1) * limit, page * limit), total: data.length, page, limit });
 }
 
 export async function POST(req: NextRequest) {
