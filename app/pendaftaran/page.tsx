@@ -22,11 +22,12 @@ export default function PendaftaranPage() {
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fileVersion, setFileVersion] = useState(0);
   useEffect(() => { const nim = new URLSearchParams(window.location.search).get('nim') || ''; if (nim) setInitialNim(nim.replace(/\D/g, '')); }, []);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault(); setLoading(true); setMessage(''); setSuccess(false);
-    try { const res = await fetch('/api/members/register', { method: 'POST', body: new FormData(e.currentTarget) }); const json = await res.json(); setSuccess(json.success); setMessage(json.success ? `Pendaftaran berhasil. NIM ${json.data.nim} menunggu verifikasi staf.` : json.error); if (json.success) { e.currentTarget.reset(); setDepartment(''); setProgram(''); } }
+    e.preventDefault(); const form = e.currentTarget; setLoading(true); setMessage(''); setSuccess(false);
+    try { const res = await fetch('/api/members/register', { method: 'POST', body: new FormData(form) }); const json = await res.json(); setSuccess(json.success); setMessage(json.success ? `Pendaftaran berhasil. NIM ${json.data.nim} menunggu verifikasi staf.` : json.error); if (json.success) { form.reset(); setDepartment(''); setProgram(''); setFileVersion(value => value + 1); } }
     catch { setMessage('Pendaftaran gagal. Periksa koneksi lalu coba lagi.'); }
     finally { setLoading(false); }
   }
@@ -54,7 +55,7 @@ export default function PendaftaranPage() {
           <label className="sm:col-span-2"><span className={label}>Alamat surat *</span><textarea required name="mailingAddress" autoComplete="street-address" placeholder="Masukkan alamat lengkap" className={`${field} min-h-28 py-3`} rows={3}/></label>
           <label className="sm:col-span-2"><span className={label}>Password *</span><input required type="password" minLength={12} maxLength={72} name="password" autoComplete="new-password" placeholder="Minimal 12 karakter" className={field}/><span className="mt-2 block text-xs text-slate-500">Gunakan minimal 12 karakter. Jangan gunakan password akun lain.</span></label>
         </div></section>
-        <section aria-labelledby="document-heading"><h2 id="document-heading" className="mb-4 border-b border-slate-100 pb-3 text-base font-extrabold text-[#0B2546]">4. Dokumen verifikasi</h2><div className="grid gap-4 sm:grid-cols-2"><FileField name="selfie" title="Foto diri *" hint="JPG, PNG, atau WebP · Maksimal 5 MB" accept="image/jpeg,image/png,image/webp"/><FileField name="identityFile" title="File identitas *" hint="JPG, PNG, WebP, atau PDF · Maksimal 5 MB" accept="image/jpeg,image/png,image/webp,application/pdf"/></div></section>
+        <section aria-labelledby="document-heading"><h2 id="document-heading" className="mb-4 border-b border-slate-100 pb-3 text-base font-extrabold text-[#0B2546]">4. Dokumen verifikasi</h2><div className="grid gap-4 sm:grid-cols-2"><FileField key={`selfie-${fileVersion}`} name="selfie" title="Foto diri *" hint="JPG, PNG, atau WebP · Maksimal 5 MB" accept="image/jpeg,image/png,image/webp"/><FileField key={`identity-${fileVersion}`} name="identityFile" title="File identitas *" hint="JPG, PNG, WebP, atau PDF · Maksimal 5 MB" accept="image/jpeg,image/png,image/webp,application/pdf"/></div></section>
         {message && <p role={success ? 'status' : 'alert'} className={`rounded-xl border p-4 text-sm font-semibold ${success ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-800'}`}>{message}</p>}
         <button disabled={loading} className="min-h-12 w-full rounded-xl bg-[#0B2546] px-5 font-bold text-white transition hover:bg-[#123968] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 disabled:cursor-wait disabled:opacity-60">{loading ? 'Menyimpan…' : 'Daftar sebagai Anggota'}</button>
       </div>
