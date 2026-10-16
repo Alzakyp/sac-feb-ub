@@ -160,6 +160,8 @@ model Member {
   mailingAddress String   @db.Text
   identityType   String
   passwordHash   String
+  passwordResetTokenHash String?
+  passwordResetExpiresAt DateTime?
   selfiePath     String?  @db.Text
   identityPath   String?  @db.Text
   status         String   @default("PENDING")
@@ -173,6 +175,8 @@ model Member {
 model MembershipRecord {
   id             String    @id @default(cuid())
   passwordHash   String?
+  passwordResetTokenHash String?
+  passwordResetExpiresAt DateTime?
   sourceKey      String    @unique // SHA-256 row signature
   registeredAt   DateTime?
   adminName      String?

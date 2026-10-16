@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ dataset
   if (dataset === 'memberships') {
     const where = { ...(q ? { OR: [{ nim: { contains: q } }, { fullName: { contains: q } }, { email: { contains: q } }] } : {}), ...(Object.keys(range).length ? { registeredAt: range } : {}) }; 
     const [total, data] = await Promise.all([prisma.membershipRecord.count({ where }), prisma.membershipRecord.findMany({ where, skip, take: limit, orderBy: { registeredAt: 'desc' } })]);
-    return NextResponse.json({ success: true, total, page, limit, data: data.map(({ passwordHash: _passwordHash, ...record }) => record) });
+    return NextResponse.json({ success: true, total, page, limit, data: data.map(({ passwordHash: _passwordHash, passwordResetTokenHash: _token, passwordResetExpiresAt: _expires, ...record }) => record) });
   }
   if (dataset === 'deposits') {
     const where = { ...(q ? { OR: [{ nim: { contains: q } }, { fullName: { contains: q } }, { title: { contains: q } }] } : {}), ...(Object.keys(range).length ? { submittedAt: range } : {}) }; 
