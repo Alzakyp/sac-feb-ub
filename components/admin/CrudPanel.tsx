@@ -1,6 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import Button from '@/components/admin/tailadmin/Button';
+import Badge from '@/components/admin/tailadmin/Badge';
+import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/admin/tailadmin/Table';
 
 type Kind = 'repository' | 'books' | 'members' | 'membership-records';
 type Row = Record<string, any>;
@@ -118,7 +121,7 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
     } catch (error) { setError(error instanceof Error ? error.message : 'Export gagal.'); }
     finally { setBusy(false); }
   }
-  const icon = kind === 'repository' ? 'auto_stories' : kind === 'books' ? 'library_books' : 'badge';
+  const icon = kind === 'repository' ? 'docs.svg' : kind === 'books' ? 'table.svg' : 'user-circle.svg';
   return <section className="space-y-4">
     <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-xs dark:border-gray-800 dark:bg-white/[0.03]">
       {initialKind === 'members' && (
@@ -133,7 +136,7 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
       <label className="min-w-52 flex-1 text-xs font-bold text-gray-700 dark:text-gray-300">
         <span className="sr-only">Cari {settings.title}</span>
         <div className="relative">
-          <span aria-hidden="true" className="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[18px]">search</span>
+          <img src="/tailadmin/icons/docs.svg" alt="" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50" />
           <input placeholder={`Cari ${settings.title.toLowerCase()}...`} className={`${inputClass} pl-10`} value={q} onChange={event => { setQ(event.target.value); setPage(1); }} />
         </div>
       </label>
@@ -176,7 +179,7 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
         </label>
       )}
       <span className="flex min-h-11 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3.5 text-xs font-bold text-gray-700 dark:border-gray-800 dark:bg-white/5 dark:text-gray-300">
-        <span className="material-symbols-outlined text-[18px] text-amber-500">dataset</span>
+        <img src="/tailadmin/icons/table.svg" alt="" className="h-4 w-4" />
         {total.toLocaleString('id-ID')} data
       </span>
       <button
@@ -187,21 +190,16 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
       >
         Export Excel
       </button>
-      <button
-        disabled={busy}
-        className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white shadow-xs transition hover:bg-blue-700 disabled:opacity-50"
-        onClick={startCreate}
-      >
-        <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add</span>
+      <Button disabled={busy} onClick={startCreate} className="min-h-11">
         Tambah {settings.title}
-      </button>
+      </Button>
       {(kind === 'repository' || kind === 'membership-records') && (
         <button
           disabled={busy}
           className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 text-xs font-bold text-gray-700 shadow-xs hover:bg-gray-50 disabled:opacity-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
           onClick={sync}
         >
-          <span aria-hidden="true" className="material-symbols-outlined text-[18px]">sync</span>
+          <img src="/tailadmin/icons/arrow-right.svg" alt="" className="h-4 w-4" />
           Sinkron Sheet
         </button>
       )}
@@ -209,23 +207,23 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
     {error && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs font-medium text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-400">{error}</p>}
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs dark:border-gray-800 dark:bg-white/[0.03]">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px] text-left text-sm">
-          <thead className="border-b border-gray-100 bg-gray-50/75 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:bg-gray-800/40 dark:text-gray-400">
-            <tr>
-              <th className="p-4">Nama / Judul</th>
-              <th className="p-4">NIM / Inventaris</th>
-              <th className="p-4">Status / Jenis</th>
-              <th className="p-4">Sumber</th>
-              <th className="p-4 text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+        <Table className="w-full min-w-[760px] text-left text-sm">
+          <TableHeader className="border-b border-gray-100 bg-gray-50/75 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:bg-gray-800/40 dark:text-gray-400">
+            <TableRow>
+              <TableCell isHeader className="p-4">Nama / Judul</TableCell>
+              <TableCell isHeader className="p-4">NIM / Inventaris</TableCell>
+              <TableCell isHeader className="p-4">Status / Jenis</TableCell>
+              <TableCell isHeader className="p-4">Sumber</TableCell>
+              <TableCell isHeader className="p-4 text-right">Aksi</TableCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
             {rows.map(row => (
               <tr key={row.id} onClick={() => open(row, 'detail')} className="cursor-pointer align-top transition-colors hover:bg-gray-50/75 dark:hover:bg-white/[0.02]">
                 <td className="max-w-sm p-4">
                   <div className="flex items-start gap-3">
                     <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
-                      <span aria-hidden="true" className="material-symbols-outlined text-[17px]">{icon}</span>
+                      <img src={`/tailadmin/icons/${icon}`} alt="" className="h-4 w-4" />
                     </span>
                     <b className="font-semibold text-gray-900 dark:text-white/90 line-clamp-2">{name(row)}</b>
                   </div>
@@ -234,14 +232,12 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
                   {kind === 'repository' ? displayRepositoryIdentity(row).nim : (row.nim || row.inventoryNumber || '-')}
                 </td>
                 <td className="p-4">
-                  <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-400">
-                    {row.status || row.jenis || row.author || '-'}
-                  </span>
+                  <Badge color="warning" size="sm">{row.status || row.jenis || row.author || '-'}</Badge>
                 </td>
                 <td className="p-4">
                   <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
                     sheet(row)
-                      ? 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300'
+                      ? 'border-warning-500/20 bg-warning-50 text-warning-600 dark:border-warning-500/20 dark:bg-warning-50 dark:text-warning-600'
                       : kind === 'members'
                       ? 'border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-blue-300'
                       : 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-300'
@@ -252,13 +248,13 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
                 <td className="whitespace-nowrap p-4 text-right" onClick={event => event.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
                     <button aria-label={`Detail ${name(row)}`} className="grid h-9 w-9 place-items-center rounded-lg text-blue-600 transition hover:bg-blue-50 dark:hover:bg-blue-500/10" onClick={() => open(row, 'detail')}>
-                      <span aria-hidden="true" className="material-symbols-outlined text-[19px]">visibility</span>
+                      <img src="/tailadmin/icons/eye.svg" alt="" className="h-4 w-4" />
                     </button>
-                    <button aria-label={`Edit ${name(row)}`} className="grid h-9 w-9 place-items-center rounded-lg text-amber-600 transition hover:bg-amber-50 dark:hover:bg-amber-500/10" onClick={() => open(row, 'edit')}>
-                      <span aria-hidden="true" className="material-symbols-outlined text-[19px]">edit</span>
+                    <button aria-label={`Edit ${name(row)}`} className="grid h-9 w-9 place-items-center rounded-lg text-warning-600 transition hover:bg-warning-50 dark:hover:bg-warning-50/10" onClick={() => open(row, 'edit')}>
+                      <img src="/tailadmin/icons/pencil.svg" alt="" className="h-4 w-4" />
                     </button>
                     <button aria-label={`Hapus ${name(row)}`} disabled={busy} className="grid h-9 w-9 place-items-center rounded-lg text-rose-600 transition hover:bg-rose-50 disabled:opacity-50 dark:hover:bg-rose-500/10" onClick={() => remove(row)}>
-                      <span aria-hidden="true" className="material-symbols-outlined text-[19px]">delete</span>
+                      <img src="/tailadmin/icons/trash.svg" alt="" className="h-4 w-4" />
                     </button>
                   </div>
                 </td>
@@ -271,8 +267,8 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
                 </td>
               </tr>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
     <div className="flex items-center justify-end gap-2">
@@ -311,11 +307,11 @@ export default function CrudPanel({ kind: initialKind }: { kind: 'repository' | 
               onClick={close}
               className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
             >
-              <span className="material-symbols-outlined text-[18px]">close</span>
+              <img src="/tailadmin/icons/table.svg" alt="" className="h-4 w-4" />
             </button>
           </div>
           {sheet(selected) && (
-            <p className="my-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300">
+            <p className="my-4 rounded-xl border border-warning-500/20 bg-warning-50 p-3 text-xs text-warning-600 dark:border-warning-500/20 dark:bg-warning-50 dark:text-warning-600">
               {sheetWarning}
             </p>
           )}
