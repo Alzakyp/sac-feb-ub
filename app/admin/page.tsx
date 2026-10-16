@@ -14,6 +14,8 @@ import ComingSoonNotice, { ComingSoonDetails } from '@/components/ComingSoonNoti
 import { depositWorkflow } from '@/lib/deposit-workflow';
 import { validateDepositDecision } from '@/lib/deposit-decision';
 import CrudPanel from '@/components/admin/CrudPanel';
+import { AdminShell } from '@/components/admin/tailadmin/AdminShell';
+import { StatCard, Card, Badge } from '@/components/admin/tailadmin/Primitives';
 
 function ReportManagementPanel() {
   const [tickets, setTickets] = useState<any[]>([]);
@@ -36,11 +38,11 @@ function ReportManagementPanel() {
 
   return <div className="space-y-4">
     <div className="flex justify-between items-center rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
-      <p className="text-sm font-bold text-[#0B2546]">{tickets.length} tiket</p>
+      <p className="text-sm font-bold text-gray-900 dark:text-white/90">{tickets.length} tiket</p>
       <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-slate-300 p-2 text-xs bg-white"><option value="ALL">Semua Status</option><option value="OPEN">Baru</option><option value="IN_PROGRESS">Diproses</option><option value="RESOLVED">Selesai</option></select>
     </div>
-    <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm"><table className="w-full text-left text-xs"><thead className="bg-slate-50 text-slate-500 uppercase text-[11px]"><tr><th className="p-3">Tiket</th><th className="p-3">Pengadu</th><th className="p-3">Kategori</th><th className="p-3">Laporan</th><th className="p-3">Status</th><th className="p-3" /></tr></thead><tbody className="divide-y divide-slate-100">{tickets.map((t) => <tr key={t.id}><td className="p-3 font-mono font-bold text-[#0B2546]">{t.ticketNumber}</td><td className="p-3"><p className="font-bold">{t.fullName}</p><p className="text-slate-500">{t.identityNumber}</p></td><td className="p-3">{t.category}</td><td className="p-3 max-w-xs line-clamp-2">{t.description}</td><td className="p-3"><span className="rounded bg-amber-50 px-2 py-1 font-bold text-[10px] text-amber-800">{t.status}</span></td><td className="p-3 text-right"><button onClick={() => { setSelected(t); setNotes(t.staffNotes || ''); }} className="text-blue-600 hover:underline">Tanggapi</button></td></tr>)}{tickets.length === 0 && <tr><td colSpan={6} className="p-8 text-center text-slate-400">Belum ada laporan.</td></tr>}</tbody></table></div>
-    {selected && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"><p className="text-xs font-bold text-amber-700">{selected.ticketNumber}</p><h3 className="mt-2 font-bold text-[#0B2546]">{selected.category}</h3><p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm leading-6">{selected.description}</p><textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} placeholder="Tulis tanggapan untuk mahasiswa..." className="mt-4 w-full rounded-xl border p-3 text-sm" /><div className="mt-4 flex flex-wrap justify-end gap-2"><button onClick={() => setSelected(null)} className="rounded-lg border px-3 py-2 text-xs">Batal</button><button onClick={() => update('IN_PROGRESS')} className="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold">Proses</button><button onClick={() => update('RESOLVED')} className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white">Kirim Jawaban & Selesai</button></div></div></div>}
+    <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm"><table className="w-full text-left text-xs"><thead className="bg-slate-50 text-slate-500 uppercase text-[11px]"><tr><th className="p-3">Tiket</th><th className="p-3">Pengadu</th><th className="p-3">Kategori</th><th className="p-3">Laporan</th><th className="p-3">Status</th><th className="p-3" /></tr></thead><tbody className="divide-y divide-slate-100">{tickets.map((t) => <tr key={t.id}><td className="p-3 font-mono font-bold text-gray-900 dark:text-white/90">{t.ticketNumber}</td><td className="p-3"><p className="font-bold">{t.fullName}</p><p className="text-slate-500">{t.identityNumber}</p></td><td className="p-3">{t.category}</td><td className="p-3 max-w-xs line-clamp-2">{t.description}</td><td className="p-3"><span className="rounded bg-amber-50 px-2 py-1 font-bold text-[10px] text-amber-800">{t.status}</span></td><td className="p-3 text-right"><button onClick={() => { setSelected(t); setNotes(t.staffNotes || ''); }} className="text-blue-600 hover:underline">Tanggapi</button></td></tr>)}{tickets.length === 0 && <tr><td colSpan={6} className="p-8 text-center text-slate-400">Belum ada laporan.</td></tr>}</tbody></table></div>
+    {selected && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"><p className="text-xs font-bold text-amber-700">{selected.ticketNumber}</p><h3 className="mt-2 font-bold text-gray-900 dark:text-white/90">{selected.category}</h3><p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm leading-6">{selected.description}</p><textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} placeholder="Tulis tanggapan untuk mahasiswa..." className="mt-4 w-full rounded-xl border p-3 text-sm" /><div className="mt-4 flex flex-wrap justify-end gap-2"><button onClick={() => setSelected(null)} className="rounded-lg border px-3 py-2 text-xs">Batal</button><button onClick={() => update('IN_PROGRESS')} className="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold">Proses</button><button onClick={() => update('RESOLVED')} className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white">Kirim Jawaban & Selesai</button></div></div></div>}
   </div>;
 }
 
@@ -82,17 +84,17 @@ function SheetDataPanel({ dataset, title }: { dataset: 'memberships' | 'deposits
   return <div className="space-y-4">
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex w-full flex-wrap gap-2 sm:max-w-2xl"><label className="min-w-48 flex-1"><span className="sr-only">Cari {title}</span><input value={q} onChange={e => { setQ(e.target.value); setPage(1); }} placeholder={`Cari data ${title}...`} className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-400" /></label><label className="text-xs text-slate-500">Dari<input type="date" value={from} onChange={e => { setFrom(e.target.value); setPage(1); }} className="ml-1 rounded-xl border border-slate-300 p-2 text-xs" /></label><label className="text-xs text-slate-500">Sampai<input type="date" value={to} onChange={e => { setTo(e.target.value); setPage(1); }} className="ml-1 rounded-xl border border-slate-300 p-2 text-xs" /></label></div>
-      <div className="flex items-center gap-3"><strong className="text-sm text-slate-600">{total.toLocaleString('id-ID')} data</strong><button onClick={downloadExcel} className="min-h-11 rounded-xl border border-slate-300 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50">Export Excel</button><button onClick={sync} disabled={syncing} className="min-h-11 rounded-xl bg-[#0B2546] px-4 text-xs font-bold text-white disabled:opacity-50">{syncing ? 'Menyinkronkan…' : 'Sinkron Google Sheet'}</button></div>
+      <div className="flex items-center gap-3"><strong className="text-sm text-slate-600">{total.toLocaleString('id-ID')} data</strong><button onClick={downloadExcel} className="min-h-11 rounded-xl border border-slate-300 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50">Export Excel</button><button onClick={sync} disabled={syncing} className="min-h-11 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white disabled:opacity-50">{syncing ? 'Menyinkronkan…' : 'Sinkron Google Sheet'}</button></div>
     </div>
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-4">Nama / NIM</th><th className="p-4">Program / Jenis</th><th className="p-4">Tanggal</th><th className="p-4">Status / Bukti</th></tr></thead><tbody className="divide-y divide-slate-100">{loading ? <tr><td colSpan={4} className="p-10 text-center">Memuat…</td></tr> : data.length === 0 ? <tr><td colSpan={4} className="p-10 text-center text-slate-400">Belum ada data.</td></tr> : data.map(row => {
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs dark:border-gray-800 dark:bg-white/[0.03]"><div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-4">Nama / NIM</th><th className="p-4">Program / Jenis</th><th className="p-4">Tanggal</th><th className="p-4">Status / Bukti</th></tr></thead><tbody className="divide-y divide-slate-100">{loading ? <tr><td colSpan={4} className="p-10 text-center">Memuat…</td></tr> : data.length === 0 ? <tr><td colSpan={4} className="p-10 text-center text-slate-400">Belum ada data.</td></tr> : data.map(row => {
       const rawDate = row.registeredAt || row.submittedAt || row.checkInTime;
       const parsedDate = rawDate ? new Date(rawDate) : null;
       const dateText = parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
       const proofText = row.proofNumber ? `${row.proofNumber} • ${row.title || 'Tanpa Judul'}` : (row.title || row.status || (row.checkOutTime ? 'Selesai' : 'Tercatat'));
-      return <tr key={row.id} onClick={() => dataset === 'deposits' && setSelectedRecord(row)} className={`align-top ${dataset === 'deposits' ? 'cursor-pointer hover:bg-amber-100/50' : 'hover:bg-amber-50/40'}`}><td className="p-4"><b className="block text-[#0B2546]">{row.fullName}</b><span className="text-xs text-slate-500">{row.nim || row.identityNumber}</span></td><td className="p-4">{row.studyProgram || row.memberType || row.workType || '-'}</td><td className="p-4 text-xs font-semibold">{dateText}</td><td className="max-w-md p-4"><span className="line-clamp-2">{proofText}</span></td></tr>;
+      return <tr key={row.id} onClick={() => dataset === 'deposits' && setSelectedRecord(row)} className={`align-top ${dataset === 'deposits' ? 'cursor-pointer hover:bg-amber-100/50' : 'hover:bg-amber-50/40'}`}><td className="p-4"><b className="block text-gray-900 dark:text-white/90">{row.fullName}</b><span className="text-xs text-slate-500">{row.nim || row.identityNumber}</span></td><td className="p-4">{row.studyProgram || row.memberType || row.workType || '-'}</td><td className="p-4 text-xs font-semibold">{dateText}</td><td className="max-w-md p-4"><span className="line-clamp-2">{proofText}</span></td></tr>;
     })}</tbody></table></div></div>
     <div className="flex justify-end gap-2"><button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="min-h-11 rounded-xl border px-4 disabled:opacity-40">Sebelumnya</button><span className="grid min-h-11 place-items-center px-3 text-sm font-bold">{page} / {Math.max(1, Math.ceil(total / 25))}</span><button disabled={page * 25 >= total} onClick={() => setPage(p => p + 1)} className="min-h-11 rounded-xl border px-4 disabled:opacity-40">Berikutnya</button></div>
-    {selectedRecord && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4" onClick={() => setSelectedRecord(null)}><div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}><h3 className="text-lg font-bold text-[#0B2546]">Detail Bukti Serah Simpan</h3><p className="mt-2 text-sm font-bold text-slate-800">{selectedRecord.title || 'Tanpa Judul'}</p><div className="mt-4 space-y-2 text-xs"><p><b>Nama:</b> {selectedRecord.fullName} ({selectedRecord.nim})</p><p><b>Nomor Bukti:</b> {selectedRecord.proofNumber || '-'}</p><p><b>Nilai Plagiasi:</b> {selectedRecord.plagiarismScore || '-'}</p><p><b>Catatan Revisi:</b> {selectedRecord.revisionNotes || '-'}</p></div><div className="mt-5 space-y-2 border-t pt-4 text-xs font-bold text-blue-700">{selectedRecord.downloadProofUrl && <a className="block hover:underline" href={selectedRecord.downloadProofUrl} target="_blank" rel="noopener noreferrer">Unduh Bukti Lengkap (Drive) ↗</a>}{selectedRecord.driveFolderUrl && <a className="block hover:underline" href={selectedRecord.driveFolderUrl} target="_blank" rel="noopener noreferrer">Folder Drive Berkas ↗</a>}{selectedRecord.initialSectionUrl && <a className="block hover:underline" href={selectedRecord.initialSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Awal ↗</a>}{selectedRecord.mainSectionUrl && <a className="block hover:underline" href={selectedRecord.mainSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Isi ↗</a>}{selectedRecord.finalSectionUrl && <a className="block hover:underline" href={selectedRecord.finalSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Akhir ↗</a>}</div><div className="mt-6 flex justify-end"><button onClick={() => setSelectedRecord(null)} className="min-h-10 rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-700">Tutup</button></div></div></div>}
+    {selectedRecord && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4" onClick={() => setSelectedRecord(null)}><div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}><h3 className="text-lg font-bold text-gray-900 dark:text-white/90">Detail Bukti Serah Simpan</h3><p className="mt-2 text-sm font-bold text-slate-800">{selectedRecord.title || 'Tanpa Judul'}</p><div className="mt-4 space-y-2 text-xs"><p><b>Nama:</b> {selectedRecord.fullName} ({selectedRecord.nim})</p><p><b>Nomor Bukti:</b> {selectedRecord.proofNumber || '-'}</p><p><b>Nilai Plagiasi:</b> {selectedRecord.plagiarismScore || '-'}</p><p><b>Catatan Revisi:</b> {selectedRecord.revisionNotes || '-'}</p></div><div className="mt-5 space-y-2 border-t pt-4 text-xs font-bold text-blue-700">{selectedRecord.downloadProofUrl && <a className="block hover:underline" href={selectedRecord.downloadProofUrl} target="_blank" rel="noopener noreferrer">Unduh Bukti Lengkap (Drive) ↗</a>}{selectedRecord.driveFolderUrl && <a className="block hover:underline" href={selectedRecord.driveFolderUrl} target="_blank" rel="noopener noreferrer">Folder Drive Berkas ↗</a>}{selectedRecord.initialSectionUrl && <a className="block hover:underline" href={selectedRecord.initialSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Awal ↗</a>}{selectedRecord.mainSectionUrl && <a className="block hover:underline" href={selectedRecord.mainSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Isi ↗</a>}{selectedRecord.finalSectionUrl && <a className="block hover:underline" href={selectedRecord.finalSectionUrl} target="_blank" rel="noopener noreferrer">Berkas Akhir ↗</a>}</div><div className="mt-6 flex justify-end"><button onClick={() => setSelectedRecord(null)} className="min-h-10 rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-700">Tutup</button></div></div></div>}
   </div>;
 }
 
@@ -151,7 +153,7 @@ function RepositoryManagementPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-xs dark:border-gray-800 dark:bg-white/[0.03]">
         <div className="relative w-full sm:w-80">
           <input
             value={q}
@@ -175,7 +177,7 @@ function RepositoryManagementPanel() {
 
       <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
         <table className="w-full text-left text-xs">
-          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[11px]">
+          <thead className="bg-gray-50 border-b border-gray-100 dark:bg-gray-800/50 dark:border-gray-800 text-slate-500 font-bold uppercase text-[11px]">
             <tr>
               <th className="p-3">Penulis / NIM</th>
               <th className="p-3">Judul Karya</th>
@@ -192,7 +194,7 @@ function RepositoryManagementPanel() {
                   <p className="text-[11px] text-slate-500 font-mono">{d.nim}</p>
                 </td>
                 <td className="p-3 max-w-md">
-                  <p className="font-semibold text-[#0B2546] line-clamp-2">{d.judul}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white/90 line-clamp-2">{d.judul}</p>
                 </td>
                 <td className="p-3">
                   <span className="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-bold block w-fit mb-1">{d.jenis}</span>
@@ -225,7 +227,7 @@ function RepositoryManagementPanel() {
       {editDoc && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4">
           <form onSubmit={saveEdit} className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-xl space-y-3">
-            <h3 className="font-bold text-sm text-[#0B2546]">Edit Data Karya</h3>
+            <h3 className="font-bold text-sm text-gray-900 dark:text-white/90">Edit Data Karya</h3>
             <input required value={editDoc.nama} onChange={(e) => setEditDoc({ ...editDoc, nama: e.target.value })} placeholder="Nama" className="w-full rounded-xl border p-2 text-xs" />
             <input required value={editDoc.nim} onChange={(e) => setEditDoc({ ...editDoc, nim: e.target.value })} placeholder="NIM" className="w-full rounded-xl border p-2 text-xs" />
             <textarea required value={editDoc.judul} onChange={(e) => setEditDoc({ ...editDoc, judul: e.target.value })} rows={3} placeholder="Judul" className="w-full rounded-xl border p-2 text-xs" />
@@ -235,7 +237,7 @@ function RepositoryManagementPanel() {
             <input value={editDoc.bagianAkhirUrl || ''} onChange={(e) => setEditDoc({ ...editDoc, bagianAkhirUrl: e.target.value })} placeholder="Link Bagian Akhir" className="w-full rounded-xl border p-2 text-xs" />
             <div className="flex justify-end gap-2 pt-2">
               <button type="button" onClick={() => setEditDoc(null)} className="px-3 py-1.5 text-xs rounded-lg border">Batal</button>
-              <button className="px-4 py-1.5 text-xs rounded-lg bg-[#0B2546] text-white font-bold">Simpan</button>
+              <button className="px-4 py-1.5 text-xs rounded-lg bg-blue-600 text-white font-bold">Simpan</button>
             </div>
           </form>
         </div>
@@ -293,13 +295,13 @@ function BookManagementPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-xs dark:border-gray-800 dark:bg-white/[0.03]">
         <div className="relative w-full sm:w-80">
           <input
             value={q}
             onChange={(e) => { setQ(e.target.value); setPage(1); }}
             placeholder="Cari judul buku, pengarang, ISBN, DDC..."
-            className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs outline-none focus:border-[#0B2546] focus:ring-1 focus:ring-[#0B2546]"
+            className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs outline-none focus:border-blue-600 focus:ring-1 focus:ring-[#0B2546]"
           />
           <span className="material-symbols-outlined absolute left-2.5 top-2.5 text-slate-400 text-[18px]">
             search
@@ -309,7 +311,7 @@ function BookManagementPanel() {
           <span className="text-xs font-bold text-slate-500">{total.toLocaleString('id-ID')} Buku Fisik</span>
           <button
             onClick={() => setEditBook({ title: '', author: '', publisher: '', publicationYear: 2024, isbn: '', ddc: '' })}
-            className="px-3.5 py-2 rounded-xl bg-[#0B2546] hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px]">add</span>
             <span>Tambah Buku</span>
@@ -319,7 +321,7 @@ function BookManagementPanel() {
 
       <div className="overflow-x-auto rounded-2xl bg-white border border-slate-200 shadow-sm">
         <table className="w-full text-left text-xs min-w-[760px]">
-          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[11px]">
+          <thead className="bg-gray-50 border-b border-gray-100 dark:bg-gray-800/50 dark:border-gray-800 text-slate-500 font-bold uppercase text-[11px]">
             <tr>
               <th className="p-3 w-40">DDC / Register</th>
               <th className="p-3">Judul Buku</th>
@@ -336,7 +338,7 @@ function BookManagementPanel() {
                   <p className="text-[10px] text-slate-400 mt-0.5">{b.inventoryNumber || b.registerNumber || '-'}</p>
                 </td>
                 <td className="p-3 align-top">
-                  <p className="font-bold text-[#0B2546] text-xs leading-relaxed line-clamp-2">{b.title}</p>
+                  <p className="font-bold text-gray-900 dark:text-white/90 text-xs leading-relaxed line-clamp-2">{b.title}</p>
                   {b.subject && (
                     <span className="inline-block mt-1 px-1.5 py-0.5 rounded bg-slate-100 text-[10px] text-slate-500 font-medium">
                       {b.subject}
@@ -392,7 +394,7 @@ function BookManagementPanel() {
         <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 backdrop-blur-xs p-4">
           <form onSubmit={save} className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-2xl border border-slate-200 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-sm text-[#0B2546]">{editBook.id ? 'Edit Buku' : 'Tambah Buku Baru'}</h3>
+              <h3 className="font-bold text-sm text-gray-900 dark:text-white/90">{editBook.id ? 'Edit Buku' : 'Tambah Buku Baru'}</h3>
               <button
                 type="button"
                 onClick={() => setEditBook(null)}
@@ -403,35 +405,35 @@ function BookManagementPanel() {
             </div>
             <div>
               <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Judul Buku *</label>
-              <input required value={editBook.title} onChange={(e) => setEditBook({ ...editBook, title: e.target.value })} placeholder="Judul Buku" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-[#0B2546]" />
+              <input required value={editBook.title} onChange={(e) => setEditBook({ ...editBook, title: e.target.value })} placeholder="Judul Buku" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-blue-600" />
             </div>
             <div>
               <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Pengarang</label>
-              <input value={editBook.author || ''} onChange={(e) => setEditBook({ ...editBook, author: e.target.value })} placeholder="Pengarang" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-[#0B2546]" />
+              <input value={editBook.author || ''} onChange={(e) => setEditBook({ ...editBook, author: e.target.value })} placeholder="Pengarang" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-blue-600" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Penerbit</label>
-                <input value={editBook.publisher || ''} onChange={(e) => setEditBook({ ...editBook, publisher: e.target.value })} placeholder="Penerbit" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-[#0B2546]" />
+                <input value={editBook.publisher || ''} onChange={(e) => setEditBook({ ...editBook, publisher: e.target.value })} placeholder="Penerbit" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-blue-600" />
               </div>
               <div>
                 <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Tahun Terbit</label>
-                <input type="number" value={editBook.publicationYear || ''} onChange={(e) => setEditBook({ ...editBook, publicationYear: parseInt(e.target.value) || null })} placeholder="Tahun" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-[#0B2546]" />
+                <input type="number" value={editBook.publicationYear || ''} onChange={(e) => setEditBook({ ...editBook, publicationYear: parseInt(e.target.value) || null })} placeholder="Tahun" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-blue-600" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[11px] font-semibold text-slate-600 mb-1 block">ISBN</label>
-                <input value={editBook.isbn || ''} onChange={(e) => setEditBook({ ...editBook, isbn: e.target.value })} placeholder="ISBN" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-[#0B2546]" />
+                <input value={editBook.isbn || ''} onChange={(e) => setEditBook({ ...editBook, isbn: e.target.value })} placeholder="ISBN" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-blue-600" />
               </div>
               <div>
                 <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Klasifikasi DDC</label>
-                <input value={editBook.ddc || ''} onChange={(e) => setEditBook({ ...editBook, ddc: e.target.value })} placeholder="DDC" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-[#0B2546]" />
+                <input value={editBook.ddc || ''} onChange={(e) => setEditBook({ ...editBook, ddc: e.target.value })} placeholder="DDC" className="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-blue-600" />
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-              <button type="button" onClick={() => setEditBook(null)} className="px-4 py-2 text-xs rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">Batal</button>
-              <button type="submit" className="px-4 py-2 text-xs rounded-xl bg-[#0B2546] hover:bg-slate-800 text-white font-bold transition-colors cursor-pointer">Simpan</button>
+              <button type="button" onClick={() => setEditBook(null)} className="px-4 py-2 text-xs rounded-xl border border-slate-200 hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors cursor-pointer">Batal</button>
+              <button type="submit" className="px-4 py-2 text-xs rounded-xl bg-blue-600 hover:bg-slate-800 text-white font-bold transition-colors cursor-pointer">Simpan</button>
             </div>
           </form>
         </div>
@@ -515,11 +517,11 @@ function StaffManagementPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end"><button onClick={() => { setError(''); setShowCreate(true); }} className="min-h-11 rounded-xl bg-[#0B2546] px-4 text-sm font-bold text-white">Tambah Staf</button></div>
+      <div className="flex justify-end"><button onClick={() => { setError(''); setShowCreate(true); }} className="min-h-11 rounded-xl bg-blue-600 px-4 text-sm font-bold text-white">Tambah Staf</button></div>
 
       <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
         <table className="w-full text-left text-xs">
-          <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase text-slate-500">
+          <thead className="bg-gray-50 border-b border-gray-100 dark:bg-gray-800/50 dark:border-gray-800 text-[11px] font-bold uppercase text-slate-500">
             <tr>
               <th className="p-3.5">Nama</th>
               <th className="p-3.5">Email</th>
@@ -580,9 +582,9 @@ function StaffManagementPanel() {
           </tbody>
         </table>
       </div>
-      {showCreate && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4"><form onSubmit={create} className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-2xl"><h3 className="text-lg font-bold text-[#0B2546]">Tambah Staf Baru</h3>{error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}<label className="block text-sm font-bold">Nama lengkap<input required autoFocus value={name} onChange={e => setName(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Email<input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Password<input required minLength={8} type="password" value={password} onChange={e => setPassword(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Role<select value={role} onChange={e => setRole(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3"><option value="PETUGAS">PETUGAS</option><option value="ADMIN">ADMIN</option>{selfRole === 'PROGRAMMER' && <option value="PROGRAMMER">PROGRAMMER</option>}</select></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setShowCreate(false)} className="min-h-11 rounded-xl border px-4">Batal</button><button className="min-h-11 rounded-xl bg-[#0B2546] px-4 font-bold text-white">Simpan</button></div></form></div>}
-      {editStaff && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><form onSubmit={async event => { event.preventDefault(); if (editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER') return; const response = await fetch(`/api/backoffice/staff/${editStaff.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: editStaff.name, role: editStaff.role }) }); const result = await response.json(); if (!response.ok) { setError(result.error || 'Simpan gagal.'); return; } setEditStaff(null); load(); }} className="w-full max-w-sm space-y-4 rounded-2xl bg-white p-6 shadow-xl"><h3 className="text-lg font-bold text-[#0B2546]">Detail / Edit Staf</h3><p className="text-xs text-slate-500">{editStaff.email}</p>{error && <p role="alert" className="text-sm text-rose-700">{error}</p>}<label className="block text-sm font-bold">Nama<input required value={editStaff.name} disabled={editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER'} onChange={event => setEditStaff({ ...editStaff, name: event.target.value })} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Role<select value={editStaff.role} disabled={editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER'} onChange={event => setEditStaff({ ...editStaff, role: event.target.value })} className="mt-1 min-h-11 w-full rounded-xl border p-3"><option value="PETUGAS">PETUGAS</option><option value="ADMIN">ADMIN</option>{selfRole === 'PROGRAMMER' && <option value="PROGRAMMER">PROGRAMMER</option>}</select></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setEditStaff(null)} className="min-h-11 rounded-xl border px-4">Tutup</button>{(editStaff.role !== 'PROGRAMMER' || selfRole === 'PROGRAMMER') && <button className="min-h-11 rounded-xl bg-[#0B2546] px-4 font-bold text-white">Simpan</button>}</div></form></div>}
-      {resetId && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><form onSubmit={(e) => { e.preventDefault(); reset(resetId); }} className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"><h3 className="font-bold text-[#0B2546]">Reset Password Staf</h3><input required minLength={8} type="password" value={resetPassword} onChange={(e) => setResetPassword(e.target.value)} placeholder="Password baru (min. 8 karakter)" className="mt-4 w-full rounded-xl border p-3 text-sm"/><div className="mt-4 flex justify-end gap-2"><button type="button" onClick={() => setResetId(null)} className="rounded-lg border px-3 py-2 text-xs">Batal</button><button className="rounded-lg bg-[#0B2546] px-3 py-2 text-xs font-bold text-white">Simpan</button></div></form></div>}
+      {showCreate && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4"><form onSubmit={create} className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-2xl"><h3 className="text-lg font-bold text-gray-900 dark:text-white/90">Tambah Staf Baru</h3>{error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}<label className="block text-sm font-bold">Nama lengkap<input required autoFocus value={name} onChange={e => setName(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Email<input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Password<input required minLength={8} type="password" value={password} onChange={e => setPassword(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Role<select value={role} onChange={e => setRole(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border p-3"><option value="PETUGAS">PETUGAS</option><option value="ADMIN">ADMIN</option>{selfRole === 'PROGRAMMER' && <option value="PROGRAMMER">PROGRAMMER</option>}</select></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setShowCreate(false)} className="min-h-11 rounded-xl border px-4">Batal</button><button className="min-h-11 rounded-xl bg-blue-600 px-4 font-bold text-white">Simpan</button></div></form></div>}
+      {editStaff && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><form onSubmit={async event => { event.preventDefault(); if (editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER') return; const response = await fetch(`/api/backoffice/staff/${editStaff.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: editStaff.name, role: editStaff.role }) }); const result = await response.json(); if (!response.ok) { setError(result.error || 'Simpan gagal.'); return; } setEditStaff(null); load(); }} className="w-full max-w-sm space-y-4 rounded-2xl bg-white p-6 shadow-xl"><h3 className="text-lg font-bold text-gray-900 dark:text-white/90">Detail / Edit Staf</h3><p className="text-xs text-slate-500">{editStaff.email}</p>{error && <p role="alert" className="text-sm text-rose-700">{error}</p>}<label className="block text-sm font-bold">Nama<input required value={editStaff.name} disabled={editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER'} onChange={event => setEditStaff({ ...editStaff, name: event.target.value })} className="mt-1 min-h-11 w-full rounded-xl border p-3" /></label><label className="block text-sm font-bold">Role<select value={editStaff.role} disabled={editStaff.role === 'PROGRAMMER' && selfRole !== 'PROGRAMMER'} onChange={event => setEditStaff({ ...editStaff, role: event.target.value })} className="mt-1 min-h-11 w-full rounded-xl border p-3"><option value="PETUGAS">PETUGAS</option><option value="ADMIN">ADMIN</option>{selfRole === 'PROGRAMMER' && <option value="PROGRAMMER">PROGRAMMER</option>}</select></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setEditStaff(null)} className="min-h-11 rounded-xl border px-4">Tutup</button>{(editStaff.role !== 'PROGRAMMER' || selfRole === 'PROGRAMMER') && <button className="min-h-11 rounded-xl bg-blue-600 px-4 font-bold text-white">Simpan</button>}</div></form></div>}
+      {resetId && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><form onSubmit={(e) => { e.preventDefault(); reset(resetId); }} className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"><h3 className="font-bold text-gray-900 dark:text-white/90">Reset Password Staf</h3><input required minLength={8} type="password" value={resetPassword} onChange={(e) => setResetPassword(e.target.value)} placeholder="Password baru (min. 8 karakter)" className="mt-4 w-full rounded-xl border p-3 text-sm"/><div className="mt-4 flex justify-end gap-2"><button type="button" onClick={() => setResetId(null)} className="rounded-lg border px-3 py-2 text-xs">Batal</button><button className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white">Simpan</button></div></form></div>}
     </div>
   );
 }
@@ -867,354 +869,101 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-800 font-sans antialiased w-full">
-      {/* ===================================================================== */}
-      {/* 1. SIDEBAR TAILADMIN STYLE (WHITE / CLEAN BORDERED)                   */}
-      {/* ===================================================================== */}
-      <aside className="w-64 bg-white text-slate-700 flex flex-col justify-between shrink-0 h-screen sticky top-0 border-r border-slate-200 shadow-sm z-20">
-        <div>
-          {/* Logo & Header */}
-          <div className="p-5 border-b border-slate-100 flex items-center gap-3">
-            <img
-              src="/logo-feb-black.png"
-              alt="FEB UB"
-              className="h-9 w-auto object-contain shrink-0"
-            />
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm font-black tracking-tight text-[#0B2546] leading-tight truncate">
-                SAC FEB UB
-              </span>
-              <span className="text-[10px] font-bold tracking-wider text-blue-600 uppercase">
-                Admin Console
-              </span>
-            </div>
-          </div>
-
-          {/* Navigasi Tab Utama */}
-          <nav className="p-3 space-y-1">
-            <div className="px-3 pb-2 pt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              Menu Utama
-            </div>
-            {[
-              { id: 'overview', label: 'Overview', icon: 'dashboard', badge: null },
-              {
-                id: 'deposits',
-                label: 'Serah Simpan',
-                icon: 'assignment_turned_in',
-                badge:
-                  overviewData?.kpis?.pendingDepositsCount &&
-                  overviewData.kpis.pendingDepositsCount > 0
-                    ? `${overviewData.kpis.pendingDepositsCount}`
-                    : null,
-                badgeColor: 'bg-amber-100 text-amber-800 border border-amber-300',
-              },
-              { id: 'reports', label: 'Lapor Kendala', icon: 'support_agent', badge: overviewData?.kpis?.openReportsCount ? `${overviewData.kpis.openReportsCount}` : null, badgeColor: 'bg-rose-100 text-rose-800 border border-rose-300' },
-              { id: 'staff', label: 'Kelola Staf', icon: 'manage_accounts', badge: null },
-              { id: 'repository', label: 'Kelola Repositori', icon: 'auto_stories', badge: null },
-              { id: 'memberships', label: 'Data Keanggotaan', icon: 'badge', badge: null },
-              { id: 'depositRecords', label: 'Bukti Serah Simpan', icon: 'verified', badge: null },
-              { id: 'visitorHistory', label: 'Riwayat Buku Tamu', icon: 'history', badge: null },
-              { id: 'books', label: 'Kelola Buku', icon: 'library_books', badge: null },
-            ].map((tab) => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-blue-50 text-blue-700 font-bold shadow-xs border border-blue-200/60'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className={`material-symbols-outlined text-[20px] ${isActive ? 'text-blue-600' : 'text-slate-400'}`}>{tab.icon}</span>
-                    <span>{tab.label}</span>
-                  </div>
-                  {tab.badge && (
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                        isActive ? 'bg-blue-600 text-white' : tab.badgeColor || 'bg-slate-200 text-slate-700'
-                      }`}
-                    >
-                      {tab.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-100 space-y-3">
-          <button
-            onClick={() => setShowStandeeModal(true)}
-            className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center gap-2 border border-slate-200 transition-colors cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[18px] text-amber-500">qr_code</span>
-            <span>Cetak Standee QR</span>
-          </button>
-
-          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <div className="flex flex-col min-w-0">
-                <span className="text-[11px] font-bold text-slate-900 truncate">Admin Petugas</span>
-                <span className="text-[9px] text-slate-400 font-mono">Live Session</span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={logout}
-              disabled={loggingOut}
-              className="min-h-9 min-w-9 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center cursor-pointer"
-              title={loggingOut ? 'Sedang keluar…' : 'Keluar dari akun admin'}
-              aria-label={loggingOut ? 'Sedang keluar…' : 'Keluar dari akun admin'}
-            >
-              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">logout</span>
-            </button>
-          </div>
-          {logoutError && <p role="alert" className="text-xs text-rose-600">{logoutError}</p>}
-        </div>
-      </aside>
-
-      {/* ===================================================================== */}
-      {/* 2. AREA KONTEN DINAMIS UTAMA                                          */}
-      {/* ===================================================================== */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* TOP OPERATIONAL BAR */}
-        <header className="bg-white/95 backdrop-blur border-b border-slate-200 sticky top-0 z-10 px-4 sm:px-6 py-4 flex flex-wrap gap-3 items-center justify-between shadow-xs">
-          <div>
-            <div className="mb-1 text-[10px] font-bold uppercase tracking-[.18em] text-blue-600">Dashboard / SAC FEB UB</div>
-            <h1 className="text-xl font-black text-slate-900 capitalize flex items-center gap-2 tracking-tight">
-              {activeTab === 'overview' && 'Ringkasan Eksekutif Operasional'}
-              {activeTab === 'visitors' && 'Riwayat Buku Tamu'}
-              {activeTab === 'deposits' && 'Verifikasi Serah Simpan Karya Ilmiah'}
-              {activeTab === 'reports' && 'Kelola Laporan Kendala'}
-              {activeTab === 'staff' && 'Kelola Akun Staf'}
-              {activeTab === 'repository' && 'Manajemen Database Repositori'}
-              {activeTab === 'memberships' && 'Database Keanggotaan SAC'}
-              {activeTab === 'depositRecords' && 'Arsip Bukti Serah Simpan'}
-              {activeTab === 'visitorHistory' && 'Riwayat Check-In / Buku Tamu'}
-              {activeTab === 'books' && 'Manajemen Katalog Buku Fisik'}
-            </h1>
-            <p className="text-xs text-slate-500 font-medium">
-              Gedung F Pascasarjana Lantai 1 FEB Universitas Brawijaya
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {/* Live Clock */}
-            <div className="hidden md:flex items-center gap-2 bg-slate-50 px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-700">
-              <span className="material-symbols-outlined text-amber-500 text-[18px]">
-                schedule
-              </span>
-              <span>{currentTime}</span>
-            </div>
-
-
-            {/* Refresh Button */}
-            <button
-              onClick={refreshAll}
-              disabled={refreshing}
-              className="min-h-10 min-w-10 rounded-xl border border-slate-200 hover:bg-blue-50 hover:border-blue-200 text-slate-600 hover:text-blue-600 transition-colors flex items-center justify-center cursor-pointer"
-              title="Segarkan Data"
-            >
-              <span
-                className={`material-symbols-outlined text-[20px] ${
-                  refreshing ? 'animate-spin text-[#0B2546]' : ''
-                }`}
-              >
-                refresh
-              </span>
-            </button>
-          </div>
-        </header>
-
-        {/* TAB CONTENTS */}
-        <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 overflow-y-auto max-w-[1600px] w-full mx-auto">
+    <>
+    <AdminShell
+      tabs={[
+        { id: 'overview', label: 'Overview', icon: 'dashboard' },
+        { id: 'deposits', label: 'Serah Simpan', icon: 'assignment_turned_in', badge: overviewData?.kpis?.pendingDepositsCount ? String(overviewData.kpis.pendingDepositsCount) : null, badgeColor: 'bg-amber-100 text-amber-800' },
+        { id: 'reports', label: 'Lapor Kendala', icon: 'support_agent', badge: overviewData?.kpis?.openReportsCount ? String(overviewData.kpis.openReportsCount) : null, badgeColor: 'bg-rose-100 text-rose-800' },
+        { id: 'staff', label: 'Kelola Staf', icon: 'manage_accounts' },
+        { id: 'repository', label: 'Kelola Repositori', icon: 'auto_stories' },
+        { id: 'memberships', label: 'Data Keanggotaan', icon: 'badge' },
+        { id: 'depositRecords', label: 'Bukti Serah Simpan', icon: 'verified' },
+        { id: 'visitorHistory', label: 'Riwayat Buku Tamu', icon: 'history' },
+        { id: 'books', label: 'Kelola Buku', icon: 'library_books' },
+      ]}
+      activeTab={activeTab}
+      onSelectTab={id => setActiveTab(id as typeof activeTab)}
+      currentTime={currentTime}
+      onRefresh={refreshAll}
+      refreshing={refreshing}
+      onLogout={logout}
+      loggingOut={loggingOut}
+      logoutError={logoutError}
+      onOpenStandee={() => setShowStandeeModal(true)}
+    >
           {/* ================================================================= */}
           {/* TAB 1: OVERVIEW (RINGKASAN EKSEKUTIF)                             */}
           {/* ================================================================= */}
           {activeTab === 'overview' && (
             <div className="space-y-6">
-              {/* 4 KARTU KPI UTAMA */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-reduce:animate-none">
-                {/* KPI 1 */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between transition motion-safe:hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none">
-                  <div>
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      Pengunjung di Ruangan
-                    </span>
-                    <div className="text-2xl sm:text-3xl font-black text-[#0B2546] mt-1">
-                      {overviewData?.kpis?.activeVisitorsCount ?? 0}
-                      <span className="text-xs font-normal text-slate-400 ml-1.5">Mahasiswa</span>
-                    </div>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 mt-1">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span>Sesi Aktif Kiosk Gedung F</span>
-                    </span>
-                  </div>
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-[26px]">co_present</span>
-                  </div>
-                </div>
-
-                {/* KPI 2 */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between transition motion-safe:hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none">
-                  <div>
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      Menunggu Verifikasi
-                    </span>
-                    <div className="text-2xl sm:text-3xl font-black text-amber-600 mt-1">
-                      {overviewData?.kpis?.pendingDepositsCount ?? 0}
-                      <span className="text-xs font-normal text-slate-400 ml-1.5">Naskah</span>
-                    </div>
-                    <span className="text-[11px] text-amber-700 font-medium mt-1 block">
-                      Antrean Serah Simpan SAC-ONE
-                    </span>
-                  </div>
-                  <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-[26px]">pending_actions</span>
-                  </div>
-                </div>
-
-                {/* KPI 3 */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between transition motion-safe:hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none">
-                  <div>
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      Total Staf
-                    </span>
-                    <div className="text-2xl sm:text-3xl font-black text-[#0B2546] mt-1">
-                      {overviewData?.kpis?.totalStaffCount ?? 0}
-                      <span className="text-xs font-normal text-slate-400 ml-1.5">Akun</span>
-                    </div>
-                    <span className="text-[11px] text-slate-500 font-medium mt-1 block">
-                      Pendaftaran Mandiri Mahasiswa
-                    </span>
-                  </div>
-                  <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-[26px]">how_to_reg</span>
-                  </div>
-                </div>
-
-                {/* KPI 4 */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between transition motion-safe:hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none">
-                  <div>
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      Aktivitas E-Resource
-                    </span>
-                    <div className="text-2xl sm:text-3xl font-black text-[#0B2546] mt-1">
-                      {overviewData?.kpis?.totalActivityCount ?? 0}
-                      <span className="text-xs font-normal text-slate-400 ml-1.5">Hit Log</span>
-                    </div>
-                    <span className="text-[11px] text-slate-500 font-medium mt-1 block">
-                      Pencarian &amp; Unduh Naskah
-                    </span>
-                  </div>
-                  <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-800 flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-[26px]">query_stats</span>
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <StatCard label="Pengunjung di Ruangan" value={overviewData?.kpis?.activeVisitorsCount ?? 0} note="Sesi aktif ruangan" icon="co_present" tone="emerald" />
+                <StatCard label="Menunggu Verifikasi" value={overviewData?.kpis?.pendingDepositsCount ?? 0} note="Antrean serah simpan" icon="pending_actions" tone="amber" />
+                <StatCard label="Total Staf" value={overviewData?.kpis?.totalStaffCount ?? 0} note="Akun petugas" icon="manage_accounts" tone="blue" />
+                <StatCard label="Aktivitas E-Resource" value={overviewData?.kpis?.totalActivityCount ?? 0} note="Pencarian & unduh naskah" icon="query_stats" tone="purple" />
               </div>
 
               {/* 2 PANEL WIDGET OVERVIEW */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                 {/* WIDGET 1: PENGUNJUNG TERBARU HARI INI */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-amber-500 text-[20px]">
-                        history
-                      </span>
-                      <h3 className="text-sm font-bold text-[#0B2546]">
-                        Pengunjung Terbaru Hari Ini
-                      </h3>
-                    </div>
-                    <button
-                      onClick={() => setActiveTab('visitorHistory')}
-                      className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors"
-                    >
-                      Lihat Semua →
-                    </button>
-                  </div>
-
-                  <div className="divide-y divide-slate-100">
+                <Card
+                  title={<span className="flex items-center gap-2"><span className="material-symbols-outlined text-[20px] text-blue-600">history</span>Pengunjung Terbaru Hari Ini</span>}
+                  right={<button onClick={() => setActiveTab('visitorHistory')} className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Lihat Semua →</button>}
+                >
+                  <div className="divide-y divide-gray-100">
                     {overviewData?.recentVisitors && overviewData.recentVisitors.length > 0 ? (
                       overviewData.recentVisitors.map((v: any) => (
                         <div key={v.id} className="py-2.5 flex items-center justify-between text-xs">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-slate-100 text-[#0B2546] font-bold flex items-center justify-center text-[11px]">
+                            <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-[11px]">
                               {v.fullName ? v.fullName[0] : 'M'}
                             </div>
                             <div>
-                              <div className="font-bold text-slate-800">{v.fullName}</div>
-                              <div className="text-[11px] text-slate-400 font-mono">
+                              <div className="font-bold text-gray-800">{v.fullName}</div>
+                              <div className="text-[11px] text-gray-400 font-mono">
                                 {v.identityNumber} • {v.studyProgram}
                               </div>
                             </div>
                           </div>
                           <div className="text-right">
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                v.status === 'ACTIVE'
-                                  ? 'bg-emerald-100 text-emerald-800'
-                                  : 'bg-slate-100 text-slate-600'
-                              }`}
-                            >
+                            <Badge variant={v.status === 'ACTIVE' ? 'success' : 'neutral'}>
                               {v.status === 'ACTIVE' ? 'DI RUANGAN' : 'SELESAI'}
-                            </span>
-                            <span className="text-[10px] text-slate-400 block mt-0.5">
+                            </Badge>
+                            <span className="text-[10px] text-gray-400 block mt-0.5 font-mono">
                               {formatTimeOnly(v.checkInTime)}
                             </span>
                           </div>
                         </div>
                       ))
                     ) : (
-                      <p className="text-xs text-slate-400 py-4 text-center">
+                      <p className="text-xs text-gray-400 py-4 text-center">
                         Belum ada data presensi hari ini.
                       </p>
                     )}
                   </div>
-                </div>
+                </Card>
 
                 {/* WIDGET 2: ANTREAN SERAH SIMPAN PRIORITAS */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-amber-500 text-[20px]">
-                        notification_important
-                      </span>
-                      <h3 className="text-sm font-bold text-[#0B2546]">
-                        Antrean Serah Simpan Prioritas
-                      </h3>
-                    </div>
-                    <button
-                      onClick={() => setActiveTab('deposits')}
-                      className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors"
-                    >
-                      Buka Verifikasi →
-                    </button>
-                  </div>
-
-                  <div className="divide-y divide-slate-100">
+                <Card
+                  title={<span className="flex items-center gap-2"><span className="material-symbols-outlined text-[20px] text-amber-500">notification_important</span>Antrean Serah Simpan Prioritas</span>}
+                  right={<button onClick={() => setActiveTab('deposits')} className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Buka Verifikasi →</button>}
+                >
+                  <div className="divide-y divide-gray-100">
                     {overviewData?.priorityDeposits && overviewData.priorityDeposits.length > 0 ? (
                       overviewData.priorityDeposits.map((d: any) => (
                         <div key={d.id} className="py-2.5 flex items-center justify-between text-xs">
                           <div className="flex-1 pr-3">
                             <div className="flex items-center gap-2">
-                              <span className="font-mono font-bold text-[#0B2546]">
+                              <span className="font-mono font-bold text-gray-900 dark:text-white/90">
                                 {d.depositNumber}
                               </span>
-                              <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 font-bold text-[10px]">
-                                {d.degreeLevel}
-                              </span>
+                              <Badge variant="warning">{d.degreeLevel}</Badge>
                             </div>
-                            <div className="font-medium text-slate-800 line-clamp-1 mt-0.5">
+                            <div className="font-medium text-gray-800 line-clamp-1 mt-0.5">
                               {d.titleId}
                             </div>
-                            <div className="text-[10px] text-slate-400">
+                            <div className="text-[10px] text-gray-400">
                               Oleh: {d.fullName} ({d.identityNumber})
                             </div>
                           </div>
@@ -1223,19 +972,19 @@ export default function AdminDashboardPage() {
                               openVerifyModal(d);
                               setActiveTab('deposits');
                             }}
-                            className="px-2.5 py-1.5 rounded-lg bg-[#0B2546] hover:bg-slate-900 text-amber-300 font-bold text-[11px] transition-colors shrink-0 cursor-pointer"
+                            className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] transition-colors shrink-0 cursor-pointer shadow-xs"
                           >
                             Verifikasi
                           </button>
                         </div>
                       ))
                     ) : (
-                      <p className="text-xs text-slate-400 py-4 text-center">
+                      <p className="text-xs text-gray-400 py-4 text-center">
                         Tidak ada antrean serah simpan yang menunggu verifikasi.
                       </p>
                     )}
                   </div>
-                </div>
+                </Card>
               </div>
             </div>
           )}
@@ -1246,7 +995,7 @@ export default function AdminDashboardPage() {
           {false && activeTab === 'visitors' && (
             <div className="space-y-4">
               {/* TOOLBAR & OPERATIONAL CONTROLS */}
-              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs dark:border-gray-800 dark:bg-white/[0.03] flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                   {/* Status Operasional */}
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold">
@@ -1300,7 +1049,7 @@ export default function AdminDashboardPage() {
                       value={visitorSearch}
                       onChange={(e) => setVisitorSearch(e.target.value)}
                       placeholder="Cari NIM / Nama..."
-                      className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-[#0B2546]"
+                      className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-blue-600"
                     />
                   </div>
 
@@ -1317,10 +1066,10 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* TABEL PRESENSI RUANGAN */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="rounded-2xl border border-gray-200 bg-white shadow-xs dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
+                    <thead className="bg-gray-50 border-b border-gray-100 dark:bg-gray-800/50 dark:border-gray-800 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
                       <tr>
                         <th className="p-3.5">NIM Mahasiswa</th>
                         <th className="p-3.5">Nama Lengkap</th>
@@ -1334,8 +1083,8 @@ export default function AdminDashboardPage() {
                     <tbody className="divide-y divide-slate-100">
                       {visitors.length > 0 ? (
                         visitors.map((v: any) => (
-                          <tr key={v.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="p-3.5 font-mono font-bold text-[#0B2546]">
+                          <tr key={v.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors">
+                            <td className="p-3.5 font-mono font-bold text-gray-900 dark:text-white/90">
                               {v.identityNumber}
                             </td>
                             <td className="p-3.5 font-bold text-slate-800">{v.fullName}</td>
@@ -1380,7 +1129,7 @@ export default function AdminDashboardPage() {
           {activeTab === 'deposits' && (
             <div className="space-y-4">
               {/* TOOLBAR FILTER */}
-              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs dark:border-gray-800 dark:bg-white/[0.03] flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                   {/* Status Filter Dropdown */}
                   <select
@@ -1421,16 +1170,16 @@ export default function AdminDashboardPage() {
                     value={depositSearch}
                     onChange={(e) => setDepositSearch(e.target.value)}
                     placeholder="Cari No. Reg / NIM / Judul..."
-                    className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-[#0B2546]"
+                    className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-blue-600"
                   />
                 </div>
               </div>
 
               {/* TABEL PENGURUSAN SERAH SIMPAN */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="rounded-2xl border border-gray-200 bg-white shadow-xs dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
+                    <thead className="bg-gray-50 border-b border-gray-100 dark:bg-gray-800/50 dark:border-gray-800 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
                       <tr>
                         <th className="p-3.5">No. Registrasi</th>
                         <th className="p-3.5">Tanggal</th>
@@ -1445,8 +1194,8 @@ export default function AdminDashboardPage() {
                     <tbody className="divide-y divide-slate-100">
                       {deposits.length > 0 ? (
                         deposits.map((d: any) => (
-                          <tr key={d.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="p-3.5 font-mono font-bold text-[#0B2546]">
+                          <tr key={d.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors">
+                            <td className="p-3.5 font-mono font-bold text-gray-900 dark:text-white/90">
                               {d.depositNumber}
                             </td>
                             <td className="p-3.5 text-slate-500 whitespace-nowrap">
@@ -1490,7 +1239,7 @@ export default function AdminDashboardPage() {
                             <td className="p-3.5 text-center">
                               <button
                                 onClick={() => openVerifyModal(d)}
-                                className="px-3 py-1.5 rounded-xl bg-[#0B2546] hover:bg-slate-900 text-amber-300 font-bold text-xs shadow-sm transition-colors cursor-pointer"
+                                className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-amber-300 font-bold text-xs shadow-sm transition-colors cursor-pointer"
                               >
                                 Buka Detail
                               </button>
@@ -1525,7 +1274,7 @@ export default function AdminDashboardPage() {
           {false && activeTab === 'staff' && (
             <div className="space-y-4">
               {/* TOOLBAR */}
-              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs dark:border-gray-800 dark:bg-white/[0.03] flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <select
                     value={memberTypeFilter}
@@ -1549,16 +1298,16 @@ export default function AdminDashboardPage() {
                     value={memberSearch}
                     onChange={(e) => setMemberSearch(e.target.value)}
                     placeholder="Cari PIN / NIM / Nama..."
-                    className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-[#0B2546]"
+                    className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-blue-600"
                   />
                 </div>
               </div>
 
               {/* TABEL ANGGOTA */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="rounded-2xl border border-gray-200 bg-white shadow-xs dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
+                    <thead className="bg-gray-50 border-b border-gray-100 dark:bg-gray-800/50 dark:border-gray-800 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
                       <tr>
                         <th className="p-3.5">PIN Anggota</th>
                         <th className="p-3.5">NIM / NIK</th>
@@ -1574,9 +1323,9 @@ export default function AdminDashboardPage() {
                     <tbody className="divide-y divide-slate-100">
                       {members.length > 0 ? (
                         members.map((m: any) => (
-                          <tr key={m.id} className="hover:bg-slate-50 transition-colors">
+                          <tr key={m.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors">
                             <td className="p-3.5 font-mono font-bold text-amber-700">{m.pin}</td>
-                            <td className="p-3.5 font-mono font-bold text-[#0B2546]">
+                            <td className="p-3.5 font-mono font-bold text-gray-900 dark:text-white/90">
                               {m.identityNumber}
                             </td>
                             <td className="p-3.5 font-bold text-slate-800">{m.fullName}</td>
@@ -1626,13 +1375,13 @@ export default function AdminDashboardPage() {
             <div className="space-y-6">
               <CrudPanel kind="repository" />
               {/* REKAPITULASI KLIK JURNAL INTERNASIONAL */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs dark:border-gray-800 dark:bg-white/[0.03] space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-amber-500 text-[22px]">
                       ads_click
                     </span>
-                    <h3 className="text-sm font-bold text-[#0B2546]">
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white/90">
                       Rekapitulasi Klik Akses Database Jurnal Internasional
                     </h3>
                   </div>
@@ -1664,12 +1413,12 @@ export default function AdminDashboardPage() {
               {/* 2 TABEL POPULER */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* 10 KATA KUNCI PALING POPULER */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs dark:border-gray-800 dark:bg-white/[0.03] space-y-4">
                   <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
                     <span className="material-symbols-outlined text-amber-500 text-[20px]">
                       search_insights
                     </span>
-                    <h3 className="text-sm font-bold text-[#0B2546]">
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white/90">
                       10 Kata Kunci Pencarian Paling Populer
                     </h3>
                   </div>
@@ -1701,12 +1450,12 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {/* 10 NASKAH PALING SERING DIUNDUH */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs dark:border-gray-800 dark:bg-white/[0.03] space-y-4">
                   <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
                     <span className="material-symbols-outlined text-amber-500 text-[20px]">
                       download_done
                     </span>
-                    <h3 className="text-sm font-bold text-[#0B2546]">
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white/90">
                       10 Naskah Skripsi/Tesis Paling Sering Diunduh
                     </h3>
                   </div>
@@ -1746,14 +1495,14 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* TABEL LOG AKTIVITAS REAL-TIME */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-5 space-y-4">
-                <h3 className="text-sm font-bold text-[#0B2546] border-b border-slate-100 pb-3">
+              <div className="rounded-2xl border border-gray-200 bg-white shadow-xs dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden p-5 space-y-4">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white/90 border-b border-slate-100 pb-3">
                   Riwayat Aktivitas Repositori Ilmiah (Live Activity Feed)
                 </h3>
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
+                    <thead className="bg-gray-50 border-b border-gray-100 dark:bg-gray-800/50 dark:border-gray-800 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
                       <tr>
                         <th className="p-3">Waktu</th>
                         <th className="p-3">Mahasiswa / NIM</th>
@@ -1819,8 +1568,7 @@ export default function AdminDashboardPage() {
           {activeTab === 'depositRecords' && <SheetDataPanel dataset="deposits" title="Bukti Serah Simpan" />}
           {activeTab === 'visitorHistory' && <SheetDataPanel dataset="visitors" title="Buku Tamu" />}
           {activeTab === 'books' && <CrudPanel kind="books" />}
-        </main>
-      </div>
+    </AdminShell>
 
       {/* ===================================================================== */}
       {/* 3. MODAL: DIALOG VERIFIKASI SERAH SIMPAN INTERAKTIF                    */}
@@ -1835,7 +1583,7 @@ export default function AdminDashboardPage() {
               className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-300 overflow-hidden my-8"
             >
               {/* Header Modal */}
-              <div className="bg-[#0B2546] text-white p-6 relative border-b border-amber-400/30 flex items-center justify-between">
+              <div className="bg-blue-600 text-white p-6 relative border-b border-amber-400/30 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold text-amber-300 uppercase tracking-widest block">
                     Formulir Keputusan Verifikator
@@ -1859,7 +1607,7 @@ export default function AdminDashboardPage() {
               <div className="p-6 space-y-5 text-xs max-h-[70vh] overflow-y-auto">
                 {/* 1. Detail Identitas */}
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
-                  <h4 className="font-bold text-[#0B2546] text-xs uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="font-bold text-gray-900 dark:text-white/90 text-xs uppercase tracking-wider flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[16px] text-amber-500">
                       person
                     </span>
@@ -1910,7 +1658,7 @@ export default function AdminDashboardPage() {
 
                 {/* 2. Metadata Naskah */}
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
-                  <h4 className="font-bold text-[#0B2546] text-xs uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="font-bold text-gray-900 dark:text-white/90 text-xs uppercase tracking-wider flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[16px] text-amber-500">
                       menu_book
                     </span>
@@ -1954,7 +1702,7 @@ export default function AdminDashboardPage() {
 
                 {/* 3. Pratinjau / Unduh 3 Berkas PDF */}
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
-                  <h4 className="font-bold text-[#0B2546] text-xs uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="font-bold text-gray-900 dark:text-white/90 text-xs uppercase tracking-wider flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[16px] text-amber-500">
                       attach_file
                     </span>
@@ -1969,7 +1717,7 @@ export default function AdminDashboardPage() {
                       }
                       target="_blank"
                       rel="noreferrer"
-                      className="p-2.5 bg-white rounded-xl border border-slate-200 hover:border-[#0B2546] flex items-center gap-2 text-slate-700 hover:text-[#0B2546] transition-colors shadow-sm"
+                      className="p-2.5 bg-white rounded-xl border border-slate-200 hover:border-[#0B2546] flex items-center gap-2 text-slate-700 hover:text-gray-900 dark:text-white/90 transition-colors shadow-sm"
                     >
                       <span className="material-symbols-outlined text-amber-500 text-[18px]">
                         description
@@ -1988,7 +1736,7 @@ export default function AdminDashboardPage() {
                       }
                       target="_blank"
                       rel="noreferrer"
-                      className="p-2.5 bg-white rounded-xl border border-slate-200 hover:border-[#0B2546] flex items-center gap-2 text-slate-700 hover:text-[#0B2546] transition-colors shadow-sm"
+                      className="p-2.5 bg-white rounded-xl border border-slate-200 hover:border-[#0B2546] flex items-center gap-2 text-slate-700 hover:text-gray-900 dark:text-white/90 transition-colors shadow-sm"
                     >
                       <span className="material-symbols-outlined text-blue-600 text-[18px]">
                         menu_book
@@ -2007,7 +1755,7 @@ export default function AdminDashboardPage() {
                       }
                       target="_blank"
                       rel="noreferrer"
-                      className="p-2.5 bg-white rounded-xl border border-slate-200 hover:border-[#0B2546] flex items-center gap-2 text-slate-700 hover:text-[#0B2546] transition-colors shadow-sm"
+                      className="p-2.5 bg-white rounded-xl border border-slate-200 hover:border-[#0B2546] flex items-center gap-2 text-slate-700 hover:text-gray-900 dark:text-white/90 transition-colors shadow-sm"
                     >
                       <span className="material-symbols-outlined text-emerald-600 text-[18px]">
                         library_books
@@ -2040,14 +1788,14 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
-                  <h4 className="font-bold text-[#0B2546]">Keputusan pemeriksaan</h4>
+                  <h4 className="font-bold text-gray-900 dark:text-white/90">Keputusan pemeriksaan</h4>
                   <div className="grid gap-2 sm:grid-cols-3">{([
                     ['APPROVED', 'Softcopy valid', 'emerald'],
                     ['REVISION_NEEDED', 'Minta revisi', 'amber'],
                     ['REJECTED', 'Tolak pengajuan', 'rose'],
                   ] as const).map(([value, label, tone]) => <label key={value} className={`cursor-pointer rounded-xl border p-3 text-xs font-bold ${decision === value ? `border-${tone}-500 bg-${tone}-50` : 'border-slate-200'}`}><input className="sr-only" type="radio" name="decision" checked={decision === value} onChange={() => setDecision(value)} />{label}</label>)}</div>
                   {decision !== 'APPROVED' && <><label className="block text-xs font-bold text-slate-700">Catatan untuk mahasiswa <span className="text-rose-600">(wajib)</span></label><textarea rows={3} value={revisionNotes} onChange={(e) => setRevisionNotes(e.target.value)} placeholder="Jelaskan perbaikan atau alasan penolakan..." className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-amber-400" /></>}
-                  <button onClick={() => handleUpdateDepositStatus(decision)} disabled={actionLoading || (decision !== 'APPROVED' && !revisionNotes.trim())} className="min-h-11 w-full rounded-xl bg-[#0B2546] px-4 text-sm font-bold text-white disabled:opacity-50">{actionLoading ? 'Menyimpan…' : 'Simpan keputusan'}</button>
+                  <button onClick={() => handleUpdateDepositStatus(decision)} disabled={actionLoading || (decision !== 'APPROVED' && !revisionNotes.trim())} className="min-h-11 w-full rounded-xl bg-blue-600 px-4 text-sm font-bold text-white disabled:opacity-50">{actionLoading ? 'Menyimpan…' : 'Simpan keputusan'}</button>
                   {selectedDeposit.verificationStatus === 'APPROVED' && <button onClick={async () => { if (!confirm('Terbitkan bukti serah simpan sekarang?')) return; setActionLoading(true); const res = await fetch(`/api/admin/deposits/${selectedDeposit.id}/issue-proof`, { method: 'POST' }); const json = await res.json(); setActionLoading(false); if (json.success) { alert(`Bukti berhasil diterbitkan: ${json.data.proofNumber}`); setSelectedDeposit(null); await fetchDeposits(); } else { alert(json.error || 'Gagal menerbitkan bukti.'); } }} disabled={actionLoading} className="min-h-11 w-full rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50">{actionLoading ? 'Memproses…' : 'Terbitkan Bukti Serah Simpan'}</button>}
                   {selectedDeposit.verificationStatus === 'PROOF_ISSUED' && <a href={`/api/serah-simpan/proof/${selectedDeposit.id}`} target="_blank" rel="noopener noreferrer" className="grid min-h-11 w-full place-items-center rounded-xl border border-blue-300 bg-blue-50 px-4 text-sm font-bold text-blue-700 hover:bg-blue-100">Buka Bukti Resmi ↗</a>}
                 </div>
@@ -2100,7 +1848,7 @@ export default function AdminDashboardPage() {
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   onClick={() => setShowForceCheckoutModal(false)}
-                  className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors"
+                  className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors"
                 >
                   Batal
                 </button>
@@ -2190,7 +1938,7 @@ export default function AdminDashboardPage() {
               <div className="pt-2 text-right">
                 <button
                   onClick={() => setSelectedMemberModal(null)}
-                  className="px-4 py-1.5 rounded-xl bg-[#0B2546] text-white text-xs font-bold"
+                  className="px-4 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-bold"
                 >
                   Tutup
                 </button>
@@ -2212,7 +1960,7 @@ export default function AdminDashboardPage() {
               className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-300 space-y-4 text-center"
             >
               <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
-                <h3 className="font-black text-[#0B2546] text-sm uppercase tracking-wide">
+                <h3 className="font-black text-gray-900 dark:text-white/90 text-sm uppercase tracking-wide">
                   Standee QR Presensi Kiosk Ruangan
                 </h3>
                 <button
@@ -2240,7 +1988,7 @@ export default function AdminDashboardPage() {
               <div className="flex items-center justify-center gap-2 pt-2">
                 <button
                   onClick={() => window.print()}
-                  className="px-5 py-2 rounded-xl bg-[#0B2546] text-amber-300 text-xs font-bold flex items-center gap-1.5 shadow-md cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-blue-600 text-amber-300 text-xs font-bold flex items-center gap-1.5 shadow-md cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[16px]">print</span>
                   <span>Cetak Standee Akrilik</span>
@@ -2257,6 +2005,6 @@ export default function AdminDashboardPage() {
         onClose={() => setComingSoonOpen(false)}
         details={comingSoonDetails}
       />
-    </div>
+    </>
   );
 }
