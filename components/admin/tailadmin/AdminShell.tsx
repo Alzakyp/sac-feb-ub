@@ -5,7 +5,7 @@ type Tab = { id: string; label: string; icon: string; badge?: string | null; bad
 
 const icons: Record<string, string> = {
   dashboard: 'grid.svg', assignment_turned_in: 'check-circle.svg', support_agent: 'chat.svg',
-  manage_accounts: 'user-circle.svg', auto_stories: 'docs.svg', badge: 'badge.svg',
+  manage_accounts: 'user-circle.svg', auto_stories: 'docs.svg', badge: 'user-circle.svg',
   verified: 'check-circle.svg', history: 'time.svg', library_books: 'table.svg',
   qr_code: 'copy.svg', logout: 'plug-in.svg', menu: 'list.svg', schedule: 'calender-line.svg', refresh: 'arrow-right.svg',
 };
