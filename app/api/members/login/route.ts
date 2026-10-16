@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createMemberSession } from '@/lib/member-session';
+import { membershipAccountQuery, preferredMembership } from '@/lib/member-login';
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
@@ -15,8 +16,9 @@ export async function POST(req: NextRequest) {
     response.cookies.set('sac_member_session', createMemberSession({ source: 'member', accountId: member.id, nim: member.nim }), { httpOnly: true, sameSite: 'lax', secure: req.nextUrl.protocol === 'https:', path: '/', maxAge: 8 * 60 * 60 });
     return response;
   }
-  const record = await prisma.membershipRecord.findFirst({ where: { OR: [{ nim: identity }, { email: identity }] } });
-  if (!record || !record.passwordHash || !['ACTIVE', 'APPROVED'].includes(record.status) || !await bcrypt.compare(password, record.passwordHash)) return NextResponse.json({ success: false, error: 'Kredensial tidak valid, akun belum aktif, atau password belum tersedia.' }, { status: 401 });
+  const records = await prisma.membershipRecord.findMany({ ...membershipAccountQuery(identity), take: 20 });
+  const record = preferredMembership(records);
+  if (!record?.passwordHash || !await bcrypt.compare(password, record.passwordHash)) return NextResponse.json({ success: false, error: 'Kredensial tidak valid, akun belum aktif, atau password belum tersedia.' }, { status: 401 });
   const response = NextResponse.json({ success: true, data: { fullName: record.fullName, nim: record.nim } });
   response.cookies.set('sac_member_session', createMemberSession({ source: 'sheet', accountId: record.id, nim: record.nim }), { httpOnly: true, sameSite: 'lax', secure: req.nextUrl.protocol === 'https:', path: '/', maxAge: 8 * 60 * 60 });
   return response;

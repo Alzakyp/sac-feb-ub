@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
   ]);
   if (!member && !record) return NextResponse.json({ success: false, error: 'Tautan reset tidak valid atau sudah kedaluwarsa.' }, { status: 400 });
   const data = { passwordHash: await bcrypt.hash(password, 12), passwordResetTokenHash: null, passwordResetExpiresAt: null };
-  if (member) await prisma.member.update({ where: { id: member.id }, data }); else await prisma.membershipRecord.update({ where: { id: record!.id }, data });
+  if (member) await prisma.member.update({ where: { id: member.id }, data });
+  else await prisma.membershipRecord.update({ where: { id: record!.id }, data });
   return NextResponse.json({ success: true });
 }
