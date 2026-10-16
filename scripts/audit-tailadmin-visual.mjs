@@ -32,23 +32,27 @@ async function run() {
   await page.getByRole('heading', { name: 'Overview' }).waitFor();
   await page.screenshot({ path: `${outDir}/desktop-overview.png`, fullPage: false });
 
-  // Tab: Serah Simpan
-  console.log('Clicking Serah Simpan...');
-  await page.locator('button:has-text("Serah Simpan")').first().click();
-  await page.getByRole('heading', { name: 'Serah Simpan' }).waitFor();
-  await page.screenshot({ path: `${outDir}/desktop-deposits.png`, fullPage: false });
+  const tabs = [
+    ['Serah Simpan', 'Serah Simpan', 'desktop-deposits.png'],
+    ['Lapor Kendala', 'Lapor Kendala', 'desktop-reports.png'],
+    ['Kelola Staf', 'Kelola Staf', 'desktop-staff.png'],
+    ['Kelola Repositori', 'Kelola Repositori', 'desktop-repository.png'],
+    ['Data Keanggotaan', 'Data Keanggotaan', 'desktop-memberships.png'],
+    ['Bukti Serah Simpan', 'Bukti Serah Simpan', 'desktop-proof-records.png'],
+    ['Riwayat Buku Tamu', 'Riwayat Buku Tamu', 'desktop-visitors.png'],
+    ['Kelola Buku', 'Kelola Buku', 'desktop-books.png'],
+  ];
+  for (const [label, heading, file] of tabs) {
+    console.log(`Clicking ${label}...`);
+    await page.getByRole('button', { name: new RegExp(`^${label}`) }).first().click();
+    await page.getByRole('heading', { name: heading, exact: true }).waitFor();
+    await page.screenshot({ path: `${outDir}/${file}`, fullPage: false });
+  }
 
-  // Tab: Kelola Repositori
-  console.log('Clicking Kelola Repositori...');
-  await page.locator('button:has-text("Kelola Repositori")').first().click();
-  await page.getByRole('heading', { name: 'Kelola Repositori' }).waitFor();
-  await page.screenshot({ path: `${outDir}/desktop-repository.png`, fullPage: false });
-
-  // Tab: Data Keanggotaan
-  console.log('Clicking Data Keanggotaan...');
-  await page.locator('button:has-text("Data Keanggotaan")').first().click();
-  await page.getByRole('heading', { name: 'Data Keanggotaan' }).waitFor();
-  await page.screenshot({ path: `${outDir}/desktop-memberships.png`, fullPage: false });
+  // Existing create-form trigger: open then close, no data mutation.
+  await page.getByRole('button', { name: 'Tambah Buku' }).click();
+  await page.getByRole('heading', { name: 'Tambah Buku' }).waitFor();
+  await page.keyboard.press('Escape');
 
   // Tab: Login page
   console.log('Visiting /backoffice/login...');
@@ -57,6 +61,8 @@ async function run() {
   await loginPage.goto(`${baseUrl}/backoffice/login`, { waitUntil: 'networkidle' });
   await loginPage.getByRole('heading', { name: 'Masuk Portal Staf' }).waitFor();
   await loginPage.screenshot({ path: `${outDir}/desktop-login.png`, fullPage: false });
+  await loginPage.getByRole('button', { name: 'Masuk ke Dashboard' }).click();
+  await loginPage.getByRole('alert').waitFor();
 
   // Mobile Audit
   const mobileContext = await browser.newContext({
@@ -81,8 +87,16 @@ async function run() {
 
   // Open mobile drawer
   await mobilePage.locator('button[aria-label="Buka menu navigasi"]').click();
-  await mobilePage.getByRole('button', { name: 'Kelola Buku' }).waitFor();
+  await mobilePage.getByRole('button', { name: 'Kelola Buku', exact: true }).waitFor();
   await mobilePage.screenshot({ path: `${outDir}/mobile-drawer.png`, fullPage: false });
+
+  // Logout is exercised in a separate authenticated context.
+  const logoutContext = await browser.newContext();
+  await logoutContext.addCookies([{ name: 'sac_session', value: token, domain: 'localhost', path: '/', httpOnly: true }]);
+  const logoutPage = await logoutContext.newPage();
+  await logoutPage.goto(`${baseUrl}/backoffice`, { waitUntil: 'networkidle' });
+  await logoutPage.getByRole('button', { name: 'Keluar akun' }).click();
+  await logoutPage.waitForURL(/\/backoffice\/login$/);
 
   await browser.close();
   console.log(`Audit visual complete. Saved to ${outDir}`);
