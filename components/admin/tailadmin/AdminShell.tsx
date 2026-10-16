@@ -3,6 +3,16 @@ import React, { ReactNode, useState } from 'react';
 
 type Tab = { id: string; label: string; icon: string; badge?: string | null; badgeColor?: string };
 
+const icons: Record<string, string> = {
+  dashboard: 'grid.svg', assignment_turned_in: 'check-circle.svg', support_agent: 'chat.svg',
+  manage_accounts: 'user-circle.svg', auto_stories: 'docs.svg', badge: 'user-circle.svg',
+  verified: 'check-circle.svg', history: 'time.svg', library_books: 'table.svg',
+  qr_code: 'copy.svg', logout: 'plug-in.svg', menu: 'list.svg', schedule: 'calender-line.svg', refresh: 'arrow-right.svg',
+};
+function Icon({ name, className = '' }: { name: string; className?: string }) {
+  return <img aria-hidden="true" src={`/tailadmin/icons/${icons[name] || 'grid.svg'}`} alt="" className={`h-5 w-5 object-contain ${className}`} />;
+}
+
 export function AdminShell({
   tabs,
   activeTab,
@@ -60,7 +70,7 @@ export function AdminShell({
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className={`material-symbols-outlined text-[20px] ${active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}`}>{tab.icon}</span>
+                  <Icon name={tab.icon} className={active ? 'opacity-100' : 'opacity-50'} />
                   <span>{tab.label}</span>
                 </div>
                 {tab.badge && (
@@ -79,7 +89,7 @@ export function AdminShell({
           onClick={onOpenStandee}
           className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 py-2 px-3 text-xs font-bold text-gray-700 hover:bg-gray-100 dark:border-gray-800 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
         >
-          <span className="material-symbols-outlined text-[18px] text-amber-500">qr_code</span>
+          <Icon name="qr_code" className="opacity-70" />
           <span>Cetak Standee QR</span>
         </button>
 
@@ -99,7 +109,7 @@ export function AdminShell({
             title={loggingOut ? 'Sedang keluar…' : 'Keluar akun'}
             aria-label={loggingOut ? 'Sedang keluar…' : 'Keluar akun'}
           >
-            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">logout</span>
+            <Icon name="logout" className="opacity-60" />
           </button>
         </div>
         {logoutError && <p role="alert" className="text-xs text-rose-600">{logoutError}</p>}
@@ -130,7 +140,7 @@ export function AdminShell({
               className="grid h-10 w-10 place-items-center rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-100 lg:hidden dark:border-gray-800 dark:text-gray-300"
               aria-label="Buka menu navigasi"
             >
-              <span className="material-symbols-outlined">menu</span>
+              <Icon name="menu" />
             </button>
             <div>
               <div className="text-[10px] font-bold uppercase tracking-[.18em] text-blue-600 dark:text-blue-400">SAC FEB UB / Dashboard</div>
@@ -140,7 +150,7 @@ export function AdminShell({
 
           <div className="flex items-center gap-3">
             <div className="hidden items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-1.5 font-mono text-xs font-bold text-gray-700 md:flex dark:border-gray-800 dark:bg-white/5 dark:text-gray-300">
-              <span className="material-symbols-outlined text-[18px] text-amber-500">schedule</span>
+              <Icon name="schedule" className="opacity-70" />
               <span>{currentTime}</span>
             </div>
             <button
@@ -150,7 +160,7 @@ export function AdminShell({
               title="Segarkan Data"
               aria-label="Segarkan Data"
             >
-              <span className={`material-symbols-outlined text-[20px] ${refreshing ? 'animate-spin text-blue-600' : ''}`}>refresh</span>
+              <Icon name="refresh" className={refreshing ? 'animate-spin' : ''} />
             </button>
           </div>
         </header>
