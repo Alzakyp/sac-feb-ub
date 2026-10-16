@@ -81,7 +81,7 @@ export default function StaffLoginPage() {
             <span className="font-mono text-[11px] text-slate-400">Node F2-SRV</span>
           </div>
         </div>
-        <div className="hidden lg:flex flex-col justify-between bg-gradient-to-br from-[#0B2546] to-[#0f3460] p-12 text-white relative overflow-hidden">
+        <div className="hidden lg:flex flex-col justify-between bg-[#0B2546] p-12 text-white relative overflow-hidden before:absolute before:inset-0 before:bg-[url('/tailadmin/grid-01.svg')] before:bg-center before:bg-no-repeat before:opacity-35">
           <div className="relative z-10">
             <span className="inline-block rounded-full bg-amber-400/20 px-3 py-1 text-xs font-bold text-amber-300 border border-amber-300/30">Admin & Petugas Console</span>
             <h2 className="mt-6 text-3xl font-black leading-tight">Pusat Rujukan Akademik & Literasi Riset FEB UB</h2>
