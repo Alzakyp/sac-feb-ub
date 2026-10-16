@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const admin = readFileSync(new URL('../app/admin/page.tsx', import.meta.url), 'utf8');
+const login = readFileSync(new URL('../app/backoffice/login/page.tsx', import.meta.url), 'utf8');
+assert.match(admin, /bg-white text-slate-700 flex flex-col/);
+assert.match(admin, /Dashboard \/ SAC FEB UB/);
+assert.match(admin, /logo-feb-black\.png/);
+assert.match(login, /Admin & Petugas Console/);
+assert.match(login, /logo-feb-black\.png/);
+assert.match(login, /Masuk ke Dashboard/);
+console.log('TailAdmin SAC UI contract passed.');

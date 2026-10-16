@@ -867,31 +867,34 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-800 font-sans antialiased w-full">
+    <div className="flex min-h-screen bg-slate-50 text-slate-800 font-sans antialiased w-full">
       {/* ===================================================================== */}
-      {/* 1. SIDEBAR NAVIGASI STATIS                                            */}
+      {/* 1. SIDEBAR TAILADMIN STYLE (WHITE / CLEAN BORDERED)                   */}
       {/* ===================================================================== */}
-      <aside className="w-64 bg-[#0B2546] text-white flex flex-col justify-between shrink-0 h-screen sticky top-0 border-r border-slate-800 shadow-xl z-20">
+      <aside className="w-64 bg-white text-slate-700 flex flex-col justify-between shrink-0 h-screen sticky top-0 border-r border-slate-200 shadow-sm z-20">
         <div>
           {/* Logo & Header */}
-          <div className="p-5 border-b border-white/10 flex items-center gap-3">
+          <div className="p-5 border-b border-slate-100 flex items-center gap-3">
             <img
-              src="/logo-feb.webp"
+              src="/logo-feb-black.png"
               alt="FEB UB"
-              className="h-10 w-auto object-contain shrink-0"
+              className="h-9 w-auto object-contain shrink-0"
             />
-            <div className="flex flex-col">
-              <span className="text-sm font-bold tracking-tight text-white leading-tight">
-                Self Access Centre
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-black tracking-tight text-[#0B2546] leading-tight truncate">
+                SAC FEB UB
               </span>
-              <span className="text-[10px] font-semibold tracking-wider text-amber-400 uppercase">
-                Admin Console FEB UB
+              <span className="text-[10px] font-bold tracking-wider text-blue-600 uppercase">
+                Admin Console
               </span>
             </div>
           </div>
 
-          {/* Navigasi 5 Tab Utama */}
-          <nav className="p-3 space-y-1.5">
+          {/* Navigasi Tab Utama */}
+          <nav className="p-3 space-y-1">
+            <div className="px-3 pb-2 pt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Menu Utama
+            </div>
             {[
               { id: 'overview', label: 'Overview', icon: 'dashboard', badge: null },
               {
@@ -903,9 +906,9 @@ export default function AdminDashboardPage() {
                   overviewData.kpis.pendingDepositsCount > 0
                     ? `${overviewData.kpis.pendingDepositsCount}`
                     : null,
-                badgeColor: 'bg-amber-500 text-slate-950',
+                badgeColor: 'bg-amber-100 text-amber-800 border border-amber-300',
               },
-              { id: 'reports', label: 'Lapor Kendala', icon: 'support_agent', badge: overviewData?.kpis?.openReportsCount ? `${overviewData.kpis.openReportsCount}` : null, badgeColor: 'bg-rose-500' },
+              { id: 'reports', label: 'Lapor Kendala', icon: 'support_agent', badge: overviewData?.kpis?.openReportsCount ? `${overviewData.kpis.openReportsCount}` : null, badgeColor: 'bg-rose-100 text-rose-800 border border-rose-300' },
               { id: 'staff', label: 'Kelola Staf', icon: 'manage_accounts', badge: null },
               { id: 'repository', label: 'Kelola Repositori', icon: 'auto_stories', badge: null },
               { id: 'memberships', label: 'Data Keanggotaan', icon: 'badge', badge: null },
@@ -918,20 +921,20 @@ export default function AdminDashboardPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-amber-400 text-slate-950 font-bold shadow-md'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                      ? 'bg-blue-50 text-blue-700 font-bold shadow-xs border border-blue-200/60'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-[20px]">{tab.icon}</span>
+                    <span className={`material-symbols-outlined text-[20px] ${isActive ? 'text-blue-600' : 'text-slate-400'}`}>{tab.icon}</span>
                     <span>{tab.label}</span>
                   </div>
                   {tab.badge && (
                     <span
                       className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                        isActive ? 'bg-slate-900 text-white' : tab.badgeColor || 'bg-slate-700'
+                        isActive ? 'bg-blue-600 text-white' : tab.badgeColor || 'bg-slate-200 text-slate-700'
                       }`}
                     >
                       {tab.badge}
@@ -940,40 +943,39 @@ export default function AdminDashboardPage() {
                 </button>
               );
             })}
-
           </nav>
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-white/10 space-y-3">
+        <div className="p-4 border-t border-slate-100 space-y-3">
           <button
             onClick={() => setShowStandeeModal(true)}
-            className="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center gap-2 border border-slate-700 transition-colors"
+            className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center gap-2 border border-slate-200 transition-colors cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px] text-amber-400">qr_code</span>
+            <span className="material-symbols-outlined text-[18px] text-amber-500">qr_code</span>
             <span>Cetak Standee QR</span>
           </button>
 
-          <div className="bg-slate-900/80 p-3 rounded-xl border border-white/5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <div className="flex flex-col">
-                <span className="text-[11px] font-bold text-white">Admin Petugas</span>
-                <span className="text-[9px] text-slate-400 font-mono">Node F2-SRV • Live</span>
+          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <div className="flex flex-col min-w-0">
+                <span className="text-[11px] font-bold text-slate-900 truncate">Admin Petugas</span>
+                <span className="text-[9px] text-slate-400 font-mono">Live Session</span>
               </div>
             </div>
             <button
               type="button"
               onClick={logout}
               disabled={loggingOut}
-              className="min-h-11 min-w-11 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-amber-400"
+              className="min-h-9 min-w-9 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center cursor-pointer"
               title={loggingOut ? 'Sedang keluar…' : 'Keluar dari akun admin'}
               aria-label={loggingOut ? 'Sedang keluar…' : 'Keluar dari akun admin'}
             >
               <span aria-hidden="true" className="material-symbols-outlined text-[18px]">logout</span>
             </button>
           </div>
-          {logoutError && <p role="alert" className="text-xs text-rose-300">{logoutError}</p>}
+          {logoutError && <p role="alert" className="text-xs text-rose-600">{logoutError}</p>}
         </div>
       </aside>
 
@@ -982,9 +984,10 @@ export default function AdminDashboardPage() {
       {/* ===================================================================== */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* TOP OPERATIONAL BAR */}
-        <header className="bg-white border-b border-slate-200 sticky top-0 z-10 px-6 py-4 flex items-center justify-between shadow-sm">
+        <header className="bg-white/95 backdrop-blur border-b border-slate-200 sticky top-0 z-10 px-4 sm:px-6 py-4 flex flex-wrap gap-3 items-center justify-between shadow-xs">
           <div>
-            <h1 className="text-lg font-black text-[#0B2546] capitalize flex items-center gap-2">
+            <div className="mb-1 text-[10px] font-bold uppercase tracking-[.18em] text-blue-600">Dashboard / SAC FEB UB</div>
+            <h1 className="text-xl font-black text-slate-900 capitalize flex items-center gap-2 tracking-tight">
               {activeTab === 'overview' && 'Ringkasan Eksekutif Operasional'}
               {activeTab === 'visitors' && 'Riwayat Buku Tamu'}
               {activeTab === 'deposits' && 'Verifikasi Serah Simpan Karya Ilmiah'}
@@ -1015,7 +1018,7 @@ export default function AdminDashboardPage() {
             <button
               onClick={refreshAll}
               disabled={refreshing}
-              className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors flex items-center justify-center cursor-pointer"
+              className="min-h-10 min-w-10 rounded-xl border border-slate-200 hover:bg-blue-50 hover:border-blue-200 text-slate-600 hover:text-blue-600 transition-colors flex items-center justify-center cursor-pointer"
               title="Segarkan Data"
             >
               <span
@@ -1030,7 +1033,7 @@ export default function AdminDashboardPage() {
         </header>
 
         {/* TAB CONTENTS */}
-        <main className="p-6 space-y-6 flex-1 overflow-y-auto">
+        <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 overflow-y-auto max-w-[1600px] w-full mx-auto">
           {/* ================================================================= */}
           {/* TAB 1: OVERVIEW (RINGKASAN EKSEKUTIF)                             */}
           {/* ================================================================= */}
